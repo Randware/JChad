@@ -1,7 +1,7 @@
 package net.jchad.installer.config;
 
 
-import net.jchad.installer.exceptions.InvalidArgumentException;
+import net.jchad.installer.core.Downloader;
 
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
@@ -11,9 +11,9 @@ import java.nio.file.Path;
 
 public class ConfigManager {
 
-    private String path = "";
+    private String path = ""; //where should be the files downloaded
     private String softwareToInstall = "";
-
+    private final String githubRepo = "https://api.github.com/repos/Dari-OS/JChad/releases/latest";
     private ConfigUtil configUtil = new ConfigUtil(Path.of(System.getProperty("user.dir")));
     public ConfigManager() {
         this(false);
@@ -92,6 +92,7 @@ public class ConfigManager {
             }
             if (softwareToInstall.isEmpty()) throw new IllegalArgumentException("Software not set that should be installed. Methode setSoftwareToInstall must be called before");
             else configUtil.save("softwareToInstall", softwareToInstall);
+            Downloader.download(githubRepo, Path.of(path), softwareToInstall);
             return true;
         } catch (Exception e) {
             e.printStackTrace();

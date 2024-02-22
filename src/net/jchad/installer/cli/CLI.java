@@ -10,8 +10,7 @@ import java.util.function.Predicate;
 
 public class CLI {
 
-    //TODO Add strict mode. When strict mode is enabled the directories will be checked if they exists and wont get creates
-    //TODO When strict mode is off folders that don't exists get created
+
     private Console console = System.console();
     private ConfigManager configManager = new ConfigManager();
 
@@ -23,7 +22,8 @@ public class CLI {
 
 
     public void start() {
-        System.out.println("""
+        try {
+            System.out.println("""
                 
                 
                 °*°+°*°*°*°*°*°*°+°*°*°*°*°*°*°+°*°*°*°*°*°*°+°*°*°*°*°*°*°+°*°*°*°*°*
@@ -33,13 +33,13 @@ public class CLI {
                 °*°+°*°*°*°*°*°*°+°*°*°*°*°*°*°+°*°*°*°*°*°*°+°*°*°*°*°*°*°+°*°*°*°*°*
                         
                 """);
-        System.out.println("Where should the software be installed? (leave empty for defined path of yaml file)");
-        configManager.setDownloadPath(
-                reader("> ",
-                        (e) -> configManager.isValidPath(e)
-                                &&  ConfigUtil.isDirectory(Path.of(e)) ));
-        //&& Files.exists(Path.of(e))
-        System.out.println("""
+            System.out.println("Where should the software be installed? (leave empty for current or set path)");
+            configManager.setDownloadPath(
+                    reader("> ",
+                            (e) -> configManager.isValidPath(e)
+                                    &&  ConfigUtil.isDirectory(Path.of(e)) ));
+            //&& Files.exists(Path.of(e))
+            System.out.println("""
                 What software do you want to install?
                 
                 0 - This is the Client and Server software for JChad
@@ -47,14 +47,20 @@ public class CLI {
                 2 - This is the Client software for JChad
                 
                 """);
-        configManager.setSoftwareToInstall(
-                Integer.parseInt(
-                        reader("> ",
-                                (e) -> e.compareTo("/") >= 1
-                                        &&  e.compareTo("3") <= -1 && e.length() == 1
-                )
-        ));
-        configManager.process();
+            configManager.setSoftwareToInstall(
+                    Integer.parseInt(
+                            reader("> ",
+                                    (e) -> e.compareTo("/") >= 1
+                                            &&  e.compareTo("3") <= -1 && e.length() == 1
+                            )
+                    ));
+            configManager.process();
+        } catch (NullPointerException e) { //If the user ends the program abruptly
+            System.out.println("\n\n" + "\u001B[31m" + "-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_");
+            System.err.println("\nProgram stopped abruptly!");
+            System.err.println("Unsaved yml file may be lost and the unfinished download(s) may be corrupt, be careful! \n");
+            System.out.println("-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_" + "\u001B[0m \n");
+        }
 
     }
 
