@@ -10,9 +10,6 @@ import java.nio.file.Path;
 
 public class Downloader {
 
-    public void getServer(Path path) {
-        if (!Files.isDirectory(path)) throw new IllegalArgumentException("Path must be a Directory!");
 
-    }
 
 }
