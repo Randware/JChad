@@ -10,19 +10,36 @@ public class Bar {
 
     private String suffix = "[";
 
-
+    private int currentValue = 0;
 
     private String prefix = "]";
     private int repeats = 1;
 
-    public Bar(int setMax, String progressBarSymbol, int charWidth, String suffix, String prefix, int repeats ) {
-        setMaxValue(maxValue);
-        setProgressBarSymbol(progressBarSymbol);
+    private int valueMultiplier = 1;
 
+    public Bar(int maxValue, String progressBarSymbol, int charWidth, String suffix, String prefix, int repeats ) {
+        this(maxValue);
+        setProgressBarSymbol(progressBarSymbol);
         setCharWidth(charWidth);
         setSuffix(suffix);
         setPrefix(prefix);
         setRepeats(repeats);
+    }
+
+    public Bar(int maxValue) {
+        setMaxValue(maxValue);
+    }
+
+    public void reset() {
+        currentValue = 0;
+    }
+
+    public void update() {
+        ++currentValue;
+    }
+
+    public void update(int multiplier ) {
+        currentValue = valueMultiplier * multiplier;
     }
 
 
@@ -77,6 +94,15 @@ public class Bar {
 
     public Bar setRepeats(int repeats) {
         if (repeats >= 1) this.repeats = repeats;
+        return this;
+    }
+
+    public int getValueMultiplier() {
+        return valueMultiplier;
+    }
+
+    public Bar setValueMultiplier(int valueMultiplier) {
+        if (valueMultiplier >= 1) this.valueMultiplier = valueMultiplier;
         return this;
     }
 }
