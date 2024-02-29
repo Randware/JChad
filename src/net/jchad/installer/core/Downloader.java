@@ -97,7 +97,7 @@ public class Downloader {
     private boolean install(Path path, RepoFile... files) throws InvalidArgumentException {
 
             if (!Files.isDirectory(path))  {
-                throw new InvalidArgumentException("%s is not a directory!".formatted(path.toString()), "Please make sure that the provided path is a directory");
+                throw  new InvalidArgumentException("%s is not a directory!".formatted(path.toString()), "Please make sure that the provided path is a directory");
             }
 
 

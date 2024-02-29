@@ -8,6 +8,8 @@ public class Bar {
 
     private int charWidth = 10;
 
+    String fullBar = "";
+
     private String suffix = "[";
 
     private int currentValue = 0;
@@ -40,6 +42,11 @@ public class Bar {
 
     public void update(int multiplier ) {
         currentValue = valueMultiplier * multiplier;
+    }
+
+    Bar updateBar() {
+
+        return this;
     }
 
 
