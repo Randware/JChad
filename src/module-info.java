@@ -8,6 +8,6 @@ module net.jchad {
     requires com.fasterxml.jackson.databind;
 
     opens net.jchad.client to javafx.fxml;
-    exports net.jchad.client;
+    exports net.jchad.installer.gui;
     exports net.jchad.installer.serializable to com.google.gson;
 }
