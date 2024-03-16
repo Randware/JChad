@@ -5,12 +5,9 @@ import net.jchad.installer.config.ConfigUtil;
 import net.jchad.installer.config.ConfigManager;
 import net.jchad.installer.core.progressBar.Bar;
 import net.jchad.installer.core.progressBar.BarDisplay;
-import net.jchad.installer.core.progressBar.BarStatus;
-import net.jchad.installer.core.progressBar.BarUpdater;
 
 import java.io.Console;
 import java.nio.file.Path;
-import java.util.LinkedHashSet;
 import java.util.function.Predicate;
 
 public class CLI implements BarDisplay {
@@ -20,8 +17,11 @@ public class CLI implements BarDisplay {
     private ConfigManager configManager = new ConfigManager();
 
     public static final String lineSeparator = System.lineSeparator();
+    private  long progressForChar = 0;
     public static void main(String[] args) {
+
         CLI cli = new CLI();
+        cli.hook("RepoDownloader");
         cli.start();
     }
 
@@ -60,11 +60,12 @@ public class CLI implements BarDisplay {
                             )
                     ));
             configManager.process();
-        } catch (NullPointerException e) { //If the user ends the program abruptly
+        } catch (Exception e) { //If an error occurred
             System.out.println("\n\n" + "\u001B[31m" + "-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_");
-            System.err.println("\nProgram stopped abruptly!");
-            System.err.println("Unsaved yml file may be lost and the unfinished download(s) may be corrupt, be careful! \n");
+            System.out.println("\nFata error occurred!");
+            System.out.println("Unsaved yml file may be lost and the unfinished download(s) may be corrupt, be careful! \n");
             System.out.println("-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_" + "\u001B[0m \n");
+            e.printStackTrace(System.out);
         }
 
     }
@@ -84,6 +85,32 @@ public class CLI implements BarDisplay {
 
     @Override
     public void update(Bar bar) {
-        System.out.printf("%s/%s%n", bar.getCurrentProgress(), bar.getMaxProgress());
+
+        //System.out.printf("\r[%s/%s]", bar.getCurrentProgress(), bar.getMaxProgress());
+    }
+
+    @Override
+    public void updateOnFailed(Bar bar) {
+
+    }
+
+    @Override
+    public void updateOnStart(Bar bar) {
+        progressForChar = bar.getMaxProgress() / 80;
+        System.out.print("\033[38;5;46m");
+    }
+
+    @Override
+    public void updateOnEnd(Bar bar) {
+        //
+        System.out.println("\033[0m");
+    }
+
+    @Override
+    public void updateOnUpdate(Bar bar) {
+        int currentChars = (int) (bar.getCurrentProgress() / progressForChar);
+        int leftProgress = 80 - currentChars;
+        System.out.print("\r[" + "#".repeat(currentChars) + "=".repeat(leftProgress) + "]");
+        //System.out.println("Updated!");
     }
 }

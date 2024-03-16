@@ -1,6 +1,7 @@
 package net.jchad.installer.core.progressBar;
 
-public class Bar {
+public final class Bar {
+
     private long maxProgress;
     private long currentProgress;
 
@@ -8,25 +9,42 @@ public class Bar {
 
     private BarStatus barStatus;
 
-    public Bar() {this(100);}
+    private BarUpdater barUpdater;
+
+    private boolean initSetup = true;
+
 
     public Bar(long maxProgress) {
-        this(maxProgress, 0);
+        this(maxProgress, null);
     }
 
-    public Bar(long maxProgress, long currentProgress) {
-        this(maxProgress, currentProgress, 0,BarStatus.PROGRESS_START);
+    public Bar(long maxProgress, BarUpdater barUpdater) {
+        this(maxProgress, barUpdater, 0);
     }
 
-    public Bar(long maxProgress, long currentProgress, long lastAddedProgress, BarStatus barStatus) {
+    public Bar(long maxProgress, BarUpdater barUpdater, long currentProgress) {
+        this(maxProgress, barUpdater, currentProgress, 0,BarStatus.PROGRESS_START);
+    }
+
+    /**
+     * This class represents a progression Bar.
+     *
+     * @param maxProgress The maximum progress the bar can reach
+     * @param currentProgress The current progress of the bar
+     * @param lastAddedProgress The value of the last added progress
+     * @param barStatus The bar status (Maybe gets deleted soon)
+     */
+    public Bar(long maxProgress,BarUpdater barUpdater, long currentProgress, long lastAddedProgress, BarStatus barStatus) {
         setMaxProgress(maxProgress);
         setCurrentProgress(currentProgress);
         setLastAddedProgress(lastAddedProgress);
         setBarStatus(barStatus);
+        setBarUpdater(barUpdater);
+        initSetup = false;
     }
 
     private Bar(Bar bar) {
-        this(bar.maxProgress, bar.currentProgress, bar.lastAddedProgress, bar.barStatus);
+        this(bar.maxProgress , bar.barUpdater , bar.currentProgress, bar.lastAddedProgress, bar.barStatus);
     }
 
 
@@ -37,6 +55,7 @@ public class Bar {
     public Bar setMaxProgress(long maxProgress) {
         if (maxProgress < 0) throw new IllegalArgumentException("maxProgress can't be <0");
         this.maxProgress = maxProgress;
+        callUpdater();
         return this;
     }
 
@@ -48,26 +67,29 @@ public class Bar {
     public Bar setCurrentProgress(long currentProgress) {
         if (currentProgress < 0) throw new IllegalArgumentException("currentProgress can't be >0");
         this.currentProgress = currentProgress;
+        callUpdater();
         return this;
     }
 
     public long getLastAddedProgress() {
+
         return lastAddedProgress;
     }
 
     public Bar setLastAddedProgress(long lastAddedProgress) {
         if (lastAddedProgress < 0) throw new IllegalArgumentException("lastProgress can't be >0");
         this.lastAddedProgress = lastAddedProgress;
+        callUpdater();
         return this;
     }
 
     public boolean isFinished() {
-        if (maxProgress <= currentProgress) return true;
-        else return false;
+        return maxProgress <= currentProgress;
     }
 
     public void setBarStatus(BarStatus barStatus) {
         this.barStatus = barStatus;
+        callUpdater();
     }
 
     public BarStatus getBarStatus() {
@@ -84,6 +106,7 @@ public class Bar {
             currentProgress = maxProgress;
         }
 
+        callUpdater();
         return this;
     }
 
@@ -94,7 +117,12 @@ public class Bar {
     public Bar reset() {
         currentProgress = 0;
         lastAddedProgress=0;
+        callUpdater();
         return this;
+    }
+
+    public void setBarUpdater(BarUpdater barUpdater) {
+        this.barUpdater = barUpdater;
     }
 
     @Override
@@ -102,5 +130,11 @@ public class Bar {
         return new Bar(this);
     }
 
+
+    private void callUpdater() {
+        if (initSetup || barUpdater == null) return; //Prevents any updates when the constructor calls the setters or prevents update if barUpdater is not set
+
+        barUpdater.updateDisplays(this);
+    }
 
 }

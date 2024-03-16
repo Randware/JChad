@@ -3,6 +3,9 @@ package net.jchad.installer.core;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import net.jchad.installer.core.progressBar.Bar;
+import net.jchad.installer.core.progressBar.BarStatus;
+import net.jchad.installer.core.progressBar.BarUpdater;
 import net.jchad.installer.exceptions.InvalidArgumentException;
 import net.jchad.installer.serializable.RepoFile;
 
@@ -14,13 +17,14 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Downloader {
+public class Downloader extends BarUpdater{
 
         private final Gson gson = new Gson();
         private static Downloader onlyInstance = null;
 
 
    private Downloader() throws InstantiationException {
+       super("RepoDownloader", null, new LinkedHashSet<>());
        if (onlyInstance != null) {
            throw new InstantiationException(this.getClass().getSimpleName() + " was already instantiated and can only be instantiated once");
        } else {
@@ -99,8 +103,12 @@ public class Downloader {
             if (!Files.isDirectory(path))  {
                 throw  new InvalidArgumentException("%s is not a directory!".formatted(path.toString()), "Please make sure that the provided path is a directory");
             }
+            long sumFileSize = 0;
+            for (RepoFile repoFile : files) { //calculates
+                sumFileSize += repoFile.size();
+            }
 
-
+            super.setBar(new Bar(sumFileSize, this, 0, 0, BarStatus.PROGRESS_START));
             for (RepoFile file : files) {
                 URI uri = stringToURI(file.browser_download_url());
                 try (OutputStream output = Files.newOutputStream(Path.of(path.toString(), file.name()));
@@ -108,6 +116,7 @@ public class Downloader {
                     byte[] dataBuffer = new byte[1024];
                     int readBytes;
                     while ((readBytes = inputStream.read(dataBuffer)) != -1) {
+                        super.getBar().addProgress(readBytes).setBarStatus(BarStatus.PROGRESS_UPDATE);
                         output.write(dataBuffer, 0, readBytes);
                     }
 
@@ -116,7 +125,9 @@ public class Downloader {
                     return false;
                 }
             }
-                 return true;
+
+            super.getBar().setBarStatus(BarStatus.PROGRESS_END);
+            return true;
 
     }
 
