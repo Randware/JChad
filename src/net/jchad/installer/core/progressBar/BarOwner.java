@@ -2,10 +2,13 @@ package net.jchad.installer.core.progressBar;
 
 import java.util.LinkedHashSet;
 
-public interface BarOwner {
+interface BarOwner {
 
-    default boolean register(String name) {
-        return BarManager.register(name, this, new LinkedHashSet<>());
-    }
+    boolean register(String name, Bar bar, LinkedHashSet<BarDisplay> displays);
 
+    boolean register(String name,  LinkedHashSet<BarDisplay> displays);
+
+    void setBar(Bar bar);
+
+    Bar getBar();
 }

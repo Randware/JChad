@@ -3,12 +3,17 @@ package net.jchad.installer.cli;
 
 import net.jchad.installer.config.ConfigUtil;
 import net.jchad.installer.config.ConfigManager;
+import net.jchad.installer.core.progressBar.Bar;
+import net.jchad.installer.core.progressBar.BarDisplay;
+import net.jchad.installer.core.progressBar.BarStatus;
+import net.jchad.installer.core.progressBar.BarUpdater;
 
 import java.io.Console;
 import java.nio.file.Path;
+import java.util.LinkedHashSet;
 import java.util.function.Predicate;
 
-public class CLI {
+public class CLI implements BarDisplay {
 
 
     private Console console = System.console();
@@ -77,4 +82,8 @@ public class CLI {
     }
 
 
+    @Override
+    public void update(Bar bar) {
+        System.out.printf("%s/%s%n", bar.getCurrentProgress(), bar.getMaxProgress());
+    }
 }

@@ -1,115 +1,106 @@
 package net.jchad.installer.core.progressBar;
 
 public class Bar {
+    private long maxProgress;
+    private long currentProgress;
 
-    private int maxValue = 100;
+    private long lastAddedProgress;
 
-    private String progressBarSymbol = "=";
+    private BarStatus barStatus;
 
-    private int charWidth = 10;
+    public Bar() {this(100);}
 
-    String fullBar = "";
-
-    private String suffix = "[";
-
-    private int currentValue = 0;
-
-    private String prefix = "]";
-    private int repeats = 1;
-
-    private int valueMultiplier = 1;
-
-    public Bar(int maxValue, String progressBarSymbol, int charWidth, String suffix, String prefix, int repeats ) {
-        this(maxValue);
-        setProgressBarSymbol(progressBarSymbol);
-        setCharWidth(charWidth);
-        setSuffix(suffix);
-        setPrefix(prefix);
-        setRepeats(repeats);
+    public Bar(long maxProgress) {
+        this(maxProgress, 0);
     }
 
-    public Bar(int maxValue) {
-        setMaxValue(maxValue);
+    public Bar(long maxProgress, long currentProgress) {
+        this(maxProgress, currentProgress, 0,BarStatus.PROGRESS_START);
     }
 
-    public void reset() {
-        currentValue = 0;
+    public Bar(long maxProgress, long currentProgress, long lastAddedProgress, BarStatus barStatus) {
+        setMaxProgress(maxProgress);
+        setCurrentProgress(currentProgress);
+        setLastAddedProgress(lastAddedProgress);
+        setBarStatus(barStatus);
     }
 
-    public void update() {
-        ++currentValue;
+    private Bar(Bar bar) {
+        this(bar.maxProgress, bar.currentProgress, bar.lastAddedProgress, bar.barStatus);
     }
 
-    public void update(int multiplier ) {
-        currentValue = valueMultiplier * multiplier;
+
+    public long getMaxProgress() {
+        return maxProgress;
     }
 
-    Bar updateBar() {
+    public Bar setMaxProgress(long maxProgress) {
+        if (maxProgress < 0) throw new IllegalArgumentException("maxProgress can't be <0");
+        this.maxProgress = maxProgress;
+        return this;
+    }
+
+    public long getCurrentProgress() {
+
+        return currentProgress;
+    }
+
+    public Bar setCurrentProgress(long currentProgress) {
+        if (currentProgress < 0) throw new IllegalArgumentException("currentProgress can't be >0");
+        this.currentProgress = currentProgress;
+        return this;
+    }
+
+    public long getLastAddedProgress() {
+        return lastAddedProgress;
+    }
+
+    public Bar setLastAddedProgress(long lastAddedProgress) {
+        if (lastAddedProgress < 0) throw new IllegalArgumentException("lastProgress can't be >0");
+        this.lastAddedProgress = lastAddedProgress;
+        return this;
+    }
+
+    public boolean isFinished() {
+        if (maxProgress <= currentProgress) return true;
+        else return false;
+    }
+
+    public void setBarStatus(BarStatus barStatus) {
+        this.barStatus = barStatus;
+    }
+
+    public BarStatus getBarStatus() {
+        return barStatus;
+    }
+
+    public Bar addProgress(long progress) {
+        if (progress < 0) throw new IllegalArgumentException("The progress to add can't be <0");
+        if (currentProgress + progress <= maxProgress) {
+            lastAddedProgress = progress;
+            currentProgress += progress;
+        } else {
+            lastAddedProgress = maxProgress - currentProgress;
+            currentProgress = maxProgress;
+        }
 
         return this;
     }
 
-
-    public Bar setMaxValue(int maxValue) {
-        if (maxValue > 0) this.maxValue = maxValue;
+    /**
+     * Resets the current progress and the last added Progress
+     * @return
+     */
+    public Bar reset() {
+        currentProgress = 0;
+        lastAddedProgress=0;
         return this;
     }
 
-    public int getMaxValue() {
-        return maxValue;
+    @Override
+    protected Object clone() {
+        return new Bar(this);
     }
 
-    public String getProgressBarSymbol() {
-        return progressBarSymbol;
-    }
 
-    public Bar setProgressBarSymbol(String progressBarSymbol) {
-        this.progressBarSymbol = progressBarSymbol;
-        return this;
-    }
-
-    public int getCharWidth() {
-        return charWidth;
-    }
-
-    public Bar setCharWidth(int charWidth) {
-        if (charWidth > 0) this.charWidth = charWidth;
-        return this;
-    }
-
-    public String getSuffix() {
-        return suffix;
-    }
-
-    public Bar setSuffix(String suffix) {
-        this.suffix = suffix;
-        return this;
-    }
-
-    public String getPrefix() {
-        return prefix;
-    }
-
-    public Bar setPrefix(String prefix) {
-        this.prefix = prefix;
-        return this;
-    }
-
-    public int getRepeats() {
-        return repeats;
-    }
-
-    public Bar setRepeats(int repeats) {
-        if (repeats >= 1) this.repeats = repeats;
-        return this;
-    }
-
-    public int getValueMultiplier() {
-        return valueMultiplier;
-    }
-
-    public Bar setValueMultiplier(int valueMultiplier) {
-        if (valueMultiplier >= 1) this.valueMultiplier = valueMultiplier;
-        return this;
-    }
 }

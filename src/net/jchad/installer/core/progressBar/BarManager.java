@@ -6,22 +6,25 @@ public class BarManager {
 
     private static final HashMap<String,BarManager> barManagers = new HashMap<>();
 
-    public String name = "";
-    public BarOwner barOwner;
-    public Bar bar;
+    private String name = "";
+    private Bar bar;
 
     public LinkedHashSet<BarDisplay> barDisplays = new LinkedHashSet<>();
 
-    private BarManager(String name, BarOwner bo, LinkedHashSet<BarDisplay> displays) {
+    BarManager(String name,Bar bar, LinkedHashSet<BarDisplay> displays) {
         setName(name);
-        setBarOwner(bo);
+        setBar(bar);
         setDisplays(displays);
         barManagers.put(this.name, this);
     }
 
-    static boolean register(String name, BarOwner bo, LinkedHashSet<BarDisplay> displays) {
+     boolean register(String name,  LinkedHashSet<BarDisplay> displays) {
+        return register(name,new Bar(), displays);
+    }
+
+    boolean register(String name,  Bar bar, LinkedHashSet<BarDisplay> displays) {
         try {
-            new BarManager(name, bo, displays);
+            new BarManager(name,  bar, displays);
             return true;
         } catch (IllegalArgumentException e) {
             e.printStackTrace(System.out);
@@ -29,10 +32,14 @@ public class BarManager {
         }
     }
 
-    static boolean addDisplay(String name, BarDisplay display) {
+    boolean addDisplay(BarDisplay... displays) {
+        return addDisplay(getName(), displays);
+    }
+
+    static boolean addDisplay(String name, BarDisplay... display) {
         if (name == null || display == null) {return false;}
         if(barManagers.containsKey(name)) {
-            barManagers.get(name).barDisplays.add(display);
+            barManagers.get(name).barDisplays.addAll(List.of(display));
             return true;
         } else {
             return false;
@@ -51,24 +58,28 @@ public class BarManager {
         }
     }
 
-    private void setBarOwner(BarOwner barOwner) {
-        if (barOwner != null) {
-            this.barOwner = barOwner;
-        } else {
-            throw new IllegalArgumentException("barOwner can't be null");
-        }
-    }
 
-    private void setBar(Bar bar) {
-
+    void setBar(Bar bar) {
+        bar = (Bar) bar.clone();
         if (bar != null) {
             this.bar = bar;
+            updateDisplays(bar);
         } else {
             throw new IllegalArgumentException("bar can't be null");
         }
     }
 
-    
+
+    void updateDisplays() {
+        updateDisplays(getBar());
+    }
+    void updateDisplays(Bar bar) {
+        barDisplays.forEach(display -> display.update(bar));
+    }
+
+    Bar getBar() {
+        return bar;
+    }
 
     private void setDisplays(LinkedHashSet<BarDisplay> displays) {
         if (displays != null) {
