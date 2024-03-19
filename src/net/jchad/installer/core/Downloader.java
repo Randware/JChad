@@ -40,6 +40,7 @@ public class Downloader extends BarUpdater{
            Downloader downloader = new Downloader();
            URI uriLink = downloader.stringToURI(link);
                    JsonObject jsonObject = downloader.getJSON(uriLink.toURL());
+                   if (jsonObject == null) return false;
            List<RepoFile> repoFileList = downloader.getFiles(jsonObject).stream()
                    .filter((i) -> i.name().contains("client") || i.name().contains("server"))
                    .collect(Collectors.toList());
@@ -75,10 +76,11 @@ public class Downloader extends BarUpdater{
             return gson.fromJson(result.toString(), JsonObject.class);
 
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            BarStatus barStatus = BarStatus.PROGRESS_FAILED;
+            barStatus.setException(e);
+            super.getBar().setBarStatus(barStatus);
+            return null;
         }
-
-
     }
 
 

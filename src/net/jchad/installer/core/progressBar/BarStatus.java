@@ -1,14 +1,18 @@
 package net.jchad.installer.core.progressBar;
 
-import net.jchad.installer.core.progressBar.Bar;
 import net.jchad.installer.core.progressBar.interfaces.BarFunctional;
 
-public enum BarStatus {
+import java.util.Optional;
+
+public enum  BarStatus{
     PROGRESS_START((bar, display) -> display.updateOnStart(bar)),
     PROGRESS_UPDATE((bar, display) -> display.updateOnUpdate(bar)),
     PROGRESS_END((bar, display) -> display.updateOnEnd(bar)),
 
     PROGRESS_FAILED((bar, display) -> display.updateOnFailed(bar));
+
+    private Exception exception;
+
 
     public final BarFunctional barFunctional;
 
@@ -16,7 +20,23 @@ public enum BarStatus {
             barFunctional = bf;
     }
 
+    /**
+     * Get the associated enum
+     *
+     * @return
+     */
+    public Optional<Exception> getException() {
+        return Optional.ofNullable(exception);
+    }
 
+    /**
+     * associate an Exception with the enum type.
+     * Mostly used for the status Failed;
+     * @param exception The exception that gets associated with the enum
+     */
+    public void setException(Exception exception) {
+        this.exception = exception;
+    }
 
     @Override
     public String toString() {
