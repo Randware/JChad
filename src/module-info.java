@@ -6,6 +6,7 @@ module net.jchad {
     requires org.kordamp.bootstrapfx.core;
     requires com.fasterxml.jackson.dataformat.yaml;
     requires com.fasterxml.jackson.databind;
+    requires java.desktop;
 
     opens net.jchad.client to javafx.fxml;
     exports net.jchad.installer.gui;

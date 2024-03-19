@@ -23,7 +23,7 @@ public class Downloader extends BarUpdater{
         private static Downloader onlyInstance = null;
 
 
-   private Downloader() throws InstantiationException {
+   public Downloader() throws InstantiationException {
        super("RepoDownloader", null, new LinkedHashSet<>());
        if (onlyInstance != null) {
            throw new InstantiationException(this.getClass().getSimpleName() + " was already instantiated and can only be instantiated once");
