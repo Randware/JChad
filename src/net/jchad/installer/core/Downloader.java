@@ -20,16 +20,11 @@ import java.util.stream.Collectors;
 public class Downloader extends BarUpdater{
 
         private final Gson gson = new Gson();
-        private static Downloader onlyInstance = null;
+
 
 
    public Downloader() throws InstantiationException {
        super("RepoDownloader", null, new LinkedHashSet<>());
-       if (onlyInstance != null) {
-           throw new InstantiationException(this.getClass().getSimpleName() + " was already instantiated and can only be instantiated once");
-       } else {
-           onlyInstance = this;
-       }
    }
 
     /**
