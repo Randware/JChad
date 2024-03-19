@@ -1,7 +1,7 @@
 package net.jchad.installer.cli;
 
 import java.util.HashMap;
-
+@Deprecated
 public class Parser {
     private static final HashMap<String, String> mapArgs = new HashMap<>();
     static HashMap<String , String> argumentsParser(String[] args) {

@@ -37,7 +37,8 @@ public class Downloader extends BarUpdater{
    public static boolean download(String link, Path downloadPath, String softwareToInstall) {
 
        try {
-           Downloader downloader = new Downloader();
+           if (BarUpdater.exists("RepoDownloader")) {BarUpdater.unregister("RepoDownloader");} //unregister channels if they exist
+            Downloader downloader = new Downloader();
            URI uriLink = downloader.stringToURI(link);
                    JsonObject jsonObject = downloader.getJSON(uriLink.toURL());
                    if (jsonObject == null) return false;

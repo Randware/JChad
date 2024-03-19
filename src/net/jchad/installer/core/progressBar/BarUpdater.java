@@ -29,26 +29,39 @@ public class BarUpdater {
     /**
      * Safely deletes the BarUpdater instance and removes ALL associated displays and adds them to the displaysInQueue
      * In the display queue the displays await a new BarUpdater with the name they are hooked to
-     * @param bu the instance of the BarUpdater that gets unregistered
+     * @param chanelName the name of the chanel that gets unregistered
      */
-    public static void unregister(BarUpdater bu) {
-        if (barUpdater.containsKey(bu)) {
-            barUpdater.remove(bu.getName());
-            if (bu.barDisplays != null && !bu.barDisplays.isEmpty()) {
-                displaysInQueue.put(bu.getName(), bu.barDisplays);
-                bu.barDisplays.clear();
+    public static void unregister(String chanelName) {
+
+        if (barUpdater.containsKey(chanelName)) {
+            BarUpdater singelBarUpdater = BarUpdater.barUpdater.get(chanelName);
+            barUpdater.remove(singelBarUpdater.getName());
+            if (singelBarUpdater.barDisplays != null && !singelBarUpdater.barDisplays.isEmpty()) {
+                displaysInQueue.put(singelBarUpdater.getName(), singelBarUpdater.barDisplays);
+                singelBarUpdater.barDisplays.clear();
             }
         }
+    }
+
+    /**
+     * Checks if the chanel-name already exists
+     * @param chanelName name of the chanel
+     * @return Return true if the chanel already exists
+     */
+    public static boolean exists(String chanelName) {
+        if (chanelName == null) return false;
+        return barUpdater.containsKey(chanelName);
     }
 
     /**
      * Fully unregisters the BarUpdater instance and unhooks all displays associated with it
      * @param bu the instance of the BarUpdater that gets unregistered
      */
-    public static void fullUnregister(BarUpdater bu) {
-        if (barUpdater.containsKey(bu)) {
-            bu.barDisplays.forEach((display) -> display.unhook(bu.name));
-            unregister(bu);
+    public static void fullUnregister(String chanelName) {
+        if (barUpdater.containsKey(chanelName)) {
+            BarUpdater singelBarUpdater = BarUpdater.barUpdater.get(chanelName);
+            singelBarUpdater.barDisplays.forEach((display) -> display.unhook(singelBarUpdater.name));
+            unregister(chanelName);
         }
     }
 
