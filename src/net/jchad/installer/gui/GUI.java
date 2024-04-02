@@ -110,12 +110,20 @@ public class GUI extends Application implements BarDisplay {
 
     @Override
     public void updateOnFailed(Bar bar) {
-
+        //TODO Recolor the bar to red
         if (bar.getBarStatus().getException().isPresent()) {
-            System.out.println(bar.getBarStatus().getException().get().getMessage());
-            Pattern getErrorCode = Pattern.compile(".*([\\d]{3}).*");
-            Matcher errorCode
-            if ()
+
+            Pattern getErrorCode = Pattern.compile(".*HTTP response code: ([\\d]{3}).*");
+            Matcher findErrorCode = getErrorCode.matcher(bar.getBarStatus().getException().get().getMessage());
+            if (findErrorCode.find()) {
+                //An error occurred with https error code
+                //To get the error code do: findErrorCode.group(1)
+                System.out.println(findErrorCode.group(1));
+            } else {
+                //An error occurred without any https error code:
+                System.out.println("An error occurred!");
+            }
+
         }
     }
 
