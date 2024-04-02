@@ -15,6 +15,7 @@ import net.jchad.installer.core.progressBar.Bar;
 import net.jchad.installer.core.progressBar.BarDisplay;
 
 import java.nio.file.Path;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class GUI extends Application implements BarDisplay {
@@ -112,8 +113,9 @@ public class GUI extends Application implements BarDisplay {
 
         if (bar.getBarStatus().getException().isPresent()) {
             System.out.println(bar.getBarStatus().getException().get().getMessage());
-            Pattern getErrorCode = Pattern.compile(".*([\\d]{3})*.");
-            //if ()
+            Pattern getErrorCode = Pattern.compile(".*([\\d]{3}).*");
+            Matcher errorCode
+            if ()
         }
     }
 
