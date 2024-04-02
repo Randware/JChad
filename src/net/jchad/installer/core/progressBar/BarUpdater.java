@@ -55,7 +55,7 @@ public class BarUpdater {
 
     /**
      * Fully unregisters the BarUpdater instance and unhooks all displays associated with it
-     * @param bu the instance of the BarUpdater that gets unregistered
+     * @param chanelName the instance of the BarUpdater that gets unregistered
      */
     public static void fullUnregister(String chanelName) {
         if (barUpdater.containsKey(chanelName)) {
@@ -172,7 +172,7 @@ public class BarUpdater {
             this.bar = bar;
             updateDisplays(bar);
         } else {
-            this.bar = null;
+            this.bar = new Bar(100, this);
         }
     }
 
