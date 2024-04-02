@@ -15,6 +15,7 @@ import net.jchad.installer.core.progressBar.Bar;
 import net.jchad.installer.core.progressBar.BarDisplay;
 
 import java.nio.file.Path;
+import java.util.regex.Pattern;
 
 public class GUI extends Application implements BarDisplay {
 
@@ -85,6 +86,7 @@ public class GUI extends Application implements BarDisplay {
 
             installTask.setOnFailed(event -> {
                 // Handle failure
+
                 progressBar.setProgress(0); // Set progress to zero
                 installButton.setDisable(false); // Enable the button
             });
@@ -108,6 +110,11 @@ public class GUI extends Application implements BarDisplay {
     @Override
     public void updateOnFailed(Bar bar) {
 
+        if (bar.getBarStatus().getException().isPresent()) {
+            System.out.println(bar.getBarStatus().getException().get().getMessage());
+            Pattern getErrorCode = Pattern.compile(".*([\\d]{3})*.");
+            //if ()
+        }
     }
 
     @Override
