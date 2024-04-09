@@ -1,3 +1,2 @@
 Manifest-Version: 1.0
-Main-Class: net.jchad.server.HelloServer
-
+Main-Class: net.jchad.server.Main

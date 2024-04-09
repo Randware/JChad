@@ -1,4 +1,4 @@
-package net.jchad.installer.mainclass;
+package net.jchad.installer;
 
 import net.jchad.installer.cli.CLI;
 import net.jchad.installer.gui.GUI;
