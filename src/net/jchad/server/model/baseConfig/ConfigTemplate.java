@@ -2,6 +2,7 @@ package net.jchad.server.model.baseConfig;
 
 import java.util.ArrayList;
 
+@Deprecated
 public class ConfigTemplate {
 
     private String version;
