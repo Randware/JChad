@@ -25,6 +25,7 @@ public class ServerThread extends Thread{
 
     @Override
     public void run() {
+        serverThreadList.add(this);
         String message = "";
         try {
             while ((message = bufferedReader.readLine()) != null) {
@@ -38,12 +39,15 @@ public class ServerThread extends Thread{
 
     }
 
+
+
     /**
      * Closes all fields
      * @throws IOException If an I/O error occurs. Should be catched by the MainSocket
      */
     public void close() {
         try {
+            serverThreadList.remove(this);
             if (printWriter != null) printWriter.close();
             if (bufferedReader != null) bufferedReader.close();
             if (socket != null) socket.close();
