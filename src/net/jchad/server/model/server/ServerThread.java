@@ -17,7 +17,7 @@ public class ServerThread extends Thread{
     public ServerThread(Socket socket, MessageHandler messageHandler) throws IOException {
         if (messageHandler == null) throw new IllegalArgumentException("MessageHandler can't be null");
         this.messageHandler = messageHandler;
-        if (socket == null) messageHandler.handleError(new IllegalArgumentException("MessageHandler can't be null"));
+        if (socket == null) messageHandler.handleError(new IllegalArgumentException("Socket can't be null"));
         this.socket = socket;
         printWriter = new PrintWriter(new BufferedOutputStream(socket.getOutputStream()));
         bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
