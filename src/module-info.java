@@ -11,4 +11,5 @@ module net.jchad {
     opens net.jchad.client to javafx.fxml;
     exports net.jchad.installer.gui;
     exports net.jchad.installer.serializable to com.google.gson;
+    opens net.jchad.client.model.client to javafx.fxml;
 }
