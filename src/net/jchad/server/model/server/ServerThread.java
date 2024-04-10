@@ -43,7 +43,7 @@ public class ServerThread extends Thread{
                 printWriter.flush();
             }
         } catch (IOException  e) {
-           messageHandler.handleError(new UncheckedIOException("Could not connect to [%s]: An unknown error occurred".formatted(remoteAddress),e));
+           messageHandler.handleError(new IOException("Could not connect to [%s]: An unknown error occurred".formatted(remoteAddress),e));
         } finally {
             close();
         }
@@ -63,7 +63,7 @@ public class ServerThread extends Thread{
             if (bufferedReader != null) bufferedReader.close();
             if (socket != null) socket.close();
         } catch (IOException e) {
-            messageHandler.handleError(new UncheckedIOException("Error while closing connection to [%s]: An unknown error occurred".formatted(remoteAddress),e));
+            messageHandler.handleError(new IOException("Error while closing connection to [%s]: An unknown error occurred".formatted(remoteAddress),e));
         } finally {
             Thread.currentThread().interrupt();
         }
