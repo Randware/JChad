@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class ServerThread extends Thread{
     private final MessageHandler messageHandler;
@@ -77,13 +78,15 @@ public class ServerThread extends Thread{
         return mutable ? serverThreadList : List.copyOf(serverThreadList);
     }
 
+
+
     /**
      * This ensures that all operations done to the list get executed correctly.
      * Without this methode problems could arise when multiple threads add or remove  themselves from the array list
      * due to the nature of the ArrayList (Because it isn't concurrency safe!)
      * @param statement The statement that gets executed on the arraylist
      */
-    public static synchronized void listOperation(Consumer<List<ServerThread>> statement) {
-        statement.accept(serverThreadList);
+    public  static synchronized <Returns> Returns listOperation(Function<List<ServerThread>, Returns> statement) {
+        return statement.apply(serverThreadList);
     }
 }
