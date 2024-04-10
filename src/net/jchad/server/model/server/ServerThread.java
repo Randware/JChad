@@ -29,8 +29,8 @@ public class ServerThread extends Thread{
         String message = "";
         try {
             while ((message = bufferedReader.readLine()) != null) {
-                System.out.println("Client Wrote: " + message);
-                printWriter.println("Hello Client!");
+                messageHandler.handleInfo("Message from " + socket + ": " + message);
+                printWriter.println("Message received");
                 printWriter.flush();
             }
         } catch (IOException e) {

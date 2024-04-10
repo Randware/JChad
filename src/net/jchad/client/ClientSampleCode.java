@@ -40,7 +40,7 @@ public class ClientSampleCode {
             // receive from the server
             str1 = br.readLine();
 
-            System.out.println("Server wrote:" + str1);
+            System.out.println("[SERVER] " + str1);
         }
 
         // close connection.

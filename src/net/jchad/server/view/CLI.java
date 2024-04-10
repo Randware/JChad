@@ -14,26 +14,28 @@ public class CLI implements MessageHandler {
     private void runCLI() {
         server = new ServerController(this);
 
-        // Display CLI
+        server.startServer();
     }
 
     @Override
     public void handleFatalError(Exception e) {
-
+        System.out.println("[FATAL ERROR] " + e);
+        System.out.println("STOPPING EXECUTION");
+        System.exit(1);
     }
 
     @Override
     public void handleError(Exception e) {
-
+        System.out.println("[ERROR] " + e);
     }
 
     @Override
     public void handleWarning(String warning) {
-
+        System.out.println("[WARNING] " + warning);
     }
 
     @Override
     public void handleInfo(String info) {
-
+        System.out.println("[INFO] " + info);
     }
 }
