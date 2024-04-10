@@ -1,5 +1,6 @@
-package net.jchad.server.model.store.config;
+package net.jchad.server.model.config;
 
+import java.net.URI;
 import java.util.ArrayList;
 
 // Defines default config values and creates configs with them
@@ -14,13 +15,13 @@ public class DefaultConfig {
     private static final boolean whitelist = false;
 
     // List of whitelisted IPs
-    private static final ArrayList<String> whitelistedIPs = new ArrayList<>();
+    private static final ArrayList<URI> whitelistedIPs = new ArrayList<>();
 
     // Blacklisted IPs can't connect (stored in blacklist.yml)
     private static final boolean blacklist = false;
 
     // List of blacklisted
-    private static final ArrayList<String> blacklistedIPs = new ArrayList<>();
+    private static final ArrayList<URI> blacklistedIPs = new ArrayList<>();
 
     // Hide usernames in all channels
     private static final boolean strictlyAnonymous = false;

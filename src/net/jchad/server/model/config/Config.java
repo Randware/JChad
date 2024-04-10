@@ -1,5 +1,6 @@
-package net.jchad.server.model.store.config;
+package net.jchad.server.model.config;
 
+import java.net.URI;
 import java.util.ArrayList;
 
 public class Config {
@@ -13,13 +14,13 @@ public class Config {
     private boolean whitelist;
 
     // List of whitelisted IPs
-    private ArrayList<String> whitelistedIPs;
+    private ArrayList<URI> whitelistedIPs;
 
     // Blacklisted IPs can't connect (stored in blacklist.yml)
     private boolean blacklist;
 
     // List of blacklisted
-    private ArrayList<String> blacklistedIPs;
+    private ArrayList<URI> blacklistedIPs;
 
     // Hide usernames in all channels
     private boolean strictlyAnonymous;
@@ -33,9 +34,9 @@ public class Config {
     public Config(boolean requiresPassword,
                   String password,
                   boolean whitelist,
-                  ArrayList<String> whitelistedIPs,
+                  ArrayList<URI> whitelistedIPs,
                   boolean blacklist,
-                  ArrayList<String> blacklistedIPs,
+                  ArrayList<URI> blacklistedIPs,
                   boolean strictlyAnonymous,
                   boolean encrypted,
                   int port) {
@@ -75,12 +76,28 @@ public class Config {
         this.whitelist = whitelist;
     }
 
+    public ArrayList<URI> getWhitelistedIPs() {
+        return whitelistedIPs;
+    }
+
+    public void setWhitelistedIPs(ArrayList<URI> whitelistedIPs) {
+        this.whitelistedIPs = whitelistedIPs;
+    }
+
     public boolean isBlacklist() {
         return blacklist;
     }
 
     public void setBlacklist(boolean blacklist) {
         this.blacklist = blacklist;
+    }
+
+    public ArrayList<URI> getBlacklistedIPs() {
+        return blacklistedIPs;
+    }
+
+    public void setBlacklistedIPs(ArrayList<URI> blacklistedIPs) {
+        this.blacklistedIPs = blacklistedIPs;
     }
 
     public boolean isStrictlyAnonymous() {
