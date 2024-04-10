@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 public class ServerThread extends Thread{
     private final MessageHandler messageHandler;
@@ -26,7 +27,6 @@ public class ServerThread extends Thread{
 
     @Override
     public void run() {
-        serverThreadList.add(this);
         String message = "";
         try {
             while ((message = bufferedReader.readLine()) != null) {
@@ -50,7 +50,7 @@ public class ServerThread extends Thread{
      */
     public void close() {
         try {
-            serverThreadList.remove(this);
+            listOperation(list -> list.remove(this));
             if (printWriter != null) printWriter.close();
             if (bufferedReader != null) bufferedReader.close();
             if (socket != null) socket.close();
@@ -75,5 +75,15 @@ public class ServerThread extends Thread{
      */
     public static List<ServerThread> getServerThreadList(boolean mutable) {
         return mutable ? serverThreadList : List.copyOf(serverThreadList);
+    }
+
+    /**
+     * This ensures that all operations done to the list get executed correctly.
+     * Without this methode problems could arise when multiple threads add or remove  themselves from the array list
+     * due to the nature of the ArrayList (Because it isn't concurrency safe!)
+     * @param statement The statement that gets executed on the arraylist
+     */
+    public static synchronized void listOperation(Consumer<List<ServerThread>> statement) {
+        statement.accept(serverThreadList);
     }
 }

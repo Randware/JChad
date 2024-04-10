@@ -32,6 +32,7 @@ public final class MainSocket implements Runnable{
                 messageHandler.handleInfo("Socket connected: " + socket);
                 // Same as "new ServerThread(socket, handler).start();"
                 ServerThread serverThread = new ServerThread(socket,  messageHandler);
+                ServerThread.listOperation(list -> list.add(serverThread));
                 serverThread.start();
             }
 
