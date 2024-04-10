@@ -1,18 +1,18 @@
-package net.jchad.server.view;
+package net.jchad.client.view;
 
-import net.jchad.server.controller.ServerController;
-import net.jchad.server.model.error.MessageHandler;
+import net.jchad.client.controller.ClientController;
+import net.jchad.client.model.error.MessageHandler;
 
-// Responsible for displaying server output in GUI mode
+// Responsible for displaying client output in GUI mode
 public class GUI implements MessageHandler {
-    private ServerController server;
+    private ClientController client;
 
     public static void main(String[] args) {
         new GUI().runGUI();
     }
 
     private void runGUI() {
-        server = new ServerController(this);
+        client = new ClientController(this);
 
         // Display GUI
     }

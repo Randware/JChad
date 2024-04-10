@@ -3,7 +3,7 @@ package net.jchad.server.view;
 import net.jchad.server.controller.ServerController;
 import net.jchad.server.model.error.MessageHandler;
 
-// Responsible for displaying output in CLI mode
+// Responsible for displaying server output in CLI mode
 public class CLI implements MessageHandler {
     private ServerController server;
 
