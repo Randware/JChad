@@ -6,6 +6,7 @@ import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class ServerThread extends Thread{
     private final MessageHandler messageHandler;
@@ -33,8 +34,10 @@ public class ServerThread extends Thread{
                 printWriter.println("Message received");
                 printWriter.flush();
             }
-        } catch (IOException e) {
-            messageHandler.handleError(new UncheckedIOException("Connection couldn't be established with %s because of an unexpected error".formatted(socket.getRemoteSocketAddress()),e));
+            if (socket.isClosed()) close();
+        } catch (IOException  e) {
+           messageHandler.handleError(new UncheckedIOException("Connection couldn't be established with %s because of an unexpected error".formatted(socket.getRemoteSocketAddress()),e));
+           close();
         }
 
     }
@@ -51,8 +54,26 @@ public class ServerThread extends Thread{
             if (printWriter != null) printWriter.close();
             if (bufferedReader != null) bufferedReader.close();
             if (socket != null) socket.close();
+            Thread.currentThread().interrupt();
         } catch (IOException e) {
             messageHandler.handleError(new UncheckedIOException("An unexpected I/O-Exception occurred",e));
         }
+    }
+
+    /**
+     * Returns a List of all current connected ServerThreads IMMUTABLE BY DEFAULT
+     * @return An immutable List
+     */
+    public static List<ServerThread> getServerThreadList() {
+        return getServerThreadList(false);
+    }
+
+    /**
+     * Returns a List of all current connected ServerThreads
+     * @param mutable If the list that gets returned is mutable or not
+     * @return The ServerThreadList
+     */
+    public static List<ServerThread> getServerThreadList(boolean mutable) {
+        return mutable ? serverThreadList : List.copyOf(serverThreadList);
     }
 }
