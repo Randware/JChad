@@ -12,6 +12,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
+/*  TODO: Implement validation for config files -> validate file before live updating
+    TODO: Fix live reloading multiple times -> pause ConfigWatcher when saving configs from program
+ */
 public class ConfigManager {
     private final String configSavePath = "./configs/";
 
@@ -21,6 +24,7 @@ public class ConfigManager {
 
     private final ObjectMapper mapper;
 
+    private ConfigWatcher configWatcher;
     private ConfigObserver configObserver;
     private MessageHandler messageHandler;
     private Config config;
@@ -37,10 +41,24 @@ public class ConfigManager {
 
         // Run the ConfigWatcher on the config file directory, when changes are detected, call notifyConfigObserver()
         try {
-            new ConfigWatcher(Path.of(configSavePath), this::notifyConfigObserver);
+            configWatcher = new ConfigWatcher(Path.of(configSavePath), this::configUpdated);
         } catch (IOException e) {
             messageHandler.handleError(new IOException("The ConfigWatcher thread has unexpectedly stopped, live updating the config no longer works", e));
         }
+
+        // Used for logging status of ConfigWatcher thread
+        /*
+        new Thread(() -> {
+            while(true) {
+                System.out.println(configWatcher.getState());
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
+        */
 
         this.config = null;
     }
@@ -49,9 +67,7 @@ public class ConfigManager {
     Handling the exception is the callers job, since this enables the caller to use a previous config if loading a new one fails.
      */
     public Config getConfig() throws IOException {
-        if(config == null) {
-                loadServerConfig();
-        }
+        loadServerConfig();
 
         return config;
     }
@@ -65,7 +81,7 @@ public class ConfigManager {
 
 
         if(!Files.exists(configPath)) {
-            mapper.writeValue(Files.createFile(configPath).toFile(), DefaultConfig.get());
+            mapper.writeValue(Files.createFile(configPath).toFile(), new Config());
         }
 
         this.config = mapper.readValue(configPath.toFile(), Config.class);
@@ -110,7 +126,13 @@ public class ConfigManager {
     }
 
     private ArrayList<String> fromURIToString(ArrayList<URI> list) {
-        return (ArrayList<String>) list.stream().map(URI::toString).toList();
+        ArrayList<String> strList = new ArrayList<>();
+
+        for(URI ip : list) {
+            strList.add(ip.toString());
+        }
+
+        return strList;
     }
 
     private ArrayList<URI> fromStringToURI(ArrayList<String> list) {
@@ -128,11 +150,9 @@ public class ConfigManager {
         return uriList;
     }
 
-    public void setRequiresPassword() {
+    private void configUpdated() {
+        if(configWatcher == null) return;
 
-    }
-
-    private void notifyConfigObserver() {
         if(configObserver != null) {
             configObserver.configUpdated();
         }

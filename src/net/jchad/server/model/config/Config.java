@@ -1,5 +1,7 @@
 package net.jchad.server.model.config;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.net.URI;
 import java.util.ArrayList;
 
@@ -31,6 +33,20 @@ public class Config {
     // Server port
     private int port;
 
+    public Config() {
+        Config defaultConfig = DefaultConfig.get();
+
+        this.requiresPassword = defaultConfig.isRequiresPassword();
+        this.password = defaultConfig.getPassword();
+        this.whitelist = defaultConfig.isWhitelist();
+        this.whitelistedIPs = defaultConfig.getWhitelistedIPs();
+        this.blacklist = defaultConfig.isBlacklist();
+        this.blacklistedIPs = defaultConfig.getBlacklistedIPs();
+        this.strictlyAnonymous = defaultConfig.isStrictlyAnonymous();
+        this.encrypted = defaultConfig.isEncrypted();
+        this.port = defaultConfig.getPort();
+    }
+
     public Config(boolean requiresPassword,
                   String password,
                   boolean whitelist,
@@ -50,6 +66,21 @@ public class Config {
         this.strictlyAnonymous = strictlyAnonymous;
         this.encrypted = encrypted;
         this.port = port;
+    }
+
+    @Override
+    public String toString() {
+        return "Config{" +
+                "requiresPassword=" + requiresPassword +
+                ", password='" + password + '\'' +
+                ", whitelist=" + whitelist +
+                ", whitelistedIPs=" + whitelistedIPs +
+                ", blacklist=" + blacklist +
+                ", blacklistedIPs=" + blacklistedIPs +
+                ", strictlyAnonymous=" + strictlyAnonymous +
+                ", encrypted=" + encrypted +
+                ", port=" + port +
+                '}';
     }
 
     public boolean isRequiresPassword() {
@@ -72,14 +103,17 @@ public class Config {
         return whitelist;
     }
 
+
     public void setWhitelist(boolean whitelist) {
         this.whitelist = whitelist;
     }
 
+    @JsonIgnore
     public ArrayList<URI> getWhitelistedIPs() {
         return whitelistedIPs;
     }
 
+    @JsonIgnore
     public void setWhitelistedIPs(ArrayList<URI> whitelistedIPs) {
         this.whitelistedIPs = whitelistedIPs;
     }
@@ -92,10 +126,12 @@ public class Config {
         this.blacklist = blacklist;
     }
 
+    @JsonIgnore
     public ArrayList<URI> getBlacklistedIPs() {
         return blacklistedIPs;
     }
 
+    @JsonIgnore
     public void setBlacklistedIPs(ArrayList<URI> blacklistedIPs) {
         this.blacklistedIPs = blacklistedIPs;
     }
