@@ -63,7 +63,7 @@ public class ServerThread extends Thread{
             if (bufferedReader != null) bufferedReader.close();
             if (socket != null) socket.close();
         } catch (IOException e) {
-            messageHandler.handleError(new IOException("Error while closing connection to [%s]: An unknown error occurred".formatted(remoteAddress),e));
+            messageHandler.handleError(new IOException("Info while closing connection to [%s]: An unknown error occurred".formatted(remoteAddress),e));
         } finally {
             Thread.currentThread().interrupt();
         }

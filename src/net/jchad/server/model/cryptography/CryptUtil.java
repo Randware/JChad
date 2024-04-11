@@ -61,7 +61,11 @@ public class CryptUtil {
     }
 
     public static byte[] base64ToBytes(byte[] base64Array) {
-        return Base64.getDecoder().decode(base64Array);
+        try {
+            return Base64.getDecoder().decode(base64Array);
+        } catch (IllegalArgumentException e) {
+            return new byte[0];
+        }
     }
 
     public static String stringToBase64(String str) {

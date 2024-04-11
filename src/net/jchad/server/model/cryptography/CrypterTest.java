@@ -6,6 +6,7 @@ import net.jchad.server.model.cryptography.tagUnit.Tag;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyPair;
 import java.security.spec.X509EncodedKeySpec;
 
 public class CrypterTest {
@@ -25,7 +26,12 @@ public class CrypterTest {
         String decoded = CryptUtil.base64ToString(base64);
         System.out.println(base64);
         System.out.println(decoded);*/
-
+        KeyPair keyPair = CreateKey.getRSAKeyPair(512);
+        byte[] text = "Hello GhaxZ".getBytes();
+        byte[] encrypted = CryptUtil.bytesToBase64(Crypter.encryptRSA(text, keyPair.getPublic()));
+        System.out.println( new String(encrypted, StandardCharsets.UTF_8));
+        byte[] decrypted = Crypter.decryptRSA(CryptUtil.base64ToBytes(encrypted), keyPair.getPrivate());
+        System.out.println(new String(decrypted, StandardCharsets.UTF_8));
 
     }
 }

@@ -25,6 +25,6 @@ public class TempTest implements MessageHandler {
 
     @Override
     public void handleInfo(String info) {
-
+        System.out.println("[CLIENT] " + info);
     }
 }

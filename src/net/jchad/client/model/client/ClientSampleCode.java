@@ -31,10 +31,12 @@ public class ClientSampleCode {
                 new InputStreamReader(System.in));
         String str, str1;
 
+
+
+
         // repeat as long as exit
         // is not typed at client
         while (!(str = kb.readLine()).equals("exit")) {
-
             // send to the server
             dos.writeBytes(str + "\n");
 
