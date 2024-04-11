@@ -3,6 +3,7 @@ package net.jchad.server.model.config;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import net.jchad.server.model.common.ThrowingRunnable;
 import net.jchad.server.model.error.MessageHandler;
 
 import java.io.IOException;
@@ -12,8 +13,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
-/*  TODO: Implement validation for config files -> validate file before live updating
-    TODO: Fix live reloading multiple times -> pause ConfigWatcher when saving configs from program
+/*
+    TODO: Implement validation for config files -> validate file before live updating
+        - Catch Jackson format exception
+    TODO: Fix live reloading multiple time
+        - check if modified file is actual config file (or just temp file, user created file, etc.)
+    TODO: Inform ConfigManager which WatchEvent has occurred
+        - can check if the updated file is an actual config file (mentioned in previous entry)
+        - can also log which file was changed
+    TODO: Fix bug, where the program "fails" updating the config when creating it
+        - Only happens if config directory not created yet, only happens in jar outside of IDE
+            - Creating config directory before running ConfigWatcher on it seems to fix it
+    DONE: Fix live reloading multiple times -> pause ConfigWatcher when saving configs from program
  */
 public class ConfigManager {
     private final String configSavePath = "./configs/";
@@ -39,26 +50,14 @@ public class ConfigManager {
         this.messageHandler = messageHandler;
         this.configObserver = configObserver;
 
-        // Run the ConfigWatcher on the config file directory, when changes are detected, call notifyConfigObserver()
+        // Run the ConfigWatcher on the config file directory if not running already. When changes are detected, call configUpdated()
         try {
             configWatcher = new ConfigWatcher(Path.of(configSavePath), this::configUpdated);
         } catch (IOException e) {
             messageHandler.handleError(new IOException("The ConfigWatcher thread has unexpectedly stopped, live updating the config no longer works", e));
         }
 
-        // Used for logging status of ConfigWatcher thread
-        /*
-        new Thread(() -> {
-            while(true) {
-                System.out.println(configWatcher.getState());
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }).start();
-        */
+        configWatcher.start();
 
         this.config = null;
     }
@@ -66,22 +65,23 @@ public class ConfigManager {
     /*
     Handling the exception is the callers job, since this enables the caller to use a previous config if loading a new one fails.
      */
-    public Config getConfig() throws IOException {
+    public Config getConfig() throws Exception {
         loadServerConfig();
 
         return config;
     }
 
-    private void loadServerConfig() throws IOException {
+    private void loadServerConfig() throws Exception {
         Path configPath = Path.of(configSavePath + serverConfigName);
 
         if(!Files.exists(Path.of(configSavePath))) {
             Files.createDirectory(Path.of(configSavePath));
         }
 
-
         if(!Files.exists(configPath)) {
-            mapper.writeValue(Files.createFile(configPath).toFile(), new Config());
+            runUnsupervised(() -> {
+                mapper.writeValue(Files.createFile(configPath).toFile(), new Config());
+            });
         }
 
         this.config = mapper.readValue(configPath.toFile(), Config.class);
@@ -105,21 +105,25 @@ public class ConfigManager {
         }
     }
 
-    private ArrayList<URI> loadWhitelistedIPsConfig() throws IOException {
+    private ArrayList<URI> loadWhitelistedIPsConfig() throws Exception {
         Path whitelistedIPsPath = Path.of(configSavePath + whitelistedIPsConfigName);
 
         if(!Files.exists(whitelistedIPsPath)) {
-            mapper.writeValue(Files.createFile(whitelistedIPsPath).toFile(), fromURIToString(config.getWhitelistedIPs()));
+            runUnsupervised(() -> {
+                mapper.writeValue(Files.createFile(whitelistedIPsPath).toFile(), fromURIToString(config.getWhitelistedIPs()));
+            });
         }
 
         return fromStringToURI(mapper.readValue(whitelistedIPsPath.toFile(), new TypeReference<>() {}));
     }
 
-    private ArrayList<URI> loadBlacklistedIPsConfig() throws IOException {
+    private ArrayList<URI> loadBlacklistedIPsConfig() throws Exception {
         Path blacklistedIPsPath = Path.of(configSavePath + blacklistedIPsConfigName);
 
         if(!Files.exists(blacklistedIPsPath)) {
-            mapper.writeValue(Files.createFile(blacklistedIPsPath).toFile(), fromURIToString(config.getBlacklistedIPs()));
+            runUnsupervised(() -> {
+                mapper.writeValue(Files.createFile(blacklistedIPsPath).toFile(), fromURIToString(config.getBlacklistedIPs()));
+            });
         }
 
         return fromStringToURI(mapper.readValue(blacklistedIPsPath.toFile(), new TypeReference<>() {}));
@@ -150,9 +154,15 @@ public class ConfigManager {
         return uriList;
     }
 
-    private void configUpdated() {
-        if(configWatcher == null) return;
+    private void runUnsupervised(ThrowingRunnable code) throws Exception {
+        configWatcher.pauseWatching();
 
+        code.run();
+
+        configWatcher.continueWatching();
+    }
+
+    private void configUpdated() {
         if(configObserver != null) {
             configObserver.configUpdated();
         }

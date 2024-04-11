@@ -20,6 +20,7 @@ public class CLI implements MessageHandler {
     @Override
     public void handleFatalError(Exception e) {
         System.out.println("[FATAL ERROR] " + e);
+        e.printStackTrace();
         System.out.println("STOPPING EXECUTION");
         System.exit(1);
     }
