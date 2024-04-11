@@ -7,24 +7,25 @@ import java.util.concurrent.TimeUnit;
 
 public class ConfigWatcher extends Thread {
     private final Path path;
-    private boolean stop = false;
-
+    private boolean running = true;
 
     private final Runnable callback;
 
     public ConfigWatcher(Path path, Runnable callback) throws IOException {
         this.path = path;
         this.callback = callback;
-
-        start();
     }
 
-    public boolean isStopped() {
-        return stop;
+    public boolean isRunning() {
+        return running;
     }
 
-    public void stopThread() {
-        stop = true;
+    public void pauseWatching() {
+        running = false;
+    }
+
+    public void continueWatching() {
+        running = true;
     }
 
     @Override
@@ -32,7 +33,9 @@ public class ConfigWatcher extends Thread {
         try (WatchService watcher = FileSystems.getDefault().newWatchService()) {
             path.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
 
-            while (!isStopped()) {
+            while (true) {
+                if(!isRunning()) continue;
+
                 WatchKey key;
                 try {
                     key = watcher.poll(25, TimeUnit.MILLISECONDS);
@@ -40,17 +43,19 @@ public class ConfigWatcher extends Thread {
                     return;
                 }
 
-                if(key == null) continue;
+                if (key == null) continue;
 
-                for (WatchEvent<?> event : key.pollEvents()) {
-                    WatchEvent.Kind<?> kind = event.kind();
+                WatchEvent<?> event = key.pollEvents().getFirst();
+                WatchEvent.Kind<?> kind = event.kind();
 
-                    if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
+                if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
+                    System.out.println(event.context());
 
-                        callback.run();
-                    }
+                    callback.run();
                 }
+
                 key.reset();
+
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e);

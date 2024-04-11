@@ -26,7 +26,7 @@ public class Server implements ConfigObserver {
         try {
             this.config = configManager.getConfig();
             messageHandler.handleInfo("Successfully loaded config");
-        } catch (IOException e) {
+        } catch (Exception e) {
             messageHandler.handleFatalError(e);
         }
 
@@ -42,7 +42,7 @@ public class Server implements ConfigObserver {
 
             messageHandler.handleInfo("Config changed, updating running config");
             System.out.println(config);
-        } catch (IOException e) {
+        } catch (Exception e) {
             messageHandler.handleWarning("Failed updating config, continuing with last working config");
         }
     }

@@ -36,8 +36,8 @@ public final class MainSocket implements Runnable{
                 serverThread.start();
             }
 
-        } catch (IOException e) {
-            messageHandler.handleFatalError(new UncheckedIOException("An unknown I/O error occurred", e));
+        } catch (Exception e) {
+            messageHandler.handleFatalError(new Exception("An unknown error occurred", e));
         }
     }
 }
