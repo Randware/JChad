@@ -39,7 +39,9 @@ public class Server implements ConfigObserver {
     public void configUpdated() {
         try {
             config = configManager.getConfig();
-            messageHandler.handleInfo("Successfully updated running config");
+
+            messageHandler.handleInfo("Config changed, updating running config");
+            System.out.println(config);
         } catch (IOException e) {
             messageHandler.handleWarning("Failed updating config, continuing with last working config");
         }
