@@ -1,4 +1,4 @@
-## JChad
+## JChad 🗿
 A free and open-source, cross-platform chatting platform where you can host servers yourself. Written in Java.
 
 > [!NOTE]
