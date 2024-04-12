@@ -7,6 +7,7 @@ import net.jchad.server.model.common.ThrowingRunnable;
 import net.jchad.server.model.error.MessageHandler;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -22,8 +23,10 @@ import java.util.Map;
     TODO: Fix bug, where the program "fails" updating the config when creating it
         - Only happens if config directory not created yet, only happens in jar outside of IDE
             - Creating config directory before running ConfigWatcher on it seems to fix it
-    DONE: Fix live reloading multiple time
+    TODO: Get rid of runUnsupervised() method and concept, since this promotes bad code structure
+    DONE: Fix live reloading multiple times
         - check if modified file is actual config file (or just temp file, user created file, etc.)
+        - prevent same file edit event being recognized twice
     DONE: Inform ConfigManager which WatchEvent has occurred
         - can check if the updated file is an actual config file (mentioned in previous entry)
         - can also log which file was changed
@@ -119,7 +122,7 @@ public class ConfigManager {
             configWatcher = new ConfigWatcher(Path.of(configSavePath), (event) -> {
                 configUpdated(event);
             });
-        } catch (IOException e) {
+        } catch (IOException | UncheckedIOException e) {
             messageHandler.handleError(new IOException("The ConfigWatcher thread has unexpectedly stopped, live updating the config no longer works", e));
         }
 
@@ -156,9 +159,9 @@ public class ConfigManager {
         }
 
         if(!Files.exists(configPath)) {
-            runUnsupervised(() -> {
-                mapper.writeValue(Files.createFile(configPath).toFile(), new Config());
-            });
+            messageHandler.handleInfo("Creating " + configs.get("serverConfig") + " file");
+
+            mapper.writeValue(Files.createFile(configPath).toFile(), new Config());
         }
 
         this.config = mapper.readValue(configPath.toFile(), Config.class);
@@ -169,6 +172,7 @@ public class ConfigManager {
         if(config.isWhitelist()) {
             try {
                 config.setWhitelistedIPs(loadWhitelistedIPsConfig());
+
             } catch (IOException e) {
                 messageHandler.handleError(e);
             }
@@ -197,9 +201,10 @@ public class ConfigManager {
         Path whitelistedIPsPath = Path.of(configSavePath + configs.get("whitelistedIPsConfig"));
 
         if(!Files.exists(whitelistedIPsPath)) {
-            runUnsupervised(() -> {
-                mapper.writeValue(Files.createFile(whitelistedIPsPath).toFile(), fromURIToString(config.getWhitelistedIPs()));
-            });
+            messageHandler.handleInfo("Creating " + configs.get("whitelistedIPsConfig") + " file");
+
+            mapper.writeValue(Files.createFile(whitelistedIPsPath).toFile(), fromURIToString(config.getWhitelistedIPs()));
+
         }
 
         return fromStringToURI(mapper.readValue(whitelistedIPsPath.toFile(), new TypeReference<>() {}));
@@ -216,9 +221,9 @@ public class ConfigManager {
         Path blacklistedIPsPath = Path.of(configSavePath + configs.get("blacklistedIPsConfig"));
 
         if(!Files.exists(blacklistedIPsPath)) {
-            runUnsupervised(() -> {
-                mapper.writeValue(Files.createFile(blacklistedIPsPath).toFile(), fromURIToString(config.getBlacklistedIPs()));
-            });
+            messageHandler.handleInfo("Creating " + configs.get("blacklistedIPsConfig") + " file");
+
+            mapper.writeValue(Files.createFile(blacklistedIPsPath).toFile(), fromURIToString(config.getBlacklistedIPs()));
         }
 
         return fromStringToURI(mapper.readValue(blacklistedIPsPath.toFile(), new TypeReference<>() {}));
@@ -263,14 +268,17 @@ public class ConfigManager {
         return uriList;
     }
 
+
     /**
      * Allows a piece of code to be executed without being registered by the {@link ConfigWatcher}.
      *
      * @param code Code which gets executed without being registered by the {@link ConfigWatcher}
      * @throws Exception If an error occurs in the code
      */
+    @Deprecated
     private void runUnsupervised(ThrowingRunnable code) throws Exception {
         configWatcher.pauseWatching();
+        System.out.println("Running unsupervised code");
 
         code.run();
 
@@ -283,14 +291,15 @@ public class ConfigManager {
      * @param event {@link WatchEvent} containing the event registered by the {@link ConfigWatcher}
      */
     private void configUpdated(WatchEvent<?> event) {
-        String modifiedConfig = event.context().toString();
+        Path modifiedConfig = Path.of(configSavePath).resolve((Path) event.context());
+        String configName = modifiedConfig.getFileName().toString();
 
-        if(!configs.containsValue(modifiedConfig)) {
+        if(!configs.containsValue(configName)) {
             return;
         }
 
         if(configObserver != null) {
-            messageHandler.handleInfo("\"" + modifiedConfig + "\" config was updated");
+            messageHandler.handleInfo("\"" + configName + "\" config was updated");
 
             configObserver.configUpdated();
         }
