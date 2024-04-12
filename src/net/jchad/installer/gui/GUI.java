@@ -12,6 +12,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.concurrent.Task;
@@ -22,6 +23,7 @@ import net.jchad.installer.core.progressBar.BarStatus;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.EventListener;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,10 +35,11 @@ public class GUI extends Application implements BarDisplay {
     private VBox vbox;
     private int selectedIndex;
 
-    private double newWidth;
-    private double newHeight;
-    private double oldWidth;
-    private double oldHeight;
+    private static final double BASE_WIDTH = 800;
+    private static final double BASE_HEIGHT = 600;
+
+    private static final double MAX_SCALE = 1.3;
+    private static final double MIN_SCALE = 1.0;
 
 
     public static void main(String[] args) {
@@ -50,6 +53,8 @@ public class GUI extends Application implements BarDisplay {
         vbox = new VBox(10);
         vbox.setPadding(new Insets(10));
         vbox.setAlignment(Pos.CENTER);
+        vbox.setStyle("-fx-background-color: white;");
+
 
         Label welcomeLabel = new Label("Welcome to the JChad setup!");
         welcomeLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
@@ -130,13 +135,39 @@ public class GUI extends Application implements BarDisplay {
 
         Scene scene = new Scene(vbox, 400, 200);
 
+        scene.setFill(Color.WHITE);
 
+        scene.widthProperty().addListener((observable, oldValue, newValue) -> {
+            // Update the scale factor to maintain the aspect ratio
+            double newScale = calculateScale(newValue.doubleValue(), scene.getHeight());
+            vbox.setScaleX(newScale);
+            vbox.setScaleY(newScale);
+        });
+
+        scene.heightProperty().addListener((observable, oldValue, newValue) -> {
+            // Update the scale factor to maintain the aspect ratio
+            double newScale = calculateScale(scene.getWidth(), newValue.doubleValue());
+            vbox.setScaleX(newScale);
+            vbox.setScaleY(newScale);
+        });
 
         primaryStage.setScene(scene);
         primaryStage.setWidth(800);
         primaryStage.setHeight(600);
         primaryStage.show();
         hook("RepoDownloader");
+    }
+
+    private double calculateScale(double width, double height) {
+        // Calculate the aspect ratio
+        double aspectRatio = BASE_WIDTH / BASE_HEIGHT;
+        // Calculate the scale factor based on the current width and height
+        double scaleX = width / BASE_WIDTH;
+        double scaleY = height / BASE_HEIGHT;
+        // Choose the smaller scale factor to maintain the aspect ratio
+        double scale = Math.min(scaleX, scaleY);
+        // Limit the scale within the specified range
+        return Math.max(Math.min(scale, MAX_SCALE), MIN_SCALE);
     }
 
     @Override
