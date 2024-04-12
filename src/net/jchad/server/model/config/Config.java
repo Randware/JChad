@@ -5,34 +5,59 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.net.URI;
 import java.util.ArrayList;
 
+/**
+ * Stores the servers configuration.
+ */
+
 public class Config {
-    // Require password to connect
+    /**
+     * Require password to connect.
+     */
     private boolean requiresPassword;
 
-    // Password required to connect
+    /**
+     * Password required to connect.
+     */
     private String password;
 
-    // Only whitelisted IPs can connect (stored in whitelist.yml)
+    /**
+     * Only whitelisted IPs can connect.
+     */
     private boolean whitelist;
 
-    // List of whitelisted IPs
+    /**
+     * Whitelisted IPs (stored in separate "whitelisted-ips.yml" file.
+     */
     private ArrayList<URI> whitelistedIPs;
 
-    // Blacklisted IPs can't connect (stored in blacklist.yml)
+    /**
+     * Blacklisted IPs can't connect.
+     */
     private boolean blacklist;
 
-    // List of blacklisted
+    /**
+     * Blacklisted IPs (stored in separate "blacklisted-ips.yml").
+     */
     private ArrayList<URI> blacklistedIPs;
 
-    // Hide usernames in all channels
+    /**
+     * Hide usernames in all channels.
+     */
     private boolean strictlyAnonymous;
 
-    // Encrypt messages
+    /**
+     * Encrypt messages.
+     */
     private boolean encrypted;
 
-    // Server port
+    /**
+     * Port the server runs on.
+     */
     private int port;
 
+    /**
+     * Default constructor for default configuration.
+     */
     public Config() {
         Config defaultConfig = DefaultConfig.get();
 
@@ -47,6 +72,19 @@ public class Config {
         this.port = defaultConfig.getPort();
     }
 
+    /**
+     * Constructor for config with custom values.
+     *
+     * @param requiresPassword Require password to connect
+     * @param password  Password required to connect
+     * @param whitelist Only whitelisted IPs are allowed to connect.
+     * @param whitelistedIPs Whitelisted IPs
+     * @param blacklist Blacklisted IPs are not allowed to connect.
+     * @param blacklistedIPs Blacklisted IPs
+     * @param strictlyAnonymous Hide usernames in all channels
+     * @param encrypted Encrypt messages
+     * @param port Port the server runs on.
+     */
     public Config(boolean requiresPassword,
                   String password,
                   boolean whitelist,

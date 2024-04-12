@@ -3,36 +3,60 @@ package net.jchad.server.model.config;
 import java.net.URI;
 import java.util.ArrayList;
 
-// Defines default config values and creates configs with them
+/**
+ * Defines default configuration values.
+ */
 public class DefaultConfig {
-    // Require password to connect
+    /**
+     * Require password to connect.
+     */
     private static final boolean requiresPassword = false;
 
-    // Password required to connect
+    /**
+     * Password required to connect.
+     */
     private static final String password = "";
 
-    // Only whitelisted IPs can connect (stored in whitelist.yml)
+    /**
+     * Only whitelisted IPs can connect.
+     */
     private static final boolean whitelist = false;
 
-    // List of whitelisted IPs
+    /**
+     * Whitelisted IPs (stored in separate "whitelisted-ips.yml" file.
+     */
     private static final ArrayList<URI> whitelistedIPs = new ArrayList<>();
 
-    // Blacklisted IPs can't connect (stored in blacklist.yml)
+    /**
+     * Blacklisted IPs can't connect.
+     */
     private static final boolean blacklist = false;
 
-    // List of blacklisted
+    /**
+     * Blacklisted IPs (stored in separate "blacklisted-ips.yml").
+     */
     private static final ArrayList<URI> blacklistedIPs = new ArrayList<>();
 
-    // Hide usernames in all channels
+    /**
+     * Hide usernames in all channels.
+     */
     private static final boolean strictlyAnonymous = false;
 
-    // Encrypt messages
+    /**
+     * Encrypt messages.
+     */
     private static final boolean encrypted = true;
 
-    // Server port
+    /**
+     * Port the server runs on.
+     */
     private static final int port = 13814;
 
-    // Create a Config instance with the specified default values
+    /**
+     * Creates a config with the specified default values.
+     *
+     * @return {@link Config} with the specified default values.
+     */
     public static Config get() {
         return new Config(
                 requiresPassword,
