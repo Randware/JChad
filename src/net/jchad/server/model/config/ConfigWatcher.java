@@ -3,7 +3,6 @@ package net.jchad.server.model.config;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.*;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
@@ -74,27 +73,30 @@ public class ConfigWatcher extends Thread {
             while (true) {
                 if(!isRunning()) continue;
 
-                WatchKey key;
+                final WatchKey key = watcher.take();
+
+                /*
+                 * Let thread sleep for 100ms to prevent the same file edit from being recognized twice.
+                 * This happens, because a file gets edited once for changing metadata and a second time
+                 * for actually updating the file content.
+                 */
                 try {
-                    key = watcher.poll(25, TimeUnit.MILLISECONDS);
-                } catch (InterruptedException e) {
-                    return;
-                }
+                    Thread.sleep(100);
+                } catch (InterruptedException ignore) {}
 
-                if (key == null) continue;
 
-                WatchEvent<?> event = key.pollEvents().getFirst();
-                WatchEvent.Kind<?> kind = event.kind();
+                for(final WatchEvent<?> event : key.pollEvents() ) {
 
-                if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
-                    callback.accept(event);
+
+                    if(event.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
+                        callback.accept(event);
+                    }
                 }
 
                 key.reset();
-
             }
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+        } catch (IOException | InterruptedException e) {
+            throw new UncheckedIOException(new IOException(e));
         }
     }
 }
