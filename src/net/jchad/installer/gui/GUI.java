@@ -93,11 +93,13 @@ public class GUI extends Application implements BarDisplay {
         installButton.setTranslateY(70);
         installButton.setStyle("-fx-font-size: 13px;");
         installButton.setOnAction(e -> {
-            if (selectedIndex == 0) {
+            if (softwareComboBox.getSelectionModel().getSelectedItem() == null) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("No Software selected");
                 alert.setContentText("Please select Software!");
                 alert.showAndWait();
+
+
             } else {
                 Task<Void> installTask = new Task<Void>() {
                     @Override
