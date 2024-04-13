@@ -23,7 +23,9 @@ public final class MainSocket implements Runnable{
         this.port = port;
     }
 
-
+    /**
+     * TODO discuss the option with GhaxZ of using {@link java.util.concurrent.Executor Thread pools} for the single connections
+     */
     @Override
     public void run() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
@@ -31,8 +33,7 @@ public final class MainSocket implements Runnable{
                 Socket socket = serverSocket.accept();
                 messageHandler.handleInfo("Socket connected: " + socket);
                 // Same as "new ServerThread(socket, handler).start();"
-                ServerThread serverThread = new ServerThread(socket,  messageHandler);
-                ServerThread.listOperation(list -> list.add(serverThread));
+                Thread serverThread = new Thread(new ServerThread(socket,  messageHandler));
                 serverThread.start();
             }
 

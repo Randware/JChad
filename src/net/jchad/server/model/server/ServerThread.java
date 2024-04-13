@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class ServerThread extends Thread{
+public class ServerThread implements Runnable{
     private final MessageHandler messageHandler;
     private final static List<ServerThread> serverThreadList = new ArrayList<>();
     private final PrintWriter printWriter;
@@ -34,6 +34,7 @@ public class ServerThread extends Thread{
 
     @Override
     public void run() {
+        listOperation(list -> list.add(this));
         String message = "";
         try {
             // If the client closes the connection the bufferedReader
