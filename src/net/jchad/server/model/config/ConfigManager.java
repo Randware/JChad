@@ -1,16 +1,19 @@
 package net.jchad.server.model.config;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import com.fasterxml.jackson.dataformat.yaml.snakeyaml.error.MarkedYAMLException;
 import net.jchad.server.model.common.ThrowingRunnable;
 import net.jchad.server.model.error.MessageHandler;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.InetAddress;
 import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
@@ -19,11 +22,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 /*
-    TODO: Implement validation for config files -> validate file before live updating
-        - Catch Jackson format exception
+
     TODO: Fix bug, where the program "fails" updating the config when creating it
         - Only happens if config directory not created yet, only happens in jar outside of IDE
             - Creating config directory before running ConfigWatcher on it seems to fix it
+    TODO: Maybe don't dynamically load whitelisted and blacklisted files
+    TODO: Rewrite structure, so error handling and logging becomes easier and less hacky
+    DONE: Handle MismatchedInputException
+        - This exception occurs when the ObjectMapper tries to parse an empty file
+    DONE: Implement validation for config files
+        - Catch Jackson format exception
     DONE: Get rid of runUnsupervised() method and concept, since this promotes bad code structure
     DONE: Fix live reloading multiple times
         - check if modified file is actual config file (or just temp file, user created file, etc.)
@@ -110,7 +118,7 @@ public class ConfigManager {
      *                                             which gets notified when config file changes are detected.
      */
     public ConfigManager(MessageHandler messageHandler, ConfigObserver configObserver) {
-        this.mapper = new ObjectMapper(new YAMLFactory());
+        this.mapper = new ObjectMapper(new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
 
         this.messageHandler = messageHandler;
         this.configObserver = configObserver;
@@ -153,20 +161,20 @@ public class ConfigManager {
      * @throws Exception If an error occurs when trying to create or read configs.
      */
     private void loadServerConfig() throws Exception {
-        Path configPath = Path.of(configSavePath + configs.get("serverConfig"));
+        Path serverConfigPath = Path.of(configSavePath + configs.get("serverConfig"));
 
         if(!Files.exists(Path.of(configSavePath))) {
             Files.createDirectory(Path.of(configSavePath));
         }
 
-        if(!Files.exists(configPath)) {
+        if(!Files.exists(serverConfigPath)) {
             messageHandler.handleInfo("Creating " + configs.get("serverConfig") + " file");
 
-            mapper.writeValue(Files.createFile(configPath).toFile(), new Config());
+            mapper.writeValue(Files.createFile(serverConfigPath).toFile(), new Config());
         }
 
         try {
-            this.config = mapper.readValue(configPath.toFile(), Config.class);
+            this.config = mapper.readValue(serverConfigPath.toFile(), Config.class);
         } catch (InvalidFormatException e) {
             messageHandler.handleWarning(configs.get("serverConfig") + " couldn't be parsed: "
                             + e.getOriginalMessage());
@@ -177,28 +185,22 @@ public class ConfigManager {
             } else {
                 throw new IOException(configs.get("serverConfig") + " is invalid");
             }
+        } catch (MismatchedInputException e) {
+            messageHandler.handleWarning(configs.get("serverConfig") + " is empty");
         }
 
         /*
          * Load whitelist if feature is enabled
          */
         if(config.isWhitelist()) {
-            try {
-                config.setWhitelistedIPs(loadWhitelistedIPsConfig());
-            } catch (Exception e) {
-                messageHandler.handleError(e);
-            }
+            config.setWhitelistedIPs(loadWhitelistedIPsConfig());
         }
 
         /*
          * Load blacklist if feature is enabled
          */
         if(config.isBlacklist()) {
-            try {
-                config.setBlacklistedIPs(loadBlacklistedIPsConfig());
-            } catch (Exception e) {
-                messageHandler.handleError(e);
-            }
+            config.setBlacklistedIPs(loadBlacklistedIPsConfig());
         }
     }
 
@@ -209,7 +211,8 @@ public class ConfigManager {
      * @return {@link ArrayList} containing {@link URI} entries of whitelisted IPs
      * @throws Exception If an error occurs when trying to create or read the config.
      */
-    private ArrayList<URI> loadWhitelistedIPsConfig() throws Exception {
+    @SuppressWarnings("unchecked")
+    private ArrayList<InetAddress> loadWhitelistedIPsConfig() throws Exception {
         Path whitelistedIPsPath = Path.of(configSavePath + configs.get("whitelistedIPsConfig"));
 
         if(!Files.exists(whitelistedIPsPath)) {
@@ -218,7 +221,18 @@ public class ConfigManager {
             mapper.writeValue(Files.createFile(whitelistedIPsPath).toFile(), fromURIToString(config.getWhitelistedIPs()));
         }
 
-        return fromStringToURI(mapper.readValue(whitelistedIPsPath.toFile(), new TypeReference<>() {}));
+        ArrayList<String> ipList = new ArrayList<>();
+        try {
+            ipList = mapper.readValue(whitelistedIPsPath.toFile(), ArrayList.class);
+        } catch (MarkedYAMLException e) {
+            messageHandler.handleWarning(configs.get("blacklistedIPsConfig") + " couldn't be parsed: " + e.getProblem() + "\n"
+                        + e.getContextMark().get_snippet(0, 150));
+
+        } catch (MismatchedInputException e) {
+            messageHandler.handleWarning(configs.get("whitelistedIPsConfig") + " is empty");
+        }
+
+        return fromStringToIP(ipList);
     }
 
     /**
@@ -228,7 +242,8 @@ public class ConfigManager {
      * @return {@link ArrayList} containing {@link URI} entries of blacklisted IPs
      * @throws Exception If an error occurs when trying to create or read the config.
      */
-    private ArrayList<URI> loadBlacklistedIPsConfig() throws Exception {
+    @SuppressWarnings("unchecked")
+    private ArrayList<InetAddress> loadBlacklistedIPsConfig() throws Exception {
         Path blacklistedIPsPath = Path.of(configSavePath + configs.get("blacklistedIPsConfig"));
 
         if(!Files.exists(blacklistedIPsPath)) {
@@ -237,7 +252,18 @@ public class ConfigManager {
             mapper.writeValue(Files.createFile(blacklistedIPsPath).toFile(), fromURIToString(config.getBlacklistedIPs()));
         }
 
-        return fromStringToURI(mapper.readValue(blacklistedIPsPath.toFile(), new TypeReference<>() {}));
+        ArrayList<String> ipList = new ArrayList<>();
+        try {
+            ipList = mapper.readValue(blacklistedIPsPath.toFile(), ArrayList.class);
+        } catch (MarkedYAMLException e) {
+            messageHandler.handleWarning(configs.get("blacklistedIPsConfig") + " couldn't be parsed: " + e.getProblem() + "\n"
+                        + e.getContextMark().get_snippet(0, 150));
+
+        } catch (MismatchedInputException e) {
+            messageHandler.handleWarning(configs.get("blacklistedIPsConfig") + " is empty");
+        }
+
+        return fromStringToIP(ipList);
     }
 
     /**
@@ -247,11 +273,11 @@ public class ConfigManager {
      * @param list {@link ArrayList} containing {@link URI} entries of IPs.
      * @return {@link ArrayList} containing {@link String} entries of IPs.
      */
-    private ArrayList<String> fromURIToString(ArrayList<URI> list) {
+    private ArrayList<String> fromURIToString(ArrayList<InetAddress> list) {
         ArrayList<String> strList = new ArrayList<>();
 
-        for(URI ip : list) {
-            strList.add(ip.toString());
+        for(InetAddress ip : list) {
+            strList.add(ip.getHostAddress());
         }
 
         return strList;
@@ -264,19 +290,22 @@ public class ConfigManager {
      * @param list {@link ArrayList} containing {@link String} entries of IPs.
      * @return {@link ArrayList} containing {@link URI} entries of IPs.
      */
-    private ArrayList<URI> fromStringToURI(ArrayList<String> list) {
-        ArrayList<URI> uriList = new ArrayList<>();
+    private ArrayList<InetAddress> fromStringToIP(ArrayList<String> list) {
+        ArrayList<InetAddress> ipList = new ArrayList<>();
 
         for(String ip : list) {
             try {
-                uriList.add(new URI(ip));
-            } catch (URISyntaxException e) {
+                ipList.add(InetAddress.getByAddress(ip.getBytes()));
+            } catch (UnknownHostException e) {
+
+
+
                 // TODO: Give information in which file this error occurred
-                messageHandler.handleWarning("Failed parsing IP string: " + ip);
+                messageHandler.handleWarning("Failed parsing IP string: \"" + ip + "\"");
             }
         }
 
-        return uriList;
+        return ipList;
     }
 
 
