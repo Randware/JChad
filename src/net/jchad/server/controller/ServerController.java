@@ -14,4 +14,8 @@ public class ServerController {
     public void startServer() {
         server.runServer();
     }
+
+    public void sendCommand(String command) {
+        // Send command to server here
+    }
 }
