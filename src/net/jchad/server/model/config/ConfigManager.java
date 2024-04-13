@@ -2,6 +2,7 @@ package net.jchad.server.model.config;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import net.jchad.server.model.common.ThrowingRunnable;
 import net.jchad.server.model.error.MessageHandler;
@@ -23,7 +24,7 @@ import java.util.Map;
     TODO: Fix bug, where the program "fails" updating the config when creating it
         - Only happens if config directory not created yet, only happens in jar outside of IDE
             - Creating config directory before running ConfigWatcher on it seems to fix it
-    TODO: Get rid of runUnsupervised() method and concept, since this promotes bad code structure
+    DONE: Get rid of runUnsupervised() method and concept, since this promotes bad code structure
     DONE: Fix live reloading multiple times
         - check if modified file is actual config file (or just temp file, user created file, etc.)
         - prevent same file edit event being recognized twice
@@ -164,7 +165,19 @@ public class ConfigManager {
             mapper.writeValue(Files.createFile(configPath).toFile(), new Config());
         }
 
-        this.config = mapper.readValue(configPath.toFile(), Config.class);
+        try {
+            this.config = mapper.readValue(configPath.toFile(), Config.class);
+        } catch (InvalidFormatException e) {
+            messageHandler.handleWarning(configs.get("serverConfig") + " couldn't be parsed: "
+                            + e.getOriginalMessage());
+
+            if(this.config == null) {
+                this.config = new Config();
+                messageHandler.handleWarning("Falling back to default config");
+            } else {
+                throw new IOException(configs.get("serverConfig") + " is invalid");
+            }
+        }
 
         /*
          * Load whitelist if feature is enabled
@@ -172,8 +185,7 @@ public class ConfigManager {
         if(config.isWhitelist()) {
             try {
                 config.setWhitelistedIPs(loadWhitelistedIPsConfig());
-
-            } catch (IOException e) {
+            } catch (Exception e) {
                 messageHandler.handleError(e);
             }
         }
@@ -184,7 +196,7 @@ public class ConfigManager {
         if(config.isBlacklist()) {
             try {
                 config.setBlacklistedIPs(loadBlacklistedIPsConfig());
-            } catch (IOException e) {
+            } catch (Exception e) {
                 messageHandler.handleError(e);
             }
         }
@@ -204,7 +216,6 @@ public class ConfigManager {
             messageHandler.handleInfo("Creating " + configs.get("whitelistedIPsConfig") + " file");
 
             mapper.writeValue(Files.createFile(whitelistedIPsPath).toFile(), fromURIToString(config.getWhitelistedIPs()));
-
         }
 
         return fromStringToURI(mapper.readValue(whitelistedIPsPath.toFile(), new TypeReference<>() {}));

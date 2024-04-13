@@ -3,6 +3,9 @@ package net.jchad.server.model.config;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
@@ -24,6 +27,15 @@ public class ConfigWatcher extends Thread {
      * Defines if callback code should be executed when an event was registered
      */
     private boolean running = true;
+
+    /**
+     * Stores recently created files with a timestamp. This is used,
+     * so recently created files aren't detected as modified until after a specified time.
+     * This is needed, because when a new file is created with content, this still gets
+     * detected as a modified file, because it gets created first, then modified.
+     * This is technically correct behaviour, but not desired in this use case.
+     */
+    private final Map<Path, Long> recentlyCreatedFiles = new HashMap<>();
 
     /**
      *
@@ -68,7 +80,7 @@ public class ConfigWatcher extends Thread {
     @Override
     public void run() {
         try (WatchService watcher = FileSystems.getDefault().newWatchService()) {
-            path.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
+            path.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_CREATE);
 
             while (true) {
                 if(!isRunning()) continue;
@@ -86,10 +98,17 @@ public class ConfigWatcher extends Thread {
 
 
                 for(final WatchEvent<?> event : key.pollEvents() ) {
+                    Path modifiedConfig = path.resolve((Path) event.context());
 
-
-                    if(event.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
-                        callback.accept(event);
+                    if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE) {
+                        // Add newly created file to map with timestamp
+                        recentlyCreatedFiles.put(modifiedConfig, System.currentTimeMillis());
+                    } else if (event.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
+                        if (!recentlyCreatedFiles.containsKey(modifiedConfig) ||
+                                System.currentTimeMillis() - recentlyCreatedFiles.get(modifiedConfig) > TimeUnit.MILLISECONDS.toMillis(100)) {
+                            recentlyCreatedFiles.remove(modifiedConfig);
+                            callback.accept(event);
+                        }
                     }
                 }
 
