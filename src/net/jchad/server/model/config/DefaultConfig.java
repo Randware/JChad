@@ -1,5 +1,6 @@
 package net.jchad.server.model.config;
 
+import java.net.InetAddress;
 import java.net.URI;
 import java.util.ArrayList;
 
@@ -25,7 +26,7 @@ public class DefaultConfig {
     /**
      * Whitelisted IPs (stored in separate "whitelisted-ips.yml" file.
      */
-    private static final ArrayList<URI> whitelistedIPs = new ArrayList<>();
+    private static final ArrayList<InetAddress> whitelistedIPs = new ArrayList<>();
 
     /**
      * Blacklisted IPs can't connect.
@@ -35,7 +36,7 @@ public class DefaultConfig {
     /**
      * Blacklisted IPs (stored in separate "blacklisted-ips.yml").
      */
-    private static final ArrayList<URI> blacklistedIPs = new ArrayList<>();
+    private static final ArrayList<InetAddress> blacklistedIPs = new ArrayList<>();
 
     /**
      * Hide usernames in all channels.

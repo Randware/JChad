@@ -2,6 +2,7 @@ package net.jchad.server.model.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.net.InetAddress;
 import java.net.URI;
 import java.util.ArrayList;
 
@@ -26,9 +27,9 @@ public class Config {
     private boolean whitelist;
 
     /**
-     * Whitelisted IPs (stored in separate "whitelisted-ips.yml" file.
+     * Whitelisted IPs (stored in separate "whitelisted-ips.yml" file).
      */
-    private ArrayList<URI> whitelistedIPs;
+    private ArrayList<InetAddress> whitelistedIPs;
 
     /**
      * Blacklisted IPs can't connect.
@@ -38,7 +39,7 @@ public class Config {
     /**
      * Blacklisted IPs (stored in separate "blacklisted-ips.yml").
      */
-    private ArrayList<URI> blacklistedIPs;
+    private ArrayList<InetAddress> blacklistedIPs;
 
     /**
      * Hide usernames in all channels.
@@ -88,9 +89,9 @@ public class Config {
     public Config(boolean requiresPassword,
                   String password,
                   boolean whitelist,
-                  ArrayList<URI> whitelistedIPs,
+                  ArrayList<InetAddress> whitelistedIPs,
                   boolean blacklist,
-                  ArrayList<URI> blacklistedIPs,
+                  ArrayList<InetAddress> blacklistedIPs,
                   boolean strictlyAnonymous,
                   boolean encrypted,
                   int port) {
@@ -147,12 +148,12 @@ public class Config {
     }
 
     @JsonIgnore
-    public ArrayList<URI> getWhitelistedIPs() {
+    public ArrayList<InetAddress> getWhitelistedIPs() {
         return whitelistedIPs;
     }
 
     @JsonIgnore
-    public void setWhitelistedIPs(ArrayList<URI> whitelistedIPs) {
+    public void setWhitelistedIPs(ArrayList<InetAddress> whitelistedIPs) {
         this.whitelistedIPs = whitelistedIPs;
     }
 
@@ -165,12 +166,12 @@ public class Config {
     }
 
     @JsonIgnore
-    public ArrayList<URI> getBlacklistedIPs() {
+    public ArrayList<InetAddress> getBlacklistedIPs() {
         return blacklistedIPs;
     }
 
     @JsonIgnore
-    public void setBlacklistedIPs(ArrayList<URI> blacklistedIPs) {
+    public void setBlacklistedIPs(ArrayList<InetAddress> blacklistedIPs) {
         this.blacklistedIPs = blacklistedIPs;
     }
 
