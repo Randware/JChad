@@ -1,16 +1,21 @@
 package net.jchad.server.model.cryptography.tagUnit;
 
-public enum Key {
+public enum TagUnit {
+    LENGTH_96(96),
+    LENGTH_104(104),
+    LENGTH_112(112),
+    LENGTH_120(120),
     LENGTH_128(128),
-    LENGTH_192(192),
-    LENGTH_256(256),
-    DEFAULT(LENGTH_256.value);
+    DEFAULT(LENGTH_128.getValue());
+
     public final int value;
-    private Key(int value) {
+
+    private TagUnit(int value) {
         this.value = value;
     }
 
     public int getValue() {
         return value;
     }
+
 }
