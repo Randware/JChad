@@ -56,10 +56,17 @@ public class CryptUtil {
         }
     }
 
+    /**
+     * Converts a byte array to a base64 byte array
+     */
     public static byte[] bytesToBase64(byte[] byteArray) {
         return Base64.getEncoder().encode(byteArray);
     }
 
+    /**
+     * Converts a base64 encoded byte array into a normal one
+     * Return an empty array if the given base64 array is not a base64 encoded array
+     */
     public static byte[] base64ToBytes(byte[] base64Array) {
         try {
             return Base64.getDecoder().decode(base64Array);
@@ -67,18 +74,29 @@ public class CryptUtil {
             return new byte[0];
         }
     }
-
+    /**
+     * Converts a normal String to a base64 encoded String
+     */
     public static String stringToBase64(String str) {
-        return new String(Base64.getEncoder().encode(str.getBytes()), StandardCharsets.UTF_8);
+        return bytesToString(Base64.getEncoder().encode(str.getBytes()));
     }
 
+    /**
+     * Converts a base64 encoded String into a normal one
+     * If the given String is not convertable null gets returned
+     * @return the encoded string or null if is not decodaeble
+     */
     public static String base64ToString(String base64EncodedString) {
         try {
-            return new String(Base64.getDecoder().decode(base64EncodedString), StandardCharsets.UTF_8);
+            return bytesToString(Base64.getDecoder().decode(base64EncodedString));
         } catch (IllegalArgumentException e) {
-            return "";
+            return null;
         }
     }
+
+    /**
+     * Converts a byte array to an UTF-8 string
+     */
 
     public static String bytesToString(byte[] bytes) {
         return new String(bytes, StandardCharsets.UTF_8);

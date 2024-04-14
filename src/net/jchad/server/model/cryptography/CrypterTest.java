@@ -1,16 +1,15 @@
 package net.jchad.server.model.cryptography;
 
-import net.jchad.server.model.cryptography.keys.CreateKey;
+import net.jchad.server.model.cryptography.keys.CrypterKey;
 
-import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.util.Arrays;
 
 public class CrypterTest {
     public static void main(String[] args) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         /*String text = "Hello, World";
-        SecretKey key = CreateKey.getAESKey();
-        SecretKey key2 = CreateKey.getAESKey();
+        SecretKey key = CrypterKey.getAESKey();
+        SecretKey key2 = CrypterKey.getAESKey();
         byte[] iv = CryptUtil.getRandomByteArr(16);
         byte[] iv2 = CryptUtil.getRandomByteArr(16);
         byte[] encryptedText = CryptUtil.bytesToBase64(Crypter.encryptAES(text.getBytes(StandardCharsets.UTF_8), key, iv, TagUnit.LENGTH_128));
@@ -25,10 +24,10 @@ public class CrypterTest {
         System.out.println(decoded);*/
 
 
-        String text = "Hello World";
+        byte[] text = "Hello World".getBytes();
 
-        KeyPair keyPairServer = CreateKey.getRSAKeyPair();
-        KeyPair keyPairClient = CreateKey.getRSAKeyPair();
+        KeyPair keyPairServer = CrypterKey.getRSAKeyPair();
+        KeyPair keyPairClient = CrypterKey.getRSAKeyPair();
 
         PrivateKey clientKeyPrivate = keyPairClient.getPrivate();
         PublicKey clientKeyPublic = keyPairClient.getPublic();
@@ -37,7 +36,7 @@ public class CrypterTest {
 
         System.out.println(Arrays.toString(str));
         System.out.println(Crypter.verify(text,str,clientKeyPublic));
-
-
+        System.out.println("----");
+        System.out.println(CrypterKey.getAESkeyFromBytes(new byte[]{21,125,125}));
     }
 }
