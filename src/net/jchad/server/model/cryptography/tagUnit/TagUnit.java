@@ -1,5 +1,7 @@
 package net.jchad.server.model.cryptography.tagUnit;
-
+/**
+ * These are different units to avoid exception
+ */
 public enum TagUnit {
     LENGTH_96(96),
     LENGTH_104(104),

@@ -16,7 +16,7 @@ import java.security.spec.X509EncodedKeySpec;
 /**
  * This class provides <b><u>Thread-safe</u></b> key generation
  */
-public class CreateKey {
+public class CrypterKey {
 
 
     /**
@@ -56,6 +56,12 @@ public class CreateKey {
         }
     }
 
+    /**
+     * Generates an AES encryption/decryption key from a password and a salt
+     * @param password The password
+     * @param salt The salt
+     * @return The key generated with the key and the password
+     */
     public static SecretKey getAESKeyFromPassword(char[] password, byte[] salt) {
         return getAESKeyFromPassword(password,salt,-1,-1);
     }
@@ -76,31 +82,40 @@ public class CreateKey {
         }
     }
 
+    /**
+     * Generates an RSA keypair with the key size of 1024
+     * @return The RSA key pair
+     */
     public static KeyPair getRSAKeyPair() {
         return getRSAKeyPair(1024);
     }
 
-
-    public static SecretKey keyFromBytes(byte[] bytesOfKey) {
-        try {
-            KeyFactory facotry = KeyFactory.getInstance("RSA");
-            SecretKey key = new SecretKeySpec(bytesOfKey, 0, bytesOfKey.length, "RSA");
-            return key;
-        } catch (Exception e) {
-            return null ;
-        }
-    }
-
-
-
-    public static SecretKey getSecretKeyFromBytes(byte[] secretKeyBytes) {
+    /**
+     * Converts the given byte array into an AES SecretKey.
+     * Returns null if the byte array is invalid
+     * @param secretKeyBytes The byte array that was obtained by doing: aesKey.getEncoded();
+     * @return The converted AES Key or null if the given byte array is not a SecretKey
+     */
+    public static SecretKey getAESkeyFromBytes(byte[] secretKeyBytes) {
         return new SecretKeySpec(secretKeyBytes, "AES");
     }
 
-    public static byte[] getBytesFromSecretKey(Key key) {
+    /**
+     * Converts an AES key to a byte array
+     * @param key the AES key that should get converted
+     * @return the byte array representation of the AES key
+     */
+    public static byte[] getBytesFromAESkey(Key key) {
         return key.getEncoded();
     }
 
+    /**
+     * Converts a byte array to a Private key
+     * Returns null if the given byte array is not convertable into a Private Key
+     *
+     * @param privateKeyBytes the byte array that should be converted
+     * @return the converted Private key or null if the byte array is not a Private key
+     */
     public static PrivateKey gePrivateKeyFromBytes(byte[] privateKeyBytes) {
         try {
 
@@ -112,7 +127,13 @@ public class CreateKey {
     }
 
 
-
+    /**
+     * Converts a byte array to a Public Key
+     * Returns null if the given byte array is not convertable into a Public Key
+     *
+     * @param publicKeyBytes the byte array that should be converted
+     * @return the converted Public key or null if the byte array is not a Public Key
+     */
     public static PublicKey gePublicKeyFromBytes(byte[] publicKeyBytes) {
         try {
             KeyFactory kf = KeyFactory.getInstance("RSA");
