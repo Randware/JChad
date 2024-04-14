@@ -80,4 +80,8 @@ public class CryptUtil {
         }
     }
 
+    public static String bytesToString(byte[] bytes) {
+        return new String(bytes, StandardCharsets.UTF_8);
+    }
+
 }

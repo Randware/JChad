@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Runs the main socket and manages all the other socket threads
@@ -30,11 +33,13 @@ public final class MainSocket implements Runnable{
     public void run() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             while (true) {
+
                 Socket socket = serverSocket.accept();
                 messageHandler.handleInfo("Socket connected: " + socket);
                 // Same as "new ServerThread(socket, handler).start();"
                 Thread serverThread = new Thread(new ServerThread(socket,  messageHandler));
                 serverThread.start();
+
             }
 
         } catch (Exception e) {
