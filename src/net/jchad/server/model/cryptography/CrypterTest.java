@@ -10,16 +10,16 @@ public class CrypterTest {
         /*String text = "Hello, World";
         SecretKey key = CrypterKey.getAESKey();
         SecretKey key2 = CrypterKey.getAESKey();
-        byte[] iv = CryptUtil.getRandomByteArr(16);
-        byte[] iv2 = CryptUtil.getRandomByteArr(16);
-        byte[] encryptedText = CryptUtil.bytesToBase64(Crypter.encryptAES(text.getBytes(StandardCharsets.UTF_8), key, iv, TagUnit.LENGTH_128));
-        String decryptedText = Crypter.decryptAES(CryptUtil.base64ToBytes(encryptedText), key, iv, TagUnit.LENGTH_128);
+        byte[] iv = CrypterUtil.getRandomByteArr(16);
+        byte[] iv2 = CrypterUtil.getRandomByteArr(16);
+        byte[] encryptedText = CrypterUtil.bytesToBase64(Crypter.encryptAES(text.getBytes(StandardCharsets.UTF_8), key, iv, TagUnit.LENGTH_128));
+        String decryptedText = Crypter.decryptAES(CrypterUtil.base64ToBytes(encryptedText), key, iv, TagUnit.LENGTH_128);
         System.out.println("Clear Text: " + text);
-        System.out.println("Encrypted Text: " + CryptUtil.base64ToString(new String(encryptedText, StandardCharsets.UTF_8)));
+        System.out.println("Encrypted Text: " + CrypterUtil.base64ToString(new String(encryptedText, StandardCharsets.UTF_8)));
         System.out.println("Decrypted Text: " + decryptedText);*/
         /*String hw = "Hello World! This is JChad written by Randware";
-        String base64 = CryptUtil.stringToBase64(hw);
-        String decoded = CryptUtil.base64ToString(base64);
+        String base64 = CrypterUtil.stringToBase64(hw);
+        String decoded = CrypterUtil.base64ToString(base64);
         System.out.println(base64);
         System.out.println(decoded);*/
 

@@ -2,22 +2,46 @@ package net.jchad.server.model.cryptography;
 
 import net.jchad.server.model.cryptography.keys.CrypterKey;
 import net.jchad.server.model.cryptography.tagUnit.KeyUnit;
+import net.jchad.server.model.cryptography.tagUnit.TagUnit;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
-import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.nio.charset.StandardCharsets;
+import java.security.*;
 
 public class CrypterManager {
 
     private KeyPair keyPair = null;
     private SecretKey secretKey = null;
-    private byte[] iv = new byte[0];
+    private String iv = "";
     private String signature = null;
 
 
+    public String encryptAES(String plainText) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        return new String(
+                CrypterUtil.bytesToBase64(
+                        Crypter.encryptAES(
+                                plainText.getBytes(StandardCharsets.UTF_8),
+                                secretKey,
+                                iv,
+                                TagUnit.DEFAULT)
+                )
+        );
+    }
+
+    public String decryptAES(String encryptedText, byte[] iv) {
+        Crypter.decryptAES(
+                encryptedText.getBytes(StandardCharsets.UTF_8),
+                secretKey,
+                iv,
+                TagUnit.DEFAULT
+        )
+    }
+
     public CrypterManager() {
-        this(CryptUtil.getRandomByteArr());
+        this(CrypterUtil.getRandomByteArr());
     }
 
     public CrypterManager(byte[] iv) {
@@ -143,6 +167,20 @@ public class CrypterManager {
             return true;
         }
         return false;
+    }
+//TODO Implementateeteteteteteteete exception
+    public void setInitializationVector(byte[] iv) {
+        this.iv = CrypterUtil.stringToBase64(
+                CrypterUtil.bytesToString(iv)
+        );
+    }
+
+    public String getBase64IV() {
+        return iv;
+    }
+
+    public byte[] getIV() {
+        return CrypterUtil.base64ToString(iv).getBytes(StandardCharsets.UTF_8);
     }
 
     /**

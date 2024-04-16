@@ -8,7 +8,7 @@ import java.util.HexFormat;
 /**
  * This class provides <b><u>Thread-safe</u></b> utility for some cryptographic related tasks
  */
-public class CryptUtil {
+public class CrypterUtil {
     private static final SecureRandom secureRandom = new SecureRandom();
 
     /**
