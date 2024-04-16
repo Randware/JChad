@@ -1,6 +1,7 @@
 package net.jchad.server.view;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -19,7 +20,7 @@ public class GUI extends Application implements MessageHandler {
     private ServerController server;
     private TextArea logArea;
     private TextField cmdField;
-
+    private double sizeValue= 13;
     //launch method
     public static void main(String[] args) {
         Application.launch(args);
@@ -43,31 +44,28 @@ public class GUI extends Application implements MessageHandler {
 
         Menu fontsSubMenu = new Menu("Fonts");
 
-        MenuItem smallFont = new MenuItem("Small Font");
-        MenuItem mediumFont = new MenuItem("Medium Font");
-        MenuItem largeFont = new MenuItem("Large Font");
+        MenuItem increaseFontSize = new MenuItem("increase Font size");
+        MenuItem standardFontSize = new MenuItem("standard Font size");
+        MenuItem decreaseFontSize = new MenuItem("decrease Font size");
 
-// Set actions for each font size MenuItem
-        smallFont.setOnAction(e -> changeFontSize(13));
-        mediumFont.setOnAction(e -> changeFontSize(17));
-        largeFont.setOnAction(e -> changeFontSize(21));
+        fontsSubMenu.getItems().addAll(increaseFontSize, standardFontSize, decreaseFontSize);
 
-// Add the font size MenuItems to the "Fonts" submenu
-        fontsSubMenu.getItems().addAll(smallFont, mediumFont, largeFont);
-
-// Directly add the "Fonts" submenu to the "Settings" menu
         settingsMenu.getItems().add(fontsSubMenu);
 
-// Add the "Settings" menu to the menuBar
         menuBar.getMenus().add(settingsMenu);
 
         VBox vbox = new VBox(menuBar, logArea, cmdField);
+
+        increaseFontSize.setOnAction(e -> changeFontSize(2));
+        standardFontSize.setOnAction(e -> standardFontSizeMethod(vbox));
+        decreaseFontSize.setOnAction(e -> changeFontSize(-2));
+
         vbox.setSpacing(10);
         vbox.setPadding(new Insets(0, 10, 10, 10));
         VBox.setVgrow(logArea, Priority.ALWAYS);
         vbox.setMaxHeight(Double.MAX_VALUE);
-
         vbox.setStyle("-fx-font-size: 13px;");
+
         Scene scene = new Scene(vbox, 800, 600);
         stage.setTitle("Server GUI");
         stage.setScene(scene);
@@ -75,8 +73,15 @@ public class GUI extends Application implements MessageHandler {
     }
 
     private void changeFontSize(int size) {
-        logArea.setStyle("-fx-font-size: " + size + "px;");
-        cmdField.setStyle("-fx-font-size: " + size + "px;");
+        Platform.runLater(() -> logArea.setStyle("-fx-font-size: " +(sizeValue + size)));
+        Platform.runLater(() -> cmdField.setStyle("-fx-font-size: " +(sizeValue + size)));
+        this.sizeValue = sizeValue + size;
+    }
+
+    private void standardFontSizeMethod(VBox vBox){
+        Platform.runLater(() -> logArea.setStyle("-fx-font-size: " + 13));
+        Platform.runLater(() -> cmdField.setStyle("-fx-font-size: " + 13));
+        this.sizeValue = 13;
     }
 
     @Override
