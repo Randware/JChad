@@ -116,7 +116,7 @@ public class CrypterKey {
      * @param privateKeyBytes the byte array that should be converted
      * @return the converted Private key or null if the byte array is not a Private key
      */
-    public static PrivateKey gePrivateKeyFromBytes(byte[] privateKeyBytes) {
+    public static PrivateKey getPrivateKeyFromBytes(byte[] privateKeyBytes) {
         try {
 
             KeyFactory kf = KeyFactory.getInstance("RSA");
