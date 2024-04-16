@@ -20,6 +20,7 @@ public class GUI extends Application implements MessageHandler {
     private TextArea logArea;
     private TextField cmdField;
 
+    //launch method
     public static void main(String[] args) {
         Application.launch(args);
     }
@@ -27,26 +28,38 @@ public class GUI extends Application implements MessageHandler {
     @Override
     public void start(Stage stage) throws Exception {
         System.out.println("Current working directory: " + System.getProperty("user.dir"));
-    server = new ServerController(this);
+        server = new ServerController(this);
 
-    logArea = new TextArea();
-    logArea.setEditable(false);
+        logArea = new TextArea();
+        logArea.setEditable(false);
 
         cmdField = new TextField();
         cmdField.setPromptText("Enter command here...");
 
+
         MenuBar menuBar = new MenuBar();
-        Menu menu = new Menu("View");
+
+        Menu settingsMenu = new Menu("Settings");
+
+        Menu fontsSubMenu = new Menu("Fonts");
+
         MenuItem smallFont = new MenuItem("Small Font");
         MenuItem mediumFont = new MenuItem("Medium Font");
         MenuItem largeFont = new MenuItem("Large Font");
 
+// Set actions for each font size MenuItem
         smallFont.setOnAction(e -> changeFontSize(13));
         mediumFont.setOnAction(e -> changeFontSize(17));
         largeFont.setOnAction(e -> changeFontSize(21));
 
-        menu.getItems().addAll(smallFont, mediumFont, largeFont);
-        menuBar.getMenus().add(menu);
+// Add the font size MenuItems to the "Fonts" submenu
+        fontsSubMenu.getItems().addAll(smallFont, mediumFont, largeFont);
+
+// Directly add the "Fonts" submenu to the "Settings" menu
+        settingsMenu.getItems().add(fontsSubMenu);
+
+// Add the "Settings" menu to the menuBar
+        menuBar.getMenus().add(settingsMenu);
 
         VBox vbox = new VBox(menuBar, logArea, cmdField);
         vbox.setSpacing(10);
@@ -65,6 +78,7 @@ public class GUI extends Application implements MessageHandler {
         logArea.setStyle("-fx-font-size: " + size + "px;");
         cmdField.setStyle("-fx-font-size: " + size + "px;");
     }
+
     @Override
     public void handleFatalError(Exception e) {
 
