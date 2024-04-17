@@ -143,8 +143,6 @@ public class ConfigManager {
 
             return true;
         } catch (IOException e) {
-            messageHandler.handleError(new IOException("Failed loading server config: ", e));
-
             if (this.config == null) {
                 // Create default config
                 this.config = new Config();
