@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.dataformat.yaml.snakeyaml.error.MarkedYAMLException;
-import net.jchad.server.model.common.ThrowingRunnable;
 import net.jchad.server.model.error.MessageHandler;
 
 import java.io.IOException;
@@ -21,32 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-/*
-
-    TODO: Fix bug, where the program "fails" updating the config when creating it
-        - Only happens if config directory not created yet, only happens in jar outside of IDE
-            - Creating config directory before running ConfigWatcher on it seems to fix it
-    TODO: Maybe don't dynamically load whitelisted and blacklisted files
-    TODO: Rewrite structure, so error handling and logging becomes easier and less hacky
-    DONE: Handle MismatchedInputException
-        - This exception occurs when the ObjectMapper tries to parse an empty file
-    DONE: Implement validation for config files
-        - Catch Jackson format exception
-    DONE: Get rid of runUnsupervised() method and concept, since this promotes bad code structure
-    DONE: Fix live reloading multiple times
-        - check if modified file is actual config file (or just temp file, user created file, etc.)
-        - prevent same file edit event being recognized twice
-    DONE: Inform ConfigManager which WatchEvent has occurred
-        - can check if the updated file is an actual config file (mentioned in previous entry)
-        - can also log which file was changed
-    DONE: Fix live reloading multiple times -> pause ConfigWatcher when saving configs from program
- */
-
-/**
- * This class manages the multiple server configuration files.
- * Loading, saving and watching the files  for changes is all managed here.
- */
-public class ConfigManager {
+public class ConfigManagerRewrite {
     /**
      * Stores the save path for the configuration files.
      */
@@ -106,7 +80,7 @@ public class ConfigManager {
      * @param messageHandler {@link MessageHandler} implementing class instance responsible for handling errors,
      *                                             warnings and logs
      */
-    public ConfigManager(MessageHandler messageHandler) {
+    public ConfigManagerRewrite(MessageHandler messageHandler) {
         this(messageHandler, null);
     }
 
@@ -117,16 +91,20 @@ public class ConfigManager {
      * @param configObserver {@link ConfigObserver} implementing class instance,
      *                                             which gets notified when config file changes are detected.
      */
-    public ConfigManager(MessageHandler messageHandler, ConfigObserver configObserver) {
+    public ConfigManagerRewrite(MessageHandler messageHandler, ConfigObserver configObserver) {
         this.mapper = new ObjectMapper(new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
 
         this.messageHandler = messageHandler;
         this.configObserver = configObserver;
 
-        /*
-         * Run the ConfigWatcher on the config file directory. When changes are detected,
-         * call configUpdated(event), "event" being the WatchEvent<?> that got registered.
-         */
+        this.config = new Config();
+
+        try {
+            loadServerConfig();
+        } catch (Exception e) {
+            messageHandler.handleWarning("Failed loading server config, continuing with default config");
+        }
+
         try {
             configWatcher = new ConfigWatcher(Path.of(configSavePath), (event) -> {
                 configUpdated(event);
@@ -136,19 +114,14 @@ public class ConfigManager {
         }
 
         configWatcher.start();
-
-        this.config = null;
     }
 
     /**
-     * Loads config from file and returns it.
+     * Returns the currently loaded config.
      *
      * @return {@link Config} that got loaded
-     * @throws Exception If loading the config fails
      */
-    public Config getConfig() throws Exception {
-        loadServerConfig();
-
+    public Config getConfig() {
         return config;
     }
 
@@ -177,16 +150,17 @@ public class ConfigManager {
             this.config = mapper.readValue(serverConfigPath.toFile(), Config.class);
         } catch (InvalidFormatException e) {
             messageHandler.handleWarning(configs.get("serverConfig") + " couldn't be parsed: "
-                            + e.getOriginalMessage());
+                    + e.getOriginalMessage());
 
-            if(this.config == null) {
-                this.config = new Config();
-                messageHandler.handleWarning("Falling back to default config");
-            } else {
-                throw new IOException(configs.get("serverConfig") + " is invalid");
-            }
+            throw new Exception("Couldn't successfully update the config");
         } catch (MismatchedInputException e) {
             messageHandler.handleWarning(configs.get("serverConfig") + " is empty");
+
+            throw new Exception("Couldn't successfully update the config");
+        } catch (Exception e) {
+            messageHandler.handleError(e);
+
+            throw new Exception("Couldn't successfully update the config");
         }
 
         /*
@@ -226,10 +200,17 @@ public class ConfigManager {
             ipList = mapper.readValue(whitelistedIPsPath.toFile(), ArrayList.class);
         } catch (MarkedYAMLException e) {
             messageHandler.handleWarning(configs.get("blacklistedIPsConfig") + " couldn't be parsed: " + e.getProblem() + "\n"
-                        + e.getContextMark().get_snippet(0, 150));
+                    + e.getContextMark().get_snippet(0, 150));
 
+            throw new Exception("Couldn't successfully update the config");
         } catch (MismatchedInputException e) {
             messageHandler.handleWarning(configs.get("whitelistedIPsConfig") + " is empty");
+
+            throw new Exception("Couldn't successfully update the config");
+        } catch (Exception e) {
+            messageHandler.handleError(e);
+
+            throw new Exception("Couldn't successfully update the config");
         }
 
         return fromStringToIP(ipList);
@@ -257,10 +238,17 @@ public class ConfigManager {
             ipList = mapper.readValue(blacklistedIPsPath.toFile(), ArrayList.class);
         } catch (MarkedYAMLException e) {
             messageHandler.handleWarning(configs.get("blacklistedIPsConfig") + " couldn't be parsed: " + e.getProblem() + "\n"
-                        + e.getContextMark().get_snippet(0, 150));
+                    + e.getContextMark().get_snippet(0, 150));
 
+            throw new Exception("Couldn't successfully update the config");
         } catch (MismatchedInputException e) {
             messageHandler.handleWarning(configs.get("blacklistedIPsConfig") + " is empty");
+
+            throw new Exception("Couldn't successfully update the config");
+        } catch (Exception e) {
+            messageHandler.handleError(e);
+
+            throw new Exception("Couldn't successfully update the config");
         }
 
         return fromStringToIP(ipList);
@@ -306,29 +294,7 @@ public class ConfigManager {
         return ipList;
     }
 
-
-    /**
-     * Allows a piece of code to be executed without being registered by the {@link ConfigWatcher}.
-     *
-     * @param code Code which gets executed without being registered by the {@link ConfigWatcher}
-     * @throws Exception If an error occurs in the code
-     */
-    @Deprecated
-    private void runUnsupervised(ThrowingRunnable code) throws Exception {
-        configWatcher.pauseWatching();
-        System.out.println("Running unsupervised code");
-
-        code.run();
-
-        configWatcher.continueWatching();
-    }
-
-    /**
-     * Called when the {@link ConfigWatcher} registers a modification event in the config directory.
-     *
-     * @param event {@link WatchEvent} containing the event registered by the {@link ConfigWatcher}
-     */
-    private void configUpdated(WatchEvent<?> event) {
+    public void configUpdated(WatchEvent<?> event) {
         Path modifiedConfig = Path.of(configSavePath).resolve((Path) event.context());
         String configName = modifiedConfig.getFileName().toString();
 
@@ -336,10 +302,17 @@ public class ConfigManager {
             return;
         }
 
-        if(configObserver != null) {
-            messageHandler.handleInfo("\"" + configName + "\" config was updated");
+        messageHandler.handleInfo("\"" + configName + "\" config was updated");
 
-            configObserver.configUpdated();
+        try {
+            loadServerConfig();
+            messageHandler.handleInfo("Successfully loaded new config");
+
+            if(configObserver != null) {
+                configObserver.configUpdated();
+            }
+        } catch (Exception e) {
+            messageHandler.handleWarning("Failed loading new config");
         }
     }
 }
