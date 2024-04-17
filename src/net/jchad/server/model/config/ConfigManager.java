@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.dataformat.yaml.snakeyaml.error.MarkedYAMLException;
-import net.jchad.server.model.common.ThrowingRunnable;
 import net.jchad.server.model.error.MessageHandler;
 
 import java.io.IOException;
@@ -22,12 +21,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 /*
-
-    TODO: Fix bug, where the program "fails" updating the config when creating it
+    TODO: Store config files in ConfigFiles enum, so querying data about them becomes easier
+    TODO: Make ConfigWatcher restart itself, when an error occurs
+    TODO: Stop reloading server config, when whitelist is disabled and gets modified
+    CANCELED: Maybe don't dynamically load whitelisted and blacklisted files
+    DONE: Fix bug, where the program "fails" updating the config when creating it
         - Only happens if config directory not created yet, only happens in jar outside of IDE
             - Creating config directory before running ConfigWatcher on it seems to fix it
-    TODO: Maybe don't dynamically load whitelisted and blacklisted files
-    TODO: Rewrite structure, so error handling and logging becomes easier and less hacky
+    DONE: Rewrite structure, so error handling and logging becomes easier and less hacky
     DONE: Handle MismatchedInputException
         - This exception occurs when the ObjectMapper tries to parse an empty file
     DONE: Implement validation for config files
@@ -42,10 +43,6 @@ import java.util.Map;
     DONE: Fix live reloading multiple times -> pause ConfigWatcher when saving configs from program
  */
 
-/**
- * This class manages the multiple server configuration files.
- * Loading, saving and watching the files  for changes is all managed here.
- */
 public class ConfigManager {
     /**
      * Stores the save path for the configuration files.
@@ -102,20 +99,18 @@ public class ConfigManager {
     private Config config;
 
     /**
-     *
      * @param messageHandler {@link MessageHandler} implementing class instance responsible for handling errors,
-     *                                             warnings and logs
+     *                       warnings and logs
      */
     public ConfigManager(MessageHandler messageHandler) {
         this(messageHandler, null);
     }
 
     /**
-     *
      * @param messageHandler {@link MessageHandler} implementing class instance responsible for handling errors,
-     *                                             warnings and logs
+     *                       warnings and logs
      * @param configObserver {@link ConfigObserver} implementing class instance,
-     *                                             which gets notified when config file changes are detected.
+     *                       which gets notified when config file changes are detected.
      */
     public ConfigManager(MessageHandler messageHandler, ConfigObserver configObserver) {
         this.mapper = new ObjectMapper(new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
@@ -123,33 +118,61 @@ public class ConfigManager {
         this.messageHandler = messageHandler;
         this.configObserver = configObserver;
 
-        /*
-         * Run the ConfigWatcher on the config file directory. When changes are detected,
-         * call configUpdated(event), "event" being the WatchEvent<?> that got registered.
-         */
-        try {
-            configWatcher = new ConfigWatcher(Path.of(configSavePath), (event) -> {
-                configUpdated(event);
-            });
-        } catch (UncheckedIOException e) {
-            messageHandler.handleError(new IOException("The ConfigWatcher thread has unexpectedly stopped, live updating the config no longer works", e));
-        }
+        loadServerConfig();
 
-        configWatcher.start();
-
-        this.config = null;
+        initializeConfigWatcher();
     }
 
     /**
-     * Loads config from file and returns it.
+     * Returns the currently loaded config.
      *
      * @return {@link Config} that got loaded
-     * @throws Exception If loading the config fails
      */
-    public Config getConfig() throws Exception {
-        loadServerConfig();
-
+    public Config getConfig() {
         return config;
+    }
+
+    /**
+     * Handles the file loading process and updates the config. Also logs accordingly.
+     *
+     * @return <code>true</code> config was updated successfully, <code>false</code> if not
+     */
+    private boolean loadServerConfig() {
+        try {
+            this.config = loadConfigFiles();
+
+            return true;
+        } catch (IOException e) {
+            messageHandler.handleError(new IOException("Failed loading server config: ", e));
+
+            if (this.config == null) {
+                // Create default config
+                this.config = new Config();
+                messageHandler.handleWarning("Falling back to default config");
+            } else {
+                messageHandler.handleWarning("Continuing with last working config");
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Initializes the ConfigWatcher for the config file directory.
+     * Handles the restarting process if something goes wrong. If starting again fails
+     */
+    private void initializeConfigWatcher() {
+        configWatcher = new ConfigWatcher(Path.of(configSavePath), (event) -> {
+            configUpdated(event);
+        });
+
+        try {
+            configWatcher.start();
+        } catch (UncheckedIOException e1) {
+            messageHandler.handleError(new IOException("The ConfigWatcher thread has run into an unexpected error: ", e1));
+
+            messageHandler.handleWarning("Live updating the config files is no longer possible");
+        }
     }
 
     /**
@@ -157,51 +180,64 @@ public class ConfigManager {
      * Dynamically loads the whitelisted-ips.yml and blacklisted-ips.yml files,
      * depending on if the respective features are enabled.
      *
-     *
      * @throws Exception If an error occurs when trying to create or read configs.
      */
-    private void loadServerConfig() throws Exception {
+    private Config loadConfigFiles() throws IOException {
         Path serverConfigPath = Path.of(configSavePath + configs.get("serverConfig"));
 
-        if(!Files.exists(Path.of(configSavePath))) {
+        Config newConfig;
+
+        if (!Files.exists(Path.of(configSavePath))) {
             Files.createDirectory(Path.of(configSavePath));
         }
 
-        if(!Files.exists(serverConfigPath)) {
+        if (!Files.exists(serverConfigPath)) {
             messageHandler.handleInfo("Creating " + configs.get("serverConfig") + " file");
 
             mapper.writeValue(Files.createFile(serverConfigPath).toFile(), new Config());
         }
 
         try {
-            this.config = mapper.readValue(serverConfigPath.toFile(), Config.class);
-        } catch (InvalidFormatException e) {
-            messageHandler.handleWarning(configs.get("serverConfig") + " couldn't be parsed: "
-                            + e.getOriginalMessage());
+            newConfig = mapper.readValue(serverConfigPath.toFile(), Config.class);
+        } catch (Exception e) {
+            switch (e) {
+                case InvalidFormatException ife -> {
+                    messageHandler.handleWarning(configs.get("serverConfig") + " couldn't be parsed: "
+                            + ife.getOriginalMessage());
+                }
 
-            if(this.config == null) {
-                this.config = new Config();
-                messageHandler.handleWarning("Falling back to default config");
-            } else {
-                throw new IOException(configs.get("serverConfig") + " is invalid");
+                case MarkedYAMLException mye -> {
+                    messageHandler.handleWarning(configs.get("serverConfig") + " couldn't be parsed: " + mye.getProblem() + "\n"
+                            + mye.getContextMark().get_snippet(0, 150));
+                }
+
+                case MismatchedInputException mie -> {
+                    messageHandler.handleWarning(configs.get("serverConfig") + " is empty");
+                }
+
+                default -> {
+                    messageHandler.handleError(e);
+                }
             }
-        } catch (MismatchedInputException e) {
-            messageHandler.handleWarning(configs.get("serverConfig") + " is empty");
+
+            throw new IOException("Failed loading config file", e);
         }
 
         /*
          * Load whitelist if feature is enabled
          */
-        if(config.isWhitelist()) {
-            config.setWhitelistedIPs(loadWhitelistedIPsConfig());
+        if (newConfig.isWhitelist()) {
+            newConfig.setWhitelistedIPs(loadWhitelistedIPsConfig());
         }
 
         /*
          * Load blacklist if feature is enabled
          */
-        if(config.isBlacklist()) {
-            config.setBlacklistedIPs(loadBlacklistedIPsConfig());
+        if (newConfig.isBlacklist()) {
+            newConfig.setBlacklistedIPs(loadBlacklistedIPsConfig());
         }
+
+        return newConfig;
     }
 
     /**
@@ -212,24 +248,35 @@ public class ConfigManager {
      * @throws Exception If an error occurs when trying to create or read the config.
      */
     @SuppressWarnings("unchecked")
-    private ArrayList<InetAddress> loadWhitelistedIPsConfig() throws Exception {
+    private ArrayList<InetAddress> loadWhitelistedIPsConfig() throws IOException {
         Path whitelistedIPsPath = Path.of(configSavePath + configs.get("whitelistedIPsConfig"));
 
-        if(!Files.exists(whitelistedIPsPath)) {
+        if (!Files.exists(whitelistedIPsPath)) {
             messageHandler.handleInfo("Creating " + configs.get("whitelistedIPsConfig") + " file");
 
             mapper.writeValue(Files.createFile(whitelistedIPsPath).toFile(), fromURIToString(config.getWhitelistedIPs()));
         }
 
-        ArrayList<String> ipList = new ArrayList<>();
+        ArrayList<String> ipList;
         try {
             ipList = mapper.readValue(whitelistedIPsPath.toFile(), ArrayList.class);
-        } catch (MarkedYAMLException e) {
-            messageHandler.handleWarning(configs.get("blacklistedIPsConfig") + " couldn't be parsed: " + e.getProblem() + "\n"
-                        + e.getContextMark().get_snippet(0, 150));
+        } catch (Exception e) {
+            switch (e) {
+                case MarkedYAMLException mye -> {
+                    messageHandler.handleWarning(configs.get("whitelistedIPsConfig") + " couldn't be parsed: " + mye.getProblem() + "\n"
+                            + mye.getContextMark().get_snippet(0, 150));
+                }
 
-        } catch (MismatchedInputException e) {
-            messageHandler.handleWarning(configs.get("whitelistedIPsConfig") + " is empty");
+                case MismatchedInputException mie -> {
+                    messageHandler.handleWarning(configs.get("whitelistedIPsConfig") + " is empty");
+                }
+
+                default -> {
+                    messageHandler.handleError(e);
+                }
+            }
+
+            throw new IOException("Failed loading config file", e);
         }
 
         return fromStringToIP(ipList);
@@ -243,24 +290,35 @@ public class ConfigManager {
      * @throws Exception If an error occurs when trying to create or read the config.
      */
     @SuppressWarnings("unchecked")
-    private ArrayList<InetAddress> loadBlacklistedIPsConfig() throws Exception {
+    private ArrayList<InetAddress> loadBlacklistedIPsConfig() throws IOException {
         Path blacklistedIPsPath = Path.of(configSavePath + configs.get("blacklistedIPsConfig"));
 
-        if(!Files.exists(blacklistedIPsPath)) {
+        if (!Files.exists(blacklistedIPsPath)) {
             messageHandler.handleInfo("Creating " + configs.get("blacklistedIPsConfig") + " file");
 
             mapper.writeValue(Files.createFile(blacklistedIPsPath).toFile(), fromURIToString(config.getBlacklistedIPs()));
         }
 
-        ArrayList<String> ipList = new ArrayList<>();
+        ArrayList<String> ipList;
         try {
             ipList = mapper.readValue(blacklistedIPsPath.toFile(), ArrayList.class);
-        } catch (MarkedYAMLException e) {
-            messageHandler.handleWarning(configs.get("blacklistedIPsConfig") + " couldn't be parsed: " + e.getProblem() + "\n"
-                        + e.getContextMark().get_snippet(0, 150));
+        } catch (Exception e) {
+            switch (e) {
+                case MarkedYAMLException mye -> {
+                    messageHandler.handleWarning(configs.get("blacklistedIPsConfig") + " couldn't be parsed: " + mye.getProblem() + "\n"
+                            + mye.getContextMark().get_snippet(0, 150));
+                }
 
-        } catch (MismatchedInputException e) {
-            messageHandler.handleWarning(configs.get("blacklistedIPsConfig") + " is empty");
+                case MismatchedInputException mie -> {
+                    messageHandler.handleWarning(configs.get("blacklistedIPsConfig") + " is empty");
+                }
+
+                default -> {
+                    messageHandler.handleError(e);
+                }
+            }
+
+            throw new IOException("Failed loading config file", e);
         }
 
         return fromStringToIP(ipList);
@@ -276,7 +334,7 @@ public class ConfigManager {
     private ArrayList<String> fromURIToString(ArrayList<InetAddress> list) {
         ArrayList<String> strList = new ArrayList<>();
 
-        for(InetAddress ip : list) {
+        for (InetAddress ip : list) {
             strList.add(ip.getHostAddress());
         }
 
@@ -293,53 +351,33 @@ public class ConfigManager {
     private ArrayList<InetAddress> fromStringToIP(ArrayList<String> list) {
         ArrayList<InetAddress> ipList = new ArrayList<>();
 
-        for(String ip : list) {
+        for (String ip : list) {
             try {
                 ipList.add(InetAddress.getByAddress(ip.getBytes()));
             } catch (UnknownHostException e) {
 
                 // TODO: Give information in which file this error occurred
-                messageHandler.handleWarning("Failed parsing IP string: \"" + ip + "\"");
+                messageHandler.handleWarning("Failed parsing IP string, skipping it: \"" + ip + "\"");
             }
         }
 
         return ipList;
     }
 
-
-    /**
-     * Allows a piece of code to be executed without being registered by the {@link ConfigWatcher}.
-     *
-     * @param code Code which gets executed without being registered by the {@link ConfigWatcher}
-     * @throws Exception If an error occurs in the code
-     */
-    @Deprecated
-    private void runUnsupervised(ThrowingRunnable code) throws Exception {
-        configWatcher.pauseWatching();
-        System.out.println("Running unsupervised code");
-
-        code.run();
-
-        configWatcher.continueWatching();
-    }
-
-    /**
-     * Called when the {@link ConfigWatcher} registers a modification event in the config directory.
-     *
-     * @param event {@link WatchEvent} containing the event registered by the {@link ConfigWatcher}
-     */
-    private void configUpdated(WatchEvent<?> event) {
+    public void configUpdated(WatchEvent<?> event) {
         Path modifiedConfig = Path.of(configSavePath).resolve((Path) event.context());
         String configName = modifiedConfig.getFileName().toString();
 
-        if(!configs.containsValue(configName)) {
+        if (!configs.containsValue(configName)) {
             return;
         }
 
-        if(configObserver != null) {
-            messageHandler.handleInfo("\"" + configName + "\" config was updated");
+        messageHandler.handleInfo("\"" + configName + "\" config was updated");
 
-            configObserver.configUpdated();
+        if(loadServerConfig()) {
+            if (configObserver != null) {
+                configObserver.configUpdated();
+            }
         }
     }
 }

@@ -24,7 +24,7 @@ public class ConfigWatcher extends Thread {
     private final Consumer<WatchEvent<?>> callback;
 
     /**
-     * Defines if callback code should be executed when an event was registered
+     * Defines if callback code should be executed when an event was registered.
      */
     private boolean running = true;
 
@@ -42,7 +42,6 @@ public class ConfigWatcher extends Thread {
      * @param path {@link Path} which will be watched
      * @param callback Code that gets called when an event was registered.
      *                 Also returns the {@link WatchEvent} that got registered.
-     * @throws IOException If the thread runs into a file system error
      */
     public ConfigWatcher(Path path, Consumer<WatchEvent<?>> callback) {
         this.path = path;
