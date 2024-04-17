@@ -35,6 +35,8 @@ public class GUI extends Application implements BarDisplay {
 
     private VBox vbox;
     private int selectedIndex;
+    private DirectoryChooser directoryChooser;
+    private Button chooseDirectoryButton;
 
     private static final double BASE_WIDTH = 800;
     private static final double BASE_HEIGHT = 600;
@@ -62,8 +64,8 @@ public class GUI extends Application implements BarDisplay {
         welcomeLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
         vbox.getChildren().add(welcomeLabel);
 
-        DirectoryChooser directoryChooser = new DirectoryChooser();
-        Button chooseDirectoryButton = new Button("Choose Installation Directory");
+        directoryChooser = new DirectoryChooser();
+        chooseDirectoryButton = new Button("Choose Installation Directory");
         chooseDirectoryButton.setTranslateY(30);
         chooseDirectoryButton.setStyle("-fx-font-size: 13px;");
         chooseDirectoryButton.setOnAction(e -> {
@@ -117,17 +119,19 @@ public class GUI extends Application implements BarDisplay {
 
                 if (softwareComboBox.getSelectionModel().getSelectedIndex() == 0) {
                     boolean bothFilesExist = false;
-                    for (File file : selectedDirectory.listFiles()) {
-                        if (file.getName().equals(server)) {
-                            for (File file2 : selectedDirectory.listFiles()) {
-                                if (file2.getName().equals(client)) {
-                                    System.out.println("Both existing");
-                                    bothFilesExist = true;
+                    if(selectedDirectory.listFiles() != null) {
+                        for (File file : selectedDirectory.listFiles()) {
+                            if (file.getName().equals(server)) {
+                                for (File file2 : selectedDirectory.listFiles()) {
+                                    if (file2.getName().equals(client)) {
+                                        System.out.println("Both existing");
+                                        bothFilesExist = true;
+                                        break;
+                                    }
+                                }
+                                if (bothFilesExist) {
                                     break;
                                 }
-                            }
-                            if (bothFilesExist) {
-                                break;
                             }
                         }
                     }
@@ -142,26 +146,25 @@ public class GUI extends Application implements BarDisplay {
                         // Perform action for Continue button
                     } else {
                         // Files not found, proceed with directory selection
-                        selectedDirectory = directoryChooser.showDialog(primaryStage);
-                        if (selectedDirectory != null) {
-                            Path directory = selectedDirectory.toPath();
-                            configManager.setDownloadPath(directory.toString());
-                            chooseDirectoryButton.setText(directory.toString());
-                        }
+                        Path directory = selectedDirectory.toPath();
+                        configManager.setDownloadPath(directory.toString());
+                        chooseDirectoryButton.setText(directory.toString());
                     }
                 }
 
                 if(softwareComboBox.getSelectionModel().getSelectedIndex() == 2){
                     boolean clientExist = false;
-                    for (File file : selectedDirectory.listFiles()) {
-                        if (file.getName().equals(client)) {
-                            System.out.println("client existing");
-                            clientExist = true;
-                            break;
-                        }
+                    if(selectedDirectory.listFiles() != null) {
+                        for (File file : selectedDirectory.listFiles()) {
+                            if (file.getName().equals(client)) {
+                                System.out.println("client existing");
+                                clientExist = true;
+                                break;
+                            }
 
-                        if (clientExist) {
-                            break;
+                            if (clientExist) {
+                                break;
+                            }
                         }
                     }
 
@@ -177,45 +180,41 @@ public class GUI extends Application implements BarDisplay {
                         // Perform action for Continue button
                     } else {
                         // Files not found, proceed with directory selection
-                        selectedDirectory = directoryChooser.showDialog(primaryStage);
-                        if (selectedDirectory != null) {
-                            Path directory = selectedDirectory.toPath();
-                            configManager.setDownloadPath(directory.toString());
-                            chooseDirectoryButton.setText(directory.toString());
-                        }
+                        Path directory = selectedDirectory.toPath();
+                        configManager.setDownloadPath(directory.toString());
+                        chooseDirectoryButton.setText(directory.toString());
                     }
                         }
 
                 if(softwareComboBox.getSelectionModel().getSelectedIndex() == 1) {
                     boolean serverExist = false;
-                    for (File file : selectedDirectory.listFiles()) {
-                        if (file.getName().equals(client)) {
-                            System.out.println("client existing");
-                            serverExist = true;
-                            break;
-                        }
-
-                        if (serverExist) {
-                            break;
-                        }
-
-                        if (serverExist) {
-                            break;
-                        }
-
-
-                        if (serverExist) {
-                            Optional<ButtonType> result = alert.showAndWait();
-                            if (result.isPresent() && result.get() == cancelButton) {
-                                // User chose to cancel, do not proceed
-                                return;
+                    if (selectedDirectory.listFiles() != null) {
+                        for (File file : selectedDirectory.listFiles()) {
+                            if (file.getName().equals(client)) {
+                                System.out.println("client existing");
+                                serverExist = true;
+                                break;
                             }
 
-                            // Perform action for Continue button
-                        } else {
-                            // Files not found, proceed with directory selection
-                            selectedDirectory = directoryChooser.showDialog(primaryStage);
-                            if (selectedDirectory != null) {
+                            if (serverExist) {
+                                break;
+                            }
+
+                            if (serverExist) {
+                                break;
+                            }
+
+
+                            if (serverExist) {
+                                Optional<ButtonType> result = alert.showAndWait();
+                                if (result.isPresent() && result.get() == cancelButton) {
+                                    // User chose to cancel, do not proceed
+                                    return;
+                                }
+
+                                // Perform action for Continue button
+                            } else {
+                                // Files not found, proceed with directory selection
                                 Path directory = selectedDirectory.toPath();
                                 configManager.setDownloadPath(directory.toString());
                                 chooseDirectoryButton.setText(directory.toString());
@@ -295,6 +294,15 @@ public class GUI extends Application implements BarDisplay {
         double scale = Math.min(scaleX, scaleY);
         // Limit the scale within the specified range
         return Math.max(Math.min(scale, MAX_SCALE), MIN_SCALE);
+    }
+
+    private void showDirectoryChooser(Stage primaryStage) {
+        selectedDirectory = directoryChooser.showDialog(primaryStage);
+        if (selectedDirectory != null) {
+            Path directory = selectedDirectory.toPath();
+            configManager.setDownloadPath(directory.toString());
+            chooseDirectoryButton.setText(directory.toString());
+        }
     }
 
     @Override
