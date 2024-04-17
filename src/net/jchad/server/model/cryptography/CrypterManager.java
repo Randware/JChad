@@ -1,5 +1,6 @@
 package net.jchad.server.model.cryptography;
 
+import javafx.css.Match;
 import net.jchad.server.model.cryptography.keys.CrypterKey;
 import net.jchad.server.model.cryptography.tagUnit.KeyUnit;
 import net.jchad.server.model.cryptography.tagUnit.TagUnit;
@@ -10,12 +11,14 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CrypterManager {
 
     private KeyPair keyPair = null;
     private SecretKey secretKey = null;
-    private String iv = "";
+    private String iv = ""; //InitializationVector
     private String signature = null;
 
 
@@ -25,19 +28,19 @@ public class CrypterManager {
                         Crypter.encryptAES(
                                 plainText.getBytes(StandardCharsets.UTF_8),
                                 secretKey,
-                                iv,
+                                getIV(),
                                 TagUnit.DEFAULT)
                 )
         );
     }
 
-    public String decryptAES(String encryptedText, byte[] iv) {
-        Crypter.decryptAES(
+    public String decryptAES(String encryptedText, byte[] iv) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        return Crypter.decryptAES(
                 encryptedText.getBytes(StandardCharsets.UTF_8),
                 secretKey,
                 iv,
                 TagUnit.DEFAULT
-        )
+        );
     }
 
     public CrypterManager() {
@@ -45,7 +48,7 @@ public class CrypterManager {
     }
 
     public CrypterManager(byte[] iv) {
-        this.iv = iv;
+        setIV(iv);
     }
 
     /**
@@ -168,11 +171,24 @@ public class CrypterManager {
         }
         return false;
     }
-//TODO Implementateeteteteteteteete exception
-    public void setInitializationVector(byte[] iv) {
+
+    public void setIV(byte[] iv) {
         this.iv = CrypterUtil.stringToBase64(
                 CrypterUtil.bytesToString(iv)
         );
+    }
+
+    /**
+     * Sets the initialization vector to the provided base64 encoded string
+     * @param base64EncodedIv The base64 encoded initialization vector
+     * @return returns 'false' if the given vector was not base64 encoded
+     *         returns 'true'  if the given vector was base64 encoded
+     */
+    public boolean setBase64IV(String base64EncodedIv) {
+        String base64Regex = "^[A-Za-z0-9+/\\r\\n]+={0,2}$";
+        boolean valid = Pattern.matches(base64Regex, base64EncodedIv);
+        if (valid) this.iv = base64EncodedIv;
+        return valid;
     }
 
     public String getBase64IV() {
