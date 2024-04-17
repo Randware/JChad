@@ -44,7 +44,7 @@ public class ConfigWatcher extends Thread {
      *                 Also returns the {@link WatchEvent} that got registered.
      * @throws IOException If the thread runs into a file system error
      */
-    public ConfigWatcher(Path path, Consumer<WatchEvent<?>> callback) throws IOException {
+    public ConfigWatcher(Path path, Consumer<WatchEvent<?>> callback) {
         this.path = path;
         this.callback = callback;
     }
