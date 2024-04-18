@@ -24,6 +24,7 @@ import net.jchad.installer.core.progressBar.BarStatus;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.EventListener;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,12 +35,15 @@ public class GUI extends Application implements BarDisplay {
 
     private VBox vbox;
     private int selectedIndex;
+    private DirectoryChooser directoryChooser;
+    private Button chooseDirectoryButton;
 
     private static final double BASE_WIDTH = 800;
     private static final double BASE_HEIGHT = 600;
 
     private static final double MAX_SCALE = 1.3;
     private static final double MIN_SCALE = 1.0;
+    private File selectedDirectory;
 
 
     public static void main(String[] args) {
@@ -60,12 +64,12 @@ public class GUI extends Application implements BarDisplay {
         welcomeLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
         vbox.getChildren().add(welcomeLabel);
 
-        DirectoryChooser directoryChooser = new DirectoryChooser();
-        Button chooseDirectoryButton = new Button("Choose Installation Directory");
+        directoryChooser = new DirectoryChooser();
+        chooseDirectoryButton = new Button("Choose Installation Directory");
         chooseDirectoryButton.setTranslateY(30);
         chooseDirectoryButton.setStyle("-fx-font-size: 13px;");
         chooseDirectoryButton.setOnAction(e -> {
-            File selectedDirectory = directoryChooser.showDialog(primaryStage);
+            selectedDirectory = directoryChooser.showDialog(primaryStage);
             if (selectedDirectory != null) {
                 Path directory = selectedDirectory.toPath();
                 configManager.setDownloadPath(directory.toString());
@@ -101,6 +105,126 @@ public class GUI extends Application implements BarDisplay {
 
 
             } else {
+                String server = "JChad-server.jar";
+                String client = "JChad-client.jar";
+
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("Files already found in this directory!");
+                alert.setHeaderText("Please choose in order to proceed");
+                alert.setContentText("Do you wish to proceed and overwrite the existing files or do you want to cancel and choose another directory?");
+
+                ButtonType cancelButton = new ButtonType("Cancel");
+                ButtonType overwriteButton = new ButtonType("Overwrite");
+                alert.getButtonTypes().setAll(cancelButton, overwriteButton);
+
+                if (softwareComboBox.getSelectionModel().getSelectedIndex() == 0) {
+                    boolean bothFilesExist = false;
+                    if(selectedDirectory.listFiles() != null) {
+                        for (File file : selectedDirectory.listFiles()) {
+                            if (file.getName().equals(server)) {
+                                for (File file2 : selectedDirectory.listFiles()) {
+                                    if (file2.getName().equals(client)) {
+                                        System.out.println("Both existing");
+                                        bothFilesExist = true;
+                                        break;
+                                    }
+                                }
+                                if (bothFilesExist) {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (bothFilesExist) {
+                        Optional<ButtonType> result = alert.showAndWait();
+                        if (result.isPresent() && result.get() == cancelButton) {
+                            // User chose to cancel, do not proceed
+                            return;
+                        }
+
+                        // Perform action for Continue button
+                    } else {
+                        // Files not found, proceed with directory selection
+                        Path directory = selectedDirectory.toPath();
+                        configManager.setDownloadPath(directory.toString());
+                        chooseDirectoryButton.setText(directory.toString());
+                    }
+                }
+
+                if(softwareComboBox.getSelectionModel().getSelectedIndex() == 2){
+                    boolean clientExist = false;
+                    if(selectedDirectory.listFiles() != null) {
+                        for (File file : selectedDirectory.listFiles()) {
+                            if (file.getName().equals(client)) {
+                                System.out.println("client existing");
+                                clientExist = true;
+                                break;
+                            }
+
+                            if (clientExist) {
+                                break;
+                            }
+                        }
+                    }
+
+
+
+                    if (clientExist) {
+                        Optional<ButtonType> result = alert.showAndWait();
+                        if (result.isPresent() && result.get() == cancelButton) {
+                            // User chose to cancel, do not proceed
+                            return;
+                        }
+
+                        // Perform action for Continue button
+                    } else {
+                        // Files not found, proceed with directory selection
+                        Path directory = selectedDirectory.toPath();
+                        configManager.setDownloadPath(directory.toString());
+                        chooseDirectoryButton.setText(directory.toString());
+                    }
+                        }
+
+                if(softwareComboBox.getSelectionModel().getSelectedIndex() == 1) {
+                    boolean serverExist = false;
+                    if (selectedDirectory.listFiles() != null) {
+                        for (File file : selectedDirectory.listFiles()) {
+                            if (file.getName().equals(client)) {
+                                System.out.println("client existing");
+                                serverExist = true;
+                                break;
+                            }
+
+                            if (serverExist) {
+                                break;
+                            }
+
+                            if (serverExist) {
+                                break;
+                            }
+
+
+                            if (serverExist) {
+                                Optional<ButtonType> result = alert.showAndWait();
+                                if (result.isPresent() && result.get() == cancelButton) {
+                                    // User chose to cancel, do not proceed
+                                    return;
+                                }
+
+                                // Perform action for Continue button
+                            } else {
+                                // Files not found, proceed with directory selection
+                                Path directory = selectedDirectory.toPath();
+                                configManager.setDownloadPath(directory.toString());
+                                chooseDirectoryButton.setText(directory.toString());
+                            }
+                        }
+                    }
+                }
+
+
+
                 Task<Void> installTask = new Task<Void>() {
                     @Override
                     protected Void call() throws Exception {
@@ -170,6 +294,15 @@ public class GUI extends Application implements BarDisplay {
         double scale = Math.min(scaleX, scaleY);
         // Limit the scale within the specified range
         return Math.max(Math.min(scale, MAX_SCALE), MIN_SCALE);
+    }
+
+    private void showDirectoryChooser(Stage primaryStage) {
+        selectedDirectory = directoryChooser.showDialog(primaryStage);
+        if (selectedDirectory != null) {
+            Path directory = selectedDirectory.toPath();
+            configManager.setDownloadPath(directory.toString());
+            chooseDirectoryButton.setText(directory.toString());
+        }
     }
 
     @Override
