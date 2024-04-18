@@ -17,13 +17,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 /*
-    TODO: Store config files in ConfigFiles enum, so querying data about them becomes easier
+
     TODO: Make ConfigWatcher restart itself, when an error occurs
+    TODO: Fix IP string parsing ("192.168.0.1" for example is not valid)
     TODO: Stop reloading server config, when whitelist is disabled and gets modified
+    DONE: Store config files in ConfigFiles enum, so querying data about them becomes easier
     CANCELED: Maybe don't dynamically load whitelisted and blacklisted files
     DONE: Fix bug, where the program "fails" updating the config when creating it
         - Only happens if config directory not created yet, only happens in jar outside of IDE
@@ -44,32 +44,6 @@ import java.util.Map;
  */
 
 public class ConfigManager {
-    /**
-     * Stores the save path for the configuration files.
-     */
-    private final String configSavePath = "./configs/";
-
-    /**
-     * Stores a key-value pair for each config file, containing the configs specifier name and its file name.
-     * <br>
-     * <br>
-     * Format:
-     * <br>
-     * "[CONFIG SPECIFIER]" : "[CONFIG FILE NAME]"
-     * <br>
-     * <br>
-     * "serverConfig" : "server-config.yml"
-     * <br>
-     * "whitelistedIPsConfig" : "whitelisted-ips.yml"
-     * <br>
-     * "blacklistedIPsConfig" : "blacklisted-ips.yml"
-     */
-    private HashMap<String, String> configs = new HashMap<>(Map.of(
-            "serverConfig", "server-config.yml",
-            "whitelistedIPsConfig", "whitelisted-ips.yml",
-            "blacklistedIPsConfig", "blacklisted-ips.yml"
-    ));
-
     /**
      * Used for YAML file reading and writing using the {@link com.fasterxml.jackson} library
      */
@@ -160,7 +134,7 @@ public class ConfigManager {
      * Handles the restarting process if something goes wrong. If starting again fails
      */
     private void initializeConfigWatcher() {
-        configWatcher = new ConfigWatcher(Path.of(configSavePath), (event) -> {
+        configWatcher = new ConfigWatcher(ConfigFiles.getStorageDirectory(), (event) -> {
             configUpdated(event);
         });
 
@@ -181,36 +155,36 @@ public class ConfigManager {
      * @throws Exception If an error occurs when trying to create or read configs.
      */
     private Config loadConfigFiles() throws IOException {
-        Path serverConfigPath = Path.of(configSavePath + configs.get("serverConfig"));
-
         Config newConfig;
 
-        if (!Files.exists(Path.of(configSavePath))) {
-            Files.createDirectory(Path.of(configSavePath));
+        Path storageDirectory = ConfigFiles.getStorageDirectory();
+        if (!Files.exists(storageDirectory)) {
+            Files.createDirectory(storageDirectory);
         }
 
-        if (!Files.exists(serverConfigPath)) {
-            messageHandler.handleInfo("Creating " + configs.get("serverConfig") + " file");
+        ConfigFiles serverConfig = ConfigFiles.SERVER_CONFIG;
+        if (!Files.exists(serverConfig.getStoragePath())) {
+            messageHandler.handleInfo("Creating " + serverConfig.getFileName() + " file");
 
-            mapper.writeValue(Files.createFile(serverConfigPath).toFile(), new Config());
+            mapper.writeValue(Files.createFile(serverConfig.getStoragePath()).toFile(), new Config());
         }
 
         try {
-            newConfig = mapper.readValue(serverConfigPath.toFile(), Config.class);
+            newConfig = mapper.readValue(serverConfig.getStoragePath().toFile(), Config.class);
         } catch (Exception e) {
             switch (e) {
                 case InvalidFormatException ife -> {
-                    messageHandler.handleWarning(configs.get("serverConfig") + " couldn't be parsed: "
+                    messageHandler.handleWarning(serverConfig.getFileName() + " couldn't be parsed: "
                             + ife.getOriginalMessage());
                 }
 
                 case MarkedYAMLException mye -> {
-                    messageHandler.handleWarning(configs.get("serverConfig") + " couldn't be parsed: " + mye.getProblem() + "\n"
+                    messageHandler.handleWarning(serverConfig.getFileName() + " couldn't be parsed: " + mye.getProblem() + "\n"
                             + mye.getContextMark().get_snippet(0, 150));
                 }
 
                 case MismatchedInputException mie -> {
-                    messageHandler.handleWarning(configs.get("serverConfig") + " is empty");
+                    messageHandler.handleWarning(serverConfig.getFileName() + " is empty");
                 }
 
                 default -> {
@@ -247,26 +221,27 @@ public class ConfigManager {
      */
     @SuppressWarnings("unchecked")
     private ArrayList<InetAddress> loadWhitelistedIPsConfig() throws IOException {
-        Path whitelistedIPsPath = Path.of(configSavePath + configs.get("whitelistedIPsConfig"));
+        ConfigFiles whitelistedIPsConfig = ConfigFiles.WHITELISTED_IPS_CONFIG;
 
-        if (!Files.exists(whitelistedIPsPath)) {
-            messageHandler.handleInfo("Creating " + configs.get("whitelistedIPsConfig") + " file");
+        if (!Files.exists(whitelistedIPsConfig.getStoragePath())) {
+            messageHandler.handleInfo("Creating " + whitelistedIPsConfig.getFileName() + " file");
 
-            mapper.writeValue(Files.createFile(whitelistedIPsPath).toFile(), fromURIToString(config.getWhitelistedIPs()));
+            mapper.writeValue(Files.createFile(whitelistedIPsConfig.getStoragePath()).toFile(),
+                    fromURIToString(config.getWhitelistedIPs()));
         }
 
         ArrayList<String> ipList;
         try {
-            ipList = mapper.readValue(whitelistedIPsPath.toFile(), ArrayList.class);
+            ipList = mapper.readValue(whitelistedIPsConfig.getStoragePath().toFile(), ArrayList.class);
         } catch (Exception e) {
             switch (e) {
                 case MarkedYAMLException mye -> {
-                    messageHandler.handleWarning(configs.get("whitelistedIPsConfig") + " couldn't be parsed: " + mye.getProblem() + "\n"
+                    messageHandler.handleWarning(whitelistedIPsConfig.getFileName() + " couldn't be parsed: " + mye.getProblem() + "\n"
                             + mye.getContextMark().get_snippet(0, 150));
                 }
 
                 case MismatchedInputException mie -> {
-                    messageHandler.handleWarning(configs.get("whitelistedIPsConfig") + " is empty");
+                    messageHandler.handleWarning(whitelistedIPsConfig.getFileName() + " is empty");
                 }
 
                 default -> {
@@ -289,26 +264,27 @@ public class ConfigManager {
      */
     @SuppressWarnings("unchecked")
     private ArrayList<InetAddress> loadBlacklistedIPsConfig() throws IOException {
-        Path blacklistedIPsPath = Path.of(configSavePath + configs.get("blacklistedIPsConfig"));
+        ConfigFiles blacklistedIPsConfig = ConfigFiles.BLACKLISTED_IPS_CONFIG;
 
-        if (!Files.exists(blacklistedIPsPath)) {
-            messageHandler.handleInfo("Creating " + configs.get("blacklistedIPsConfig") + " file");
+        if (!Files.exists(blacklistedIPsConfig.getStoragePath())) {
+            messageHandler.handleInfo("Creating " + blacklistedIPsConfig.getFileName() + " file");
 
-            mapper.writeValue(Files.createFile(blacklistedIPsPath).toFile(), fromURIToString(config.getBlacklistedIPs()));
+            mapper.writeValue(Files.createFile(blacklistedIPsConfig.getStoragePath()).toFile(),
+                    fromURIToString(config.getBlacklistedIPs()));
         }
 
         ArrayList<String> ipList;
         try {
-            ipList = mapper.readValue(blacklistedIPsPath.toFile(), ArrayList.class);
+            ipList = mapper.readValue(blacklistedIPsConfig.getStoragePath().toFile(), ArrayList.class);
         } catch (Exception e) {
             switch (e) {
                 case MarkedYAMLException mye -> {
-                    messageHandler.handleWarning(configs.get("blacklistedIPsConfig") + " couldn't be parsed: " + mye.getProblem() + "\n"
+                    messageHandler.handleWarning(blacklistedIPsConfig.getFileName() + " couldn't be parsed: " + mye.getProblem() + "\n"
                             + mye.getContextMark().get_snippet(0, 150));
                 }
 
                 case MismatchedInputException mie -> {
-                    messageHandler.handleWarning(configs.get("blacklistedIPsConfig") + " is empty");
+                    messageHandler.handleWarning(blacklistedIPsConfig.getFileName() + " is empty");
                 }
 
                 default -> {
@@ -363,10 +339,10 @@ public class ConfigManager {
     }
 
     public void configUpdated(WatchEvent<?> event) {
-        Path modifiedConfig = Path.of(configSavePath).resolve((Path) event.context());
+        Path modifiedConfig = ConfigFiles.getStorageDirectory().resolve((Path) event.context());
         String configName = modifiedConfig.getFileName().toString();
 
-        if (!configs.containsValue(configName)) {
+        if (!ConfigFiles.isConfig(configName)) {
             return;
         }
 
