@@ -39,7 +39,7 @@ public class ServerThread implements Runnable{
         try {
             // If the client closes the connection the bufferedReader
             while ((message = bufferedReader.readLine()) != null) {
-                messageHandler.handleInfo("Message from " + socket + ": " + message);
+                messageHandler.handleInfo("Message from " + remoteAddress.replace("/", "") + " : " + message);
                 printWriter.println("Message received");
                 printWriter.flush();
             }
