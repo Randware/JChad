@@ -38,7 +38,7 @@ public class CrypterManager {
         return Crypter.decryptAES(
                 encryptedText.getBytes(StandardCharsets.UTF_8),
                 secretKey,
-                iv,
+                getIV(),
                 TagUnit.DEFAULT
         );
     }
