@@ -1,6 +1,8 @@
 package net.jchad.server.model.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import net.jchad.server.model.networking.ip.IPAddress;
+import net.jchad.server.model.networking.ip.IPv6Address;
 
 import java.net.InetAddress;
 import java.net.URI;
@@ -29,7 +31,7 @@ public class Config {
     /**
      * Whitelisted IPs (stored in separate "whitelisted-ips.yml" file).
      */
-    private ArrayList<InetAddress> whitelistedIPs;
+    private ArrayList<IPAddress> whitelistedIPs;
 
     /**
      * Blacklisted IPs can't connect.
@@ -39,7 +41,7 @@ public class Config {
     /**
      * Blacklisted IPs (stored in separate "blacklisted-ips.yml").
      */
-    private ArrayList<InetAddress> blacklistedIPs;
+    private ArrayList<IPAddress> blacklistedIPs;
 
     /**
      * Hide usernames in all channels.
@@ -89,9 +91,9 @@ public class Config {
     public Config(boolean requiresPassword,
                   String password,
                   boolean whitelist,
-                  ArrayList<InetAddress> whitelistedIPs,
+                  ArrayList<IPAddress> whitelistedIPs,
                   boolean blacklist,
-                  ArrayList<InetAddress> blacklistedIPs,
+                  ArrayList<IPAddress> blacklistedIPs,
                   boolean strictlyAnonymous,
                   boolean encrypted,
                   int port) {
@@ -148,12 +150,12 @@ public class Config {
     }
 
     @JsonIgnore
-    public ArrayList<InetAddress> getWhitelistedIPs() {
+    public ArrayList<IPAddress> getWhitelistedIPs() {
         return whitelistedIPs;
     }
 
     @JsonIgnore
-    public void setWhitelistedIPs(ArrayList<InetAddress> whitelistedIPs) {
+    public void setWhitelistedIPs(ArrayList<IPAddress> whitelistedIPs) {
         this.whitelistedIPs = whitelistedIPs;
     }
 
@@ -166,12 +168,12 @@ public class Config {
     }
 
     @JsonIgnore
-    public ArrayList<InetAddress> getBlacklistedIPs() {
+    public ArrayList<IPAddress> getBlacklistedIPs() {
         return blacklistedIPs;
     }
 
     @JsonIgnore
-    public void setBlacklistedIPs(ArrayList<InetAddress> blacklistedIPs) {
+    public void setBlacklistedIPs(ArrayList<IPAddress> blacklistedIPs) {
         this.blacklistedIPs = blacklistedIPs;
     }
 

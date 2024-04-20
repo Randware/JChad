@@ -8,6 +8,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.dataformat.yaml.snakeyaml.error.MarkedYAMLException;
 import net.jchad.server.model.error.MessageHandler;
+import net.jchad.server.model.networking.ip.IPAddress;
+import net.jchad.server.model.networking.ip.InvalidIPAddressException;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -231,7 +233,7 @@ public class ConfigManager {
      * @throws Exception If an error occurs when trying to create or read the config.
      */
     @SuppressWarnings("unchecked")
-    private ArrayList<InetAddress> loadWhitelistedIPsConfig() throws IOException {
+    private ArrayList<IPAddress> loadWhitelistedIPsConfig() throws IOException {
         ConfigFiles whitelistedIPsConfig = ConfigFiles.WHITELISTED_IPS_CONFIG;
 
         if (!Files.exists(whitelistedIPsConfig.getStoragePath())) {
@@ -274,7 +276,7 @@ public class ConfigManager {
      * @throws Exception If an error occurs when trying to create or read the config.
      */
     @SuppressWarnings("unchecked")
-    private ArrayList<InetAddress> loadBlacklistedIPsConfig() throws IOException {
+    private ArrayList<IPAddress> loadBlacklistedIPsConfig() throws IOException {
         ConfigFiles blacklistedIPsConfig = ConfigFiles.BLACKLISTED_IPS_CONFIG;
 
         if (!Files.exists(blacklistedIPsConfig.getStoragePath())) {
@@ -316,11 +318,11 @@ public class ConfigManager {
      * @param list {@link ArrayList} containing {@link URI} entries of IPs.
      * @return {@link ArrayList} containing {@link String} entries of IPs.
      */
-    private ArrayList<String> fromURIToString(ArrayList<InetAddress> list) {
+    private ArrayList<String> fromURIToString(ArrayList<IPAddress> list) {
         ArrayList<String> strList = new ArrayList<>();
 
-        for (InetAddress ip : list) {
-            strList.add(ip.getHostAddress());
+        for (IPAddress ip : list) {
+            strList.add(ip.getString());
         }
 
         return strList;
@@ -333,13 +335,13 @@ public class ConfigManager {
      * @param list {@link ArrayList} containing {@link String} entries of IPs.
      * @return {@link ArrayList} containing {@link URI} entries of IPs.
      */
-    private ArrayList<InetAddress> fromStringToIP(ArrayList<String> list) {
-        ArrayList<InetAddress> ipList = new ArrayList<>();
+    private ArrayList<IPAddress> fromStringToIP(ArrayList<String> list) {
+        ArrayList<IPAddress> ipList = new ArrayList<>();
 
         for (String ip : list) {
             try {
-                ipList.add(InetAddress.getByAddress(ip.getBytes()));
-            } catch (UnknownHostException e) {
+                ipList.add(IPAddress.fromString(ip));
+            } catch (InvalidIPAddressException e) {
 
                 // TODO: Give information in which file this error occurred
                 messageHandler.handleWarning("Failed parsing IP string, skipping it: \"" + ip + "\"");
