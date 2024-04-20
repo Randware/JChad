@@ -1,5 +1,6 @@
 package net.jchad.server.model.config;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
@@ -21,8 +22,18 @@ import java.util.ArrayList;
 /*
 
     TODO: Make ConfigWatcher restart itself, when an error occurs
+        - As soon as ConfigWatcher fails, try restarting (maybe twice),
+        if it still fails, stop attempting to restart and disable the ConfigWatcher feature
     TODO: Fix IP string parsing ("192.168.0.1" for example is not valid)
+        - This happens because the InetAddress class does a ip lookup every time and if it doesn't find the ip,
+        it is deemed invalid. In addition to that, the validation process is very slow because of that.
+        - Maybe use Guava library for IP address parsing (really don't want to write my own IP parser)
+        - Maybe write own classes using regex
     TODO: Stop reloading server config, when whitelist is disabled and gets modified
+        - Pass the current config to the isConfig() method in the ConfigFiles class and only check enabled files
+    TODO: Investigate missing values in config (server uses default value for missing values,
+        I don't know why, I didn't implement this knowingly)
+        - Log missing value warning
     DONE: Store config files in ConfigFiles enum, so querying data about them becomes easier
     CANCELED: Maybe don't dynamically load whitelisted and blacklisted files
     DONE: Fix bug, where the program "fails" updating the config when creating it

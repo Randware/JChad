@@ -2,7 +2,6 @@ package net.jchad.server.model.config;
 
 import java.nio.file.Path;
 
-// TODO: Store config files with related information here
 public enum ConfigFiles {
     SERVER_CONFIG("server-config.yml"),
     WHITELISTED_IPS_CONFIG("whitelisted-ips.yml"),
