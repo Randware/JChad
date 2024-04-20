@@ -1,13 +1,12 @@
 package net.jchad.server.model.networking.ip;
 
+import java.io.Serializable;
 import java.net.Inet4Address;
-import java.net.Inet6Address;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class IPv4Address implements IPAddress {
+public class IPv4Address implements IPAddress, Serializable {
     private final String ipString;
 
     private IPv4Address(String ipString) {
