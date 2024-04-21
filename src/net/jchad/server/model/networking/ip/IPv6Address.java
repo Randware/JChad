@@ -6,7 +6,7 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class IPv6Address implements IPAddress, Serializable {
+public class IPv6Address implements IPAddress {
     private final String ipString;
 
     private IPv6Address(String ipString) {

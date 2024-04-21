@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
- *  Can be used to run a separate {@link Thread} checking for file changes in a specific directory.
+ * Can be used to run a separate {@link Thread} checking for file changes in a specific directory.
  */
 public class ConfigWatcher extends Thread {
     /**
@@ -24,9 +24,17 @@ public class ConfigWatcher extends Thread {
     private final Consumer<WatchEvent<?>> callback;
 
     /**
+     * Code that gets called when an error occured.
+     * Also returns the {@link Exception} that occured.
+     */
+    private final Consumer<Exception> errorCallback;
+
+    /**
      * Defines if callback code should be executed when an event was registered.
      */
     private boolean running = true;
+
+    private boolean exit = false;
 
     /**
      * Stores recently created files with a timestamp. This is used,
@@ -38,14 +46,14 @@ public class ConfigWatcher extends Thread {
     private final Map<Path, Long> recentlyCreatedFiles = new HashMap<>();
 
     /**
-     *
-     * @param path {@link Path} which will be watched
+     * @param path     {@link Path} which will be watched
      * @param callback Code that gets called when an event was registered.
      *                 Also returns the {@link WatchEvent} that got registered.
      */
-    public ConfigWatcher(Path path, Consumer<WatchEvent<?>> callback) {
+    public ConfigWatcher(Path path, Consumer<WatchEvent<?>> callback, Consumer<Exception> errorCallback) {
         this.path = path;
         this.callback = callback;
+        this.errorCallback = errorCallback;
     }
 
     /**
@@ -72,49 +80,70 @@ public class ConfigWatcher extends Thread {
     }
 
     /**
+     * Stops the ConfigWatcher thread gracefully.
+     */
+    public void stopWatcher() {
+        exit = true;
+        interrupt();
+    }
+
+    /**
      * Run the actual loop checking for file modifications in the specified path.
      *
      * @throws UncheckedIOException If the thread runs into a file system error
      */
     @Override
     public void run() {
-        try (WatchService watcher = FileSystems.getDefault().newWatchService()) {
-            path.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_CREATE);
+        while (!exit) {
+            try (WatchService watcher = FileSystems.getDefault().newWatchService()) {
+                path.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_CREATE);
 
-            while (true) {
-                if(!isRunning()) continue;
+                while (true) {
+                    if (!isRunning()) continue;
 
-                final WatchKey key = watcher.take();
+                    final WatchKey key = watcher.take();
 
-                /*
-                 * Let thread sleep for 100ms to prevent the same file edit from being recognized twice.
-                 * This happens, because a file gets edited once for changing metadata and a second time
-                 * for actually updating the file content.
-                 */
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException ignore) {}
+                    /*
+                     * Let thread sleep for 100ms to prevent the same file edit from being recognized twice.
+                     * This happens, because a file gets edited once for changing metadata and a second time
+                     * for actually updating the file content.
+                     */
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException ignore) {
+                    }
+
+                    // Simulate an error condition
+                    if (shouldSimulateError()) {
+                        // Intentionally causing an error by accessing an invalid resource
+                        Files.newInputStream(Paths.get("nonexistent-file.txt"));
+                    }
 
 
-                for(final WatchEvent<?> event : key.pollEvents() ) {
-                    Path modifiedConfig = path.resolve((Path) event.context());
+                    for (final WatchEvent<?> event : key.pollEvents()) {
+                        Path modifiedConfig = path.resolve((Path) event.context());
 
-                    if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE) {
-                        // Add newly created file to map with timestamp
-                        recentlyCreatedFiles.put(modifiedConfig, System.currentTimeMillis());
-                    } else if (event.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
-                        if (!recentlyCreatedFiles.containsKey(modifiedConfig) ||
-                                System.currentTimeMillis() - recentlyCreatedFiles.get(modifiedConfig) > TimeUnit.MILLISECONDS.toMillis(100)) {
-                            recentlyCreatedFiles.remove(modifiedConfig);
-                            callback.accept(event);
+                        if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE) {
+                            // Add newly created file to map with timestamp
+                            recentlyCreatedFiles.put(modifiedConfig, System.currentTimeMillis());
+                        } else if (event.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
+                            if (!recentlyCreatedFiles.containsKey(modifiedConfig) ||
+                                    System.currentTimeMillis() - recentlyCreatedFiles.get(modifiedConfig) > TimeUnit.MILLISECONDS.toMillis(100)) {
+                                recentlyCreatedFiles.remove(modifiedConfig);
+                                callback.accept(event);
+                            }
                         }
                     }
-                }
 
-                key.reset();
+                    key.reset();
+                }
+            } catch (IOException | InterruptedException e) {
+                errorCallback.accept(e);
             }
-        } catch (IOException | InterruptedException e) {
-            throw new UncheckedIOException(new IOException(e));
         }
+    }
+
+    private boolean shouldSimulateError() {
+        return false;
     }
 }
