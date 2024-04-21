@@ -1,6 +1,5 @@
 package net.jchad.server.model.config;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
@@ -13,9 +12,7 @@ import net.jchad.server.model.networking.ip.InvalidIPAddressException;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.net.InetAddress;
 import java.net.URI;
-import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.WatchEvent;
@@ -26,16 +23,19 @@ import java.util.ArrayList;
     TODO: Make ConfigWatcher restart itself, when an error occurs
         - As soon as ConfigWatcher fails, try restarting (maybe twice),
         if it still fails, stop attempting to restart and disable the ConfigWatcher feature
-    TODO: Fix IP string parsing ("192.168.0.1" for example is not valid)
-        - This happens because the InetAddress class does a ip lookup every time and if it doesn't find the ip,
-        it is deemed invalid. In addition to that, the validation process is very slow because of that.
-        - Maybe use Guava library for IP address parsing (really don't want to write my own IP parser)
-        - Maybe write own classes using regex
     TODO: Stop reloading server config, when whitelist is disabled and gets modified
         - Pass the current config to the isConfig() method in the ConfigFiles class and only check enabled files
     TODO: Investigate missing values in config (server uses default value for missing values,
         I don't know why, I didn't implement this knowingly)
         - Log missing value warning
+    TODO: Implement configuration modification during runtime from within the program
+        - Create set methods that modify config values directly, then notify server of changed config
+        - Need to write the changes to file without notifying the ConfigWatcher (maybe bring back the runUnsupervised() concept?)
+    DONE: Fix IP string parsing ("192.168.0.1" for example is not valid) -> Wrote own implementation
+        - This happens because the InetAddress class does a ip lookup every time and if it doesn't find the ip,
+        it is deemed invalid. In addition to that, the validation process is very slow because of that.
+        - Maybe use Guava library for IP address parsing (really don't want to write my own IP parser)
+        - Maybe write own classes using regex
     DONE: Store config files in ConfigFiles enum, so querying data about them becomes easier
     CANCELED: Maybe don't dynamically load whitelisted and blacklisted files
     DONE: Fix bug, where the program "fails" updating the config when creating it
@@ -67,6 +67,9 @@ public class ConfigManager {
      * used for watching for file changes in config files.
      */
     private ConfigWatcher configWatcher;
+
+    private int restartAttempts = 0;
+    private final int MAX_RESTART_ATTEMPTS = 3;
 
     /**
      * Stores the instance of a {@link ConfigObserver} implementing class,
@@ -144,20 +147,11 @@ public class ConfigManager {
 
     /**
      * Initializes the ConfigWatcher for the config file directory.
-     * Handles the restarting process if something goes wrong. If starting again fails
      */
     private void initializeConfigWatcher() {
-        configWatcher = new ConfigWatcher(ConfigFiles.getStorageDirectory(), (event) -> {
-            configUpdated(event);
-        });
+        configWatcher = new ConfigWatcher(ConfigFiles.getStorageDirectory(), this::configUpdated, this::handleConfigWatcherError);
 
-        try {
-            configWatcher.start();
-        } catch (UncheckedIOException e1) {
-            messageHandler.handleError(new IOException("The ConfigWatcher thread has run into an unexpected error: ", e1));
-
-            messageHandler.handleWarning("Live updating the config files is no longer possible");
-        }
+        configWatcher.start();
     }
 
     /**
@@ -240,7 +234,7 @@ public class ConfigManager {
             messageHandler.handleInfo("Creating " + whitelistedIPsConfig.getFileName() + " file");
 
             mapper.writeValue(Files.createFile(whitelistedIPsConfig.getStoragePath()).toFile(),
-                    fromURIToString(config.getWhitelistedIPs()));
+                    fromIPToString(config.getWhitelistedIPs()));
         }
 
         ArrayList<String> ipList;
@@ -283,7 +277,7 @@ public class ConfigManager {
             messageHandler.handleInfo("Creating " + blacklistedIPsConfig.getFileName() + " file");
 
             mapper.writeValue(Files.createFile(blacklistedIPsConfig.getStoragePath()).toFile(),
-                    fromURIToString(config.getBlacklistedIPs()));
+                    fromIPToString(config.getBlacklistedIPs()));
         }
 
         ArrayList<String> ipList;
@@ -318,7 +312,7 @@ public class ConfigManager {
      * @param list {@link ArrayList} containing {@link URI} entries of IPs.
      * @return {@link ArrayList} containing {@link String} entries of IPs.
      */
-    private ArrayList<String> fromURIToString(ArrayList<IPAddress> list) {
+    private ArrayList<String> fromIPToString(ArrayList<IPAddress> list) {
         ArrayList<String> strList = new ArrayList<>();
 
         for (IPAddress ip : list) {
@@ -351,7 +345,7 @@ public class ConfigManager {
         return ipList;
     }
 
-    public void configUpdated(WatchEvent<?> event) {
+    private void configUpdated(WatchEvent<?> event) {
         Path modifiedConfig = ConfigFiles.getStorageDirectory().resolve((Path) event.context());
         String configName = modifiedConfig.getFileName().toString();
 
@@ -365,6 +359,28 @@ public class ConfigManager {
             if (configObserver != null) {
                 configObserver.configUpdated();
             }
+        }
+    }
+
+    private void handleConfigWatcherError(Exception e) {
+        restartAttempts++;
+
+        if (restartAttempts <= MAX_RESTART_ATTEMPTS) {
+            messageHandler.handleError(new IOException("The ConfigWatcher thread has run into an unexpected error: " + e));
+            messageHandler.handleWarning("Attempting to restart the ConfigWatcher. Attempt " + restartAttempts);
+
+            if (configWatcher != null) {
+                configWatcher.stopWatcher();
+            }
+
+            initializeConfigWatcher();
+
+            messageHandler.handleInfo("Restarted ConfigWatcher");
+        } else {
+            messageHandler.handleError(new IOException("Failed to restart ConfigWatcher after " + MAX_RESTART_ATTEMPTS + " attempts. Disabling ConfigWatcher."));
+            messageHandler.handleWarning("Registering live updates in config files is no longer possible.");
+
+            configWatcher.stopWatcher();
         }
     }
 }

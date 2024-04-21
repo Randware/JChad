@@ -6,7 +6,7 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class IPv4Address implements IPAddress, Serializable {
+public class IPv4Address implements IPAddress {
     private final String ipString;
 
     private IPv4Address(String ipString) {
