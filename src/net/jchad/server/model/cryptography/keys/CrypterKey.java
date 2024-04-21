@@ -1,6 +1,6 @@
 package net.jchad.server.model.cryptography.keys;
 
-import net.jchad.server.model.cryptography.tagUnit.KeyUnit;
+import net.jchad.server.model.cryptography.crypterUnits.KeyUnit;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;

@@ -17,8 +17,6 @@ public class ConfigUtil {
     private String defaultYAMLName = "installer.yml";
     private Path pathToYAMLFile;
 
-    private String serverURL = "https://github.com/Dari-OS/JChad/tree/master/me/dari_os/Server";
-    private String clientURL = "https://github.com/Dari-OS/JChad/tree/master/me/dari_os/Client";
 
 
     protected ConfigUtil(Path pathOfConfigDirectory, String name) {
