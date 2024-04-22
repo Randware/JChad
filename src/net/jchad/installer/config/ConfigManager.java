@@ -7,13 +7,13 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 
-//TODO fix the file siplay. Currently filee gets displayed with \\ but I am to replace that with /
+
 
 public class ConfigManager {
 
     private String path = ""; //where should be the files downloaded
     private String softwareToInstall = "";
-    private final String githubRepo = "https://api.github.com/repos/Dari-OS/JChad/releases/latest";
+    private final String githubRepo = "https://api.github.com/repos/Randware/JChad/releases/latest";
     private ConfigUtil configUtil = new ConfigUtil(Path.of(System.getProperty("user.dir")));
     public ConfigManager() {
         this(false);

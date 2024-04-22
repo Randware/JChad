@@ -1,12 +1,15 @@
 package net.jchad.server.model.cryptography;
 
-import net.jchad.server.model.cryptography.keys.CrypterKey;
+import net.jchad.server.model.cryptography.crypterUnits.TagUnit;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.security.*;
-import java.util.Arrays;
+import java.util.Base64;
 
 public class CrypterTest {
-    public static void main(String[] args) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public static void main(String[] args) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, ImpossibleConversionException {
         /*String text = "Hello, World";
         SecretKey key = CrypterKey.getAESKey();
         SecretKey key2 = CrypterKey.getAESKey();
@@ -23,20 +26,20 @@ public class CrypterTest {
         System.out.println(base64);
         System.out.println(decoded);*/
 
+        /*KeyPair keyPair = CrypterKey.getRSAKeyPair();
+        String plainText = "Hello World";
 
-        byte[] text = "Hello World".getBytes();
+        byte[] encryptedArr = Crypter.encryptRSA(CrypterUtil.stringToBase64Byt(plainText), keyPair.getPublic());
+        byte[] decryptedText = CrypterUtil.base64ToBytes(Crypter.decryptRSA(encryptedArr, keyPair.getPrivate()));
+        System.out.println(CrypterUtil.bytesToString(decryptedText));*/
 
-        KeyPair keyPairServer = CrypterKey.getRSAKeyPair();
-        KeyPair keyPairClient = CrypterKey.getRSAKeyPair();
+        String plainTextAES = "Hello World I love AES!";
+        CrypterManager crypterManager = new CrypterManager();
+        String encryptedString = crypterManager.encryptAES(plainTextAES);
+        String decryptedString = crypterManager.decryptAES(encryptedString);
+        System.out.println(decryptedString); //Output: Helle World I love AES!
 
-        PrivateKey clientKeyPrivate = keyPairClient.getPrivate();
-        PublicKey clientKeyPublic = keyPairClient.getPublic();
 
-        byte[] str = Crypter.sign(text, clientKeyPrivate);
 
-        System.out.println(Arrays.toString(str));
-        System.out.println(Crypter.verify(text,str,clientKeyPublic));
-        System.out.println("----");
-        System.out.println(CrypterKey.getAESkeyFromBytes(new byte[]{21,125,125}));
     }
 }
