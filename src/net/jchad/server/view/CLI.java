@@ -3,6 +3,10 @@ package net.jchad.server.view;
 import net.jchad.server.controller.ServerController;
 import net.jchad.server.model.error.MessageHandler;
 
+import java.awt.*;
+import java.awt.image.ImageObserver;
+import java.awt.image.ImageProducer;
+
 // Responsible for displaying server output in CLI mode
 public class CLI implements MessageHandler {
     private ServerController server;
@@ -38,5 +42,25 @@ public class CLI implements MessageHandler {
     @Override
     public void handleInfo(String info) {
         System.out.println("[INFO] " + info);
+    }
+
+    @Override
+    public int getWidth(ImageObserver observer) {
+        return 0;
+    }
+
+    @Override
+    public int getHeight(ImageObserver observer) {
+        return 0;
+    }
+
+    @Override
+    public ImageProducer getSource() {
+        return null;
+    }
+
+    @Override
+    public Graphics getGraphics() {
+        return null;
     }
 }

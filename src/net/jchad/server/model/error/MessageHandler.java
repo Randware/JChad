@@ -1,5 +1,9 @@
 package net.jchad.server.model.error;
 
+import java.awt.*;
+import java.awt.image.ImageObserver;
+import java.awt.image.ImageProducer;
+
 /* Is used by the server to send messages to the view,
 which then handles messages based on their types */
 public interface MessageHandler {
@@ -14,4 +18,12 @@ public interface MessageHandler {
 
     // An info used for displaying status, info, etc.
     void handleInfo(String info);
+
+    int getWidth(ImageObserver observer);
+
+    int getHeight(ImageObserver observer);
+
+    ImageProducer getSource();
+
+    Graphics getGraphics();
 }
