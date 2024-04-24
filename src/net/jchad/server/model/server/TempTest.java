@@ -2,6 +2,10 @@ package net.jchad.server.model.server;
 
 import net.jchad.server.model.error.MessageHandler;
 
+import java.awt.*;
+import java.awt.image.ImageObserver;
+import java.awt.image.ImageProducer;
+
 public class TempTest implements MessageHandler {
     public static void main(String[] args) {
         MainSocket ms = new MainSocket(13814, new TempTest());
@@ -26,5 +30,25 @@ public class TempTest implements MessageHandler {
     @Override
     public void handleInfo(String info) {
         System.out.println("[CLIENT] " + info);
+    }
+
+    @Override
+    public int getWidth(ImageObserver observer) {
+        return 0;
+    }
+
+    @Override
+    public int getHeight(ImageObserver observer) {
+        return 0;
+    }
+
+    @Override
+    public ImageProducer getSource() {
+        return null;
+    }
+
+    @Override
+    public Graphics getGraphics() {
+        return null;
     }
 }

@@ -4,12 +4,15 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.*;
+import javafx.scene.*;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import net.jchad.server.controller.ServerController;
 import net.jchad.server.model.error.MessageHandler;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Priority;
@@ -17,12 +20,20 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 
+import java.awt.*;
+import java.awt.image.ImageObserver;
+import java.awt.image.ImageProducer;
+
+
 // Responsible for displaying server output in GUI mode
 public class GUI extends Application implements MessageHandler {
     private ServerController server;
     private TextFlow logArea;
     private TextField cmdField;
     private double sizeValue= 13;
+    private Image image = new Image(getClass().getResource("/net/jchad/server/view/pictures/kisspng-logo-information-library-business-information-5abe49fe3f2365.1117500215224202222586.png").toExternalForm());
+    private ImageView imageView = new ImageView(image);
+
     //launch method
     public static void main(String[] args) {
         Application.launch(args);
@@ -51,18 +62,16 @@ public class GUI extends Application implements MessageHandler {
         MenuItem standardFontSize = new MenuItem("standard Font size");
         MenuItem decreaseFontSize = new MenuItem("decrease Font size");
 
-
-
         fontsSubMenu.getItems().addAll(increaseFontSize, standardFontSize, decreaseFontSize);
 
         settingsMenu.getItems().add(fontsSubMenu);
-
+        
         menuBar.getMenus().add(settingsMenu);
 
         VBox vbox = new VBox(menuBar, logArea, cmdField);
 
         increaseFontSize.setOnAction(e -> changeFontSize(2));
-        standardFontSize.setOnAction(e -> standardFontSizeMethod(vbox));
+        standardFontSize.setOnAction(e -> standardFontSizeMethod());
         decreaseFontSize.setOnAction(e -> changeFontSize(-2));
 
         vbox.setSpacing(10);
@@ -79,43 +88,107 @@ public class GUI extends Application implements MessageHandler {
     }
 
     private void changeFontSize(int size) {
-        Platform.runLater(() -> logArea.setStyle("-fx-font-size: " +(sizeValue + size)));
-        Platform.runLater(() -> cmdField.setStyle("-fx-font-size: " +(sizeValue + size)));
         this.sizeValue = sizeValue + size;
+        double aspectRatio = imageView.getImage().getWidth() / imageView.getImage().getHeight();
+        double newWidth = sizeValue * 10 * aspectRatio;
+
+        Platform.runLater(() -> logArea.setStyle("-fx-font-size: " +sizeValue));
+        Platform.runLater(() -> cmdField.setStyle("-fx-font-size: " +sizeValue));
+
+        imageView.setFitHeight(sizeValue * 10);
+        imageView.setFitWidth(newWidth);
+        imageView.setPreserveRatio(true);
     }
 
-    private void standardFontSizeMethod(VBox vBox){
-        Platform.runLater(() -> logArea.setStyle("-fx-font-size: " + 13));
-        Platform.runLater(() -> cmdField.setStyle("-fx-font-size: " + 13));
+
+    private void standardFontSizeMethod(){
         this.sizeValue = 13;
+        Platform.runLater(() -> logArea.setStyle("-fx-font-size: " + sizeValue));
+        Platform.runLater(() -> cmdField.setStyle("-fx-font-size: " + sizeValue));
+        Platform.runLater(() -> imageView.setFitWidth(sizeValue));
+        Platform.runLater(() -> imageView.setFitHeight(sizeValue));
     }
 
     @Override
     public void handleFatalError(Exception e) {
         //Platform.runLater(() -> logArea.appendText("[Fatal Error]: " + e.getMessage() + "\n"));
+        Image image = new Image(getClass().getResource("/net/jchad/server/view/pictures/kisspng-computer-icons-warning-sign-symbol.png").toExternalForm());
+        ImageView imageView = new ImageView(image);
+        imageView.setFitHeight(sizeValue);
+        imageView.setFitWidth(sizeValue);
+        String log = "[Fatal Error]: ";
+        Text t1 = new Text(log);
+        t1.setStyle("-fx-fill: #fd0000;-fx-font-weight:bold;");
+        Text t2 = new Text(e.getMessage() + "\n");
+        t2.setStyle("-fx-font-weight:normal;");
+        Platform.runLater(() -> logArea.getChildren().remove(imageView));
+        Platform.runLater(() -> logArea.getChildren().addAll(imageView, t1, t2));
     }
 
     @Override
     public void handleError(Exception e) {
         //Platform.runLater(() -> logArea.appendText("[Error]: " + e.getMessage() + "\n"));
+        Image image = new Image(getClass().getResource("/net/jchad/server/view/pictures/kisspng-computer-icons-warning-sign-sin.png").toExternalForm());
+        ImageView imageView = new ImageView(image);
+        imageView.setFitHeight(sizeValue);
+        imageView.setFitWidth(sizeValue);
+        String log = "[Error]: ";
+        Text t1 = new Text(log);
+        t1.setStyle("-fx-fill: #fd6e00;-fx-font-weight:bold;");
+        Text t2 = new Text(e.getMessage() + "\n");
+        t2.setStyle("-fx-font-weight:normal;");
+        Platform.runLater(() -> logArea.getChildren().remove(imageView));
+        Platform.runLater(() -> logArea.getChildren().addAll(imageView, t1, t2));
     }
 
     @Override
     public void handleWarning(String warning) {
-        //Platform.runLater(() -> logArea.appendText("[Warning]: " + warning + "\n"));
+        Image image = new Image(getClass().getResource("/net/jchad/server/view/pictures/Warning sign symbol.png").toExternalForm());
+        ImageView imageView = new ImageView(image);
+        imageView.setFitHeight(sizeValue);
+        imageView.setFitWidth(sizeValue);
+        String log = "[Warning]: ";
+        Text t1 = new Text(log);
+        t1.setStyle("-fx-fill: #fdf500;-fx-font-weight:bold;");
+        Text t2 = new Text(warning + "\n");
+        t2.setStyle("-fx-font-weight:normal;");
+        Platform.runLater(() -> logArea.getChildren().remove(imageView));
+        Platform.runLater(() -> logArea.getChildren().addAll(imageView, t1, t2));
     }
-
-    /*@Override
+    @Override
     public void handleInfo(String info) {
-        Platform.runLater(() -> logArea.appendText("[Info]: " + info + "\n"));
-    } */
-
-    public void handleInfo(String info) {
+        Image image = new Image(getClass().getResource("/net/jchad/server/view/pictures/kisspng-logo-information-library-business-information-5abe49fe3f2365.1117500215224202222586.png").toExternalForm());
+        ImageView imageView = new ImageView(image);
+        //imageView.autosize();
+        imageView.setFitHeight(sizeValue);
+        imageView.setFitWidth(sizeValue);
         String log = "[Info]: ";
         Text t1 = new Text(log);
-        t1.setStyle("-fx-fill: #4F8A10;-fx-font-weight:bold;");
+        t1.setStyle("-fx-fill: #00bafd;-fx-font-weight:bold;");
         Text t2 = new Text(info + "\n");
-        t2.setStyle("-fx-fill: RED;-fx-font-weight:normal;");
-        Platform.runLater(() -> logArea.getChildren().addAll(t1, t2));
+        t2.setStyle("-fx-font-weight:normal;");
+        Platform.runLater(() -> logArea.getChildren().remove(imageView));
+        Platform.runLater(() -> logArea.getChildren().addAll(imageView, t1, t2));
     }
+
+    @Override
+    public int getWidth(ImageObserver observer) {
+        return 0;
+    }
+
+    @Override
+    public int getHeight(ImageObserver observer) {
+        return 0;
+    }
+
+    @Override
+    public ImageProducer getSource() {
+        return null;
+    }
+
+    @Override
+    public Graphics getGraphics() {
+        return null;
+    }
+
 }

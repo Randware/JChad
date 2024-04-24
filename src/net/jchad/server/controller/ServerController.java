@@ -4,7 +4,8 @@ import net.jchad.server.model.error.MessageHandler;
 import net.jchad.server.model.server.Server;
 
 // Used for controlling the server from the view
-public class ServerController {
+public class
+ServerController {
     private final Server server;
 
     public ServerController(MessageHandler messageHandler) {
