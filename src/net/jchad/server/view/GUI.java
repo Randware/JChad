@@ -6,8 +6,6 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.image.*;
-import javafx.scene.*;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
@@ -80,6 +78,10 @@ public class GUI extends Application implements MessageHandler {
         vbox.setMaxHeight(Double.MAX_VALUE);
         vbox.setStyle("-fx-font-size: 13px;");
 
+        String warning = "Darius du fickkopf";
+        handleFatalError(new Exception("Fatal error"));
+        handleError(new Exception("error"));
+        handleWarning(warning);
 
         Scene scene = new Scene(vbox, 800, 600);
         stage.setTitle("Server GUI");
@@ -143,13 +145,13 @@ public class GUI extends Application implements MessageHandler {
 
     @Override
     public void handleWarning(String warning) {
-        Image image = new Image(getClass().getResource("/net/jchad/server/view/pictures/Warning sign symbol.png").toExternalForm());
+        Image image = new Image(getClass().getResource("/net/jchad/server/view/pictures/kisspng-warning-sign-exclamation-mark-warning-sign.png").toExternalForm());
         ImageView imageView = new ImageView(image);
         imageView.setFitHeight(sizeValue);
         imageView.setFitWidth(sizeValue);
         String log = "[Warning]: ";
         Text t1 = new Text(log);
-        t1.setStyle("-fx-fill: #fdf500;-fx-font-weight:bold;");
+        t1.setStyle("-fx-fill: #d2c800;-fx-font-weight:bold;");
         Text t2 = new Text(warning + "\n");
         t2.setStyle("-fx-font-weight:normal;");
         Platform.runLater(() -> logArea.getChildren().remove(imageView));
