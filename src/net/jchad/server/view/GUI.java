@@ -97,18 +97,23 @@ public class GUI extends Application implements MessageHandler {
         Platform.runLater(() -> logArea.setStyle("-fx-font-size: " +sizeValue));
         Platform.runLater(() -> cmdField.setStyle("-fx-font-size: " +sizeValue));
 
-        imageView.setFitHeight(sizeValue * 10);
-        imageView.setFitWidth(newWidth);
-        imageView.setPreserveRatio(true);
+        Platform.runLater(() -> imageView.setFitHeight(sizeValue * 10));
+        Platform.runLater(() -> imageView.setFitWidth(newWidth));
+        Platform.runLater(() -> imageView.setPreserveRatio(true));
     }
 
 
     private void standardFontSizeMethod(){
         this.sizeValue = 13;
-        Platform.runLater(() -> logArea.setStyle("-fx-font-size: " + sizeValue));
-        Platform.runLater(() -> cmdField.setStyle("-fx-font-size: " + sizeValue));
-        Platform.runLater(() -> imageView.setFitWidth(sizeValue));
-        Platform.runLater(() -> imageView.setFitHeight(sizeValue));
+        double aspectRatio = imageView.getImage().getWidth() / imageView.getImage().getHeight();
+        double newWidth = sizeValue * 10 * aspectRatio;
+
+        Platform.runLater(() -> logArea.setStyle("-fx-font-size: " + 13));
+        Platform.runLater(() -> cmdField.setStyle("-fx-font-size: " + 13));
+
+        Platform.runLater(() -> imageView.setFitHeight(sizeValue * 10));
+        Platform.runLater(() -> imageView.setFitWidth(newWidth));
+        Platform.runLater(() -> imageView.setPreserveRatio(true));
     }
 
     @Override
@@ -125,6 +130,7 @@ public class GUI extends Application implements MessageHandler {
         t2.setStyle("-fx-font-weight:normal;");
         Platform.runLater(() -> logArea.getChildren().remove(imageView));
         Platform.runLater(() -> logArea.getChildren().addAll(imageView, t1, t2));
+        standardFontSizeMethod();
     }
 
     @Override
@@ -141,6 +147,7 @@ public class GUI extends Application implements MessageHandler {
         t2.setStyle("-fx-font-weight:normal;");
         Platform.runLater(() -> logArea.getChildren().remove(imageView));
         Platform.runLater(() -> logArea.getChildren().addAll(imageView, t1, t2));
+        standardFontSizeMethod();
     }
 
     @Override
@@ -156,7 +163,9 @@ public class GUI extends Application implements MessageHandler {
         t2.setStyle("-fx-font-weight:normal;");
         Platform.runLater(() -> logArea.getChildren().remove(imageView));
         Platform.runLater(() -> logArea.getChildren().addAll(imageView, t1, t2));
+        standardFontSizeMethod();
     }
+
     @Override
     public void handleInfo(String info) {
         Image image = new Image(getClass().getResource("/net/jchad/server/view/pictures/kisspng-logo-information-library-business-information-5abe49fe3f2365.1117500215224202222586.png").toExternalForm());
@@ -171,6 +180,7 @@ public class GUI extends Application implements MessageHandler {
         t2.setStyle("-fx-font-weight:normal;");
         Platform.runLater(() -> logArea.getChildren().remove(imageView));
         Platform.runLater(() -> logArea.getChildren().addAll(imageView, t1, t2));
+        standardFontSizeMethod();
     }
 
     @Override
