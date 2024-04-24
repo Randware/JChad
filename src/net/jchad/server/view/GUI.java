@@ -26,8 +26,8 @@ import java.awt.image.ImageProducer;
 // Responsible for displaying server output in GUI mode
 public class GUI extends Application implements MessageHandler {
     private ServerController server;
-    private TextFlow logArea;
-    private TextField cmdField;
+    private TextFlow logArea = new TextFlow();
+    private TextField cmdField = new TextField();
     private double sizeValue= 13;
     private Image image = new Image(getClass().getResource("/net/jchad/server/view/pictures/kisspng-logo-information-library-business-information-5abe49fe3f2365.1117500215224202222586.png").toExternalForm());
     private ImageView imageView = new ImageView(image);
@@ -43,11 +43,7 @@ public class GUI extends Application implements MessageHandler {
         server = new ServerController(this);
         server.startServer();
 
-        logArea = new TextFlow();
-
-        cmdField = new TextField();
         cmdField.setPromptText("Enter command here...");
-
 
         MenuBar menuBar = new MenuBar();
         menuBar.setPadding(Insets.EMPTY);
@@ -78,10 +74,13 @@ public class GUI extends Application implements MessageHandler {
         vbox.setMaxHeight(Double.MAX_VALUE);
         vbox.setStyle("-fx-font-size: 13px;");
 
-        String warning = "Darius du fickkopf";
+       /* String warning = "Darius du fickkopf";
         handleFatalError(new Exception("Fatal error"));
         handleError(new Exception("error"));
-        handleWarning(warning);
+        for (int i = 0; i < 1000; i++) {
+            handleWarning(warning);
+        }*/
+
 
         Scene scene = new Scene(vbox, 800, 600);
         stage.setTitle("Server GUI");
@@ -94,26 +93,17 @@ public class GUI extends Application implements MessageHandler {
         double aspectRatio = imageView.getImage().getWidth() / imageView.getImage().getHeight();
         double newWidth = sizeValue * 10 * aspectRatio;
 
-        Platform.runLater(() -> logArea.setStyle("-fx-font-size: " +sizeValue));
-        Platform.runLater(() -> cmdField.setStyle("-fx-font-size: " +sizeValue));
+        logArea.setStyle("-fx-font-size: " +sizeValue);
+        cmdField.setStyle("-fx-font-size: " +sizeValue);
 
-        Platform.runLater(() -> imageView.setFitHeight(sizeValue * 10));
-        Platform.runLater(() -> imageView.setFitWidth(newWidth));
-        Platform.runLater(() -> imageView.setPreserveRatio(true));
+        imageView.setFitHeight(sizeValue * 10);
+        imageView.setFitWidth(newWidth);
+        imageView.setPreserveRatio(true);
     }
 
 
     private void standardFontSizeMethod(){
-        this.sizeValue = 13;
-        double aspectRatio = imageView.getImage().getWidth() / imageView.getImage().getHeight();
-        double newWidth = sizeValue * 10 * aspectRatio;
-
-        Platform.runLater(() -> logArea.setStyle("-fx-font-size: " + 13));
-        Platform.runLater(() -> cmdField.setStyle("-fx-font-size: " + 13));
-
-        Platform.runLater(() -> imageView.setFitHeight(sizeValue * 10));
-        Platform.runLater(() -> imageView.setFitWidth(newWidth));
-        Platform.runLater(() -> imageView.setPreserveRatio(true));
+        changeFontSize(13);
     }
 
     @Override
@@ -128,8 +118,8 @@ public class GUI extends Application implements MessageHandler {
         t1.setStyle("-fx-fill: #fd0000;-fx-font-weight:bold;");
         Text t2 = new Text(e.getMessage() + "\n");
         t2.setStyle("-fx-font-weight:normal;");
-        Platform.runLater(() -> logArea.getChildren().remove(imageView));
-        Platform.runLater(() -> logArea.getChildren().addAll(imageView, t1, t2));
+        logArea.getChildren().remove(imageView);
+        logArea.getChildren().addAll(imageView, t1, t2);
         standardFontSizeMethod();
     }
 
@@ -145,8 +135,8 @@ public class GUI extends Application implements MessageHandler {
         t1.setStyle("-fx-fill: #fd6e00;-fx-font-weight:bold;");
         Text t2 = new Text(e.getMessage() + "\n");
         t2.setStyle("-fx-font-weight:normal;");
-        Platform.runLater(() -> logArea.getChildren().remove(imageView));
-        Platform.runLater(() -> logArea.getChildren().addAll(imageView, t1, t2));
+        logArea.getChildren().remove(imageView);
+        logArea.getChildren().addAll(imageView, t1, t2);
         standardFontSizeMethod();
     }
 
@@ -161,8 +151,8 @@ public class GUI extends Application implements MessageHandler {
         t1.setStyle("-fx-fill: #d2c800;-fx-font-weight:bold;");
         Text t2 = new Text(warning + "\n");
         t2.setStyle("-fx-font-weight:normal;");
-        Platform.runLater(() -> logArea.getChildren().remove(imageView));
-        Platform.runLater(() -> logArea.getChildren().addAll(imageView, t1, t2));
+        logArea.getChildren().remove(imageView);
+        logArea.getChildren().addAll(imageView, t1, t2);
         standardFontSizeMethod();
     }
 
@@ -178,8 +168,8 @@ public class GUI extends Application implements MessageHandler {
         t1.setStyle("-fx-fill: #00bafd;-fx-font-weight:bold;");
         Text t2 = new Text(info + "\n");
         t2.setStyle("-fx-font-weight:normal;");
-        Platform.runLater(() -> logArea.getChildren().remove(imageView));
-        Platform.runLater(() -> logArea.getChildren().addAll(imageView, t1, t2));
+        logArea.getChildren().remove(imageView);
+        logArea.getChildren().addAll(imageView, t1, t2);
         standardFontSizeMethod();
     }
 
