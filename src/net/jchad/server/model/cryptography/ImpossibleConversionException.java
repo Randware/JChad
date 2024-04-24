@@ -13,6 +13,7 @@ public class ImpossibleConversionException extends Exception{
      *
      * @param   s   the detail message.
      */
+
     public ImpossibleConversionException(String s) {
         super(s);
     }
