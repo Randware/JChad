@@ -1,15 +1,13 @@
-package net.jchad.server.model.config;
+package net.jchad.server.model.config.store.serverSettings;
 
 import net.jchad.server.model.networking.ip.IPAddress;
 
-import java.net.InetAddress;
-import java.net.URI;
 import java.util.ArrayList;
 
 /**
  * Defines default configuration values.
  */
-public class DefaultConfig {
+public class DefaultServerSettings {
     /**
      * Require password to connect.
      */
@@ -58,10 +56,10 @@ public class DefaultConfig {
     /**
      * Creates a config with the specified default values.
      *
-     * @return {@link Config} with the specified default values.
+     * @return {@link ServerSettings} with the specified default values.
      */
-    public static Config get() {
-        return new Config(
+    public static ServerSettings get() {
+        return new ServerSettings(
                 requiresPassword,
                 password,
                 whitelist,

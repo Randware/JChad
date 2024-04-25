@@ -1,18 +1,14 @@
-package net.jchad.server.model.config;
+package net.jchad.server.model.config.store.serverSettings;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import net.jchad.server.model.networking.ip.IPAddress;
-import net.jchad.server.model.networking.ip.IPv6Address;
 
-import java.net.InetAddress;
-import java.net.URI;
 import java.util.ArrayList;
 
 /**
- * Stores the servers configuration.
+ * Stores general configuration data the user is likely to change.
  */
-
-public class Config {
+public class ServerSettings {
     /**
      * Require password to connect.
      */
@@ -61,18 +57,18 @@ public class Config {
     /**
      * Default constructor for default configuration.
      */
-    public Config() {
-        Config defaultConfig = DefaultConfig.get();
+    public ServerSettings() {
+        ServerSettings defaultServerSettings = DefaultServerSettings.get();
 
-        this.requiresPassword = defaultConfig.isRequiresPassword();
-        this.password = defaultConfig.getPassword();
-        this.whitelist = defaultConfig.isWhitelist();
-        this.whitelistedIPs = defaultConfig.getWhitelistedIPs();
-        this.blacklist = defaultConfig.isBlacklist();
-        this.blacklistedIPs = defaultConfig.getBlacklistedIPs();
-        this.strictlyAnonymous = defaultConfig.isStrictlyAnonymous();
-        this.encrypted = defaultConfig.isEncrypted();
-        this.port = defaultConfig.getPort();
+        this.requiresPassword = defaultServerSettings.isRequiresPassword();
+        this.password = defaultServerSettings.getPassword();
+        this.whitelist = defaultServerSettings.isWhitelist();
+        this.whitelistedIPs = defaultServerSettings.getWhitelistedIPs();
+        this.blacklist = defaultServerSettings.isBlacklist();
+        this.blacklistedIPs = defaultServerSettings.getBlacklistedIPs();
+        this.strictlyAnonymous = defaultServerSettings.isStrictlyAnonymous();
+        this.encrypted = defaultServerSettings.isEncrypted();
+        this.port = defaultServerSettings.getPort();
     }
 
     /**
@@ -88,15 +84,15 @@ public class Config {
      * @param encrypted Encrypt messages
      * @param port Port the server runs on.
      */
-    public Config(boolean requiresPassword,
-                  String password,
-                  boolean whitelist,
-                  ArrayList<IPAddress> whitelistedIPs,
-                  boolean blacklist,
-                  ArrayList<IPAddress> blacklistedIPs,
-                  boolean strictlyAnonymous,
-                  boolean encrypted,
-                  int port) {
+    public ServerSettings(boolean requiresPassword,
+                          String password,
+                          boolean whitelist,
+                          ArrayList<IPAddress> whitelistedIPs,
+                          boolean blacklist,
+                          ArrayList<IPAddress> blacklistedIPs,
+                          boolean strictlyAnonymous,
+                          boolean encrypted,
+                          int port) {
 
         this.requiresPassword = requiresPassword;
         this.password = password;
