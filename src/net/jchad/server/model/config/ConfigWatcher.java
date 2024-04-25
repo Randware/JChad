@@ -113,12 +113,6 @@ public class ConfigWatcher extends Thread {
                     } catch (InterruptedException ignore) {
                     }
 
-                    // Simulate an error condition
-                    if (shouldSimulateError()) {
-                        // Intentionally causing an error by accessing an invalid resource
-                        Files.newInputStream(Paths.get("nonexistent-file.txt"));
-                    }
-
 
                     for (final WatchEvent<?> event : key.pollEvents()) {
                         Path modifiedConfig = path.resolve((Path) event.context());
@@ -141,9 +135,5 @@ public class ConfigWatcher extends Thread {
                 errorCallback.accept(e);
             }
         }
-    }
-
-    private boolean shouldSimulateError() {
-        return false;
     }
 }

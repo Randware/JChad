@@ -11,7 +11,6 @@ import net.jchad.server.model.networking.ip.IPAddress;
 import net.jchad.server.model.networking.ip.InvalidIPAddressException;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,6 +30,7 @@ import java.util.ArrayList;
     TODO: Implement configuration modification during runtime from within the program
         - Create set methods that modify config values directly, then notify server of changed config
         - Need to write the changes to file without notifying the ConfigWatcher (maybe bring back the runUnsupervised() concept?)
+        - create method that pauses ConfigWatcher, then saves config, then continues ConfigWatcher
     DONE: Fix IP string parsing ("192.168.0.1" for example is not valid) -> Wrote own implementation
         - This happens because the InetAddress class does a ip lookup every time and if it doesn't find the ip,
         it is deemed invalid. In addition to that, the validation process is very slow because of that.
@@ -68,8 +68,20 @@ public class ConfigManager {
      */
     private ConfigWatcher configWatcher;
 
+    /**
+     *
+     */
     private int restartAttempts = 0;
+
+    /**
+     *
+     */
     private final int MAX_RESTART_ATTEMPTS = 3;
+
+    /**
+     *
+     */
+    private long lastConfigWatcherStart;
 
     /**
      * Stores the instance of a {@link ConfigObserver} implementing class,
@@ -152,6 +164,7 @@ public class ConfigManager {
         configWatcher = new ConfigWatcher(ConfigFiles.getStorageDirectory(), this::configUpdated, this::handleConfigWatcherError);
 
         configWatcher.start();
+        lastConfigWatcherStart = System.currentTimeMillis();
     }
 
     /**
@@ -345,6 +358,11 @@ public class ConfigManager {
         return ipList;
     }
 
+    /**
+     * This method gets called when a config was updated
+     *
+     * @param event event that was detected by the {@link ConfigWatcher}
+     */
     private void configUpdated(WatchEvent<?> event) {
         Path modifiedConfig = ConfigFiles.getStorageDirectory().resolve((Path) event.context());
         String configName = modifiedConfig.getFileName().toString();
@@ -362,22 +380,29 @@ public class ConfigManager {
         }
     }
 
+    /**
+     * This method gets called when an error occurred in the {@link ConfigWatcher}
+     *
+     * @param e Exception that was thrown
+     */
     private void handleConfigWatcherError(Exception e) {
+        if (System.currentTimeMillis() - lastConfigWatcherStart > 5_000) {
+            restartAttempts = 0;
+        }
+
         restartAttempts++;
 
         if (restartAttempts <= MAX_RESTART_ATTEMPTS) {
             messageHandler.handleError(new IOException("The ConfigWatcher thread has run into an unexpected error: " + e));
-            messageHandler.handleWarning("Attempting to restart the ConfigWatcher. Attempt " + restartAttempts);
+            messageHandler.handleWarning("Attempting restart " + restartAttempts + " ...");
 
             if (configWatcher != null) {
                 configWatcher.stopWatcher();
             }
 
             initializeConfigWatcher();
-
-            messageHandler.handleInfo("Restarted ConfigWatcher");
         } else {
-            messageHandler.handleError(new IOException("Failed to restart ConfigWatcher after " + MAX_RESTART_ATTEMPTS + " attempts. Disabling ConfigWatcher."));
+            messageHandler.handleError(new IOException("Failed ConfigWatcher restart after " + MAX_RESTART_ATTEMPTS + " attempts: " + e));
             messageHandler.handleWarning("Registering live updates in config files is no longer possible.");
 
             configWatcher.stopWatcher();
