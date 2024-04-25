@@ -4,8 +4,6 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
@@ -31,8 +29,6 @@ public class GUI extends Application implements MessageHandler {
     private TextField cmdField = new TextField();
     private double sizeValue= 13;
     private ScrollPane scrollPane = new ScrollPane();
-    /*private Image image = new Image(getClass().getResource("/net/jchad/server/view/pictures/kisspng-logo-information-library-business-information-5abe49fe3f2365.1117500215224202222586.png").toExternalForm());
-    private ImageView imageView = new ImageView(image);*/
 
     //launch method
     public static void main(String[] args) {
@@ -99,94 +95,61 @@ public class GUI extends Application implements MessageHandler {
 
     private void changeFontSize(int size) {
         this.sizeValue = sizeValue + size;
-        //double aspectRatio = imageView.getImage().getWidth() / imageView.getImage().getHeight();
-        //double newWidth = sizeValue * 10 * aspectRatio;
 
         logArea.setStyle("-fx-font-size: " +sizeValue);
         cmdField.setStyle("-fx-font-size: " +sizeValue);
 
-        /*imageView.setFitHeight(sizeValue * 10);
-        imageView.setFitWidth(newWidth);
-        imageView.setPreserveRatio(true);*/
     }
 
 
     private void standardFontSizeMethod(){
         this.sizeValue = 13;
-        /*double aspectRatio = imageView.getImage().getWidth() / imageView.getImage().getHeight();
-        double newWidth = sizeValue * 10 * aspectRatio;*/
 
         logArea.setStyle("-fx-font-size: " + 13);
         cmdField.setStyle("-fx-font-size: " + 13);
 
-        /*imageView.setFitHeight(sizeValue * 10);
-        imageView.setFitWidth(newWidth);
-        imageView.setPreserveRatio(true);*/
     }
 
     @Override
     public void handleFatalError(Exception e) {
-        //Platform.runLater(() -> logArea.appendText("[Fatal Error]: " + e.getMessage() + "\n"));
-        /*Image image = new Image(getClass().getResource("/net/jchad/server/view/pictures/kisspng-computer-icons-warning-sign-symbol.png").toExternalForm());
-        ImageView imageView = new ImageView(image);
-        imageView.setFitHeight(sizeValue);
-        imageView.setFitWidth(sizeValue);*/
         String log = "Ⓧ [Fatal Error]: ";
         Text t1 = new Text(log);
         t1.setStyle("-fx-fill: #fd0000;-fx-font-weight:bold;");
         Text t2 = new Text(e.getMessage() + "\n");
         t2.setStyle("-fx-font-weight:normal;");
-        //logArea.getChildren().remove(imageView);
         logArea.getChildren().addAll(t1, t2);
         standardFontSizeMethod();
     }
 
     @Override
     public void handleError(Exception e) {
-        //Platform.runLater(() -> logArea.appendText("[Error]: " + e.getMessage() + "\n"));
-        /*Image image = new Image(getClass().getResource("/net/jchad/server/view/pictures/kisspng-computer-icons-warning-sign-sin.png").toExternalForm());
-        ImageView imageView = new ImageView(image);
-        imageView.setFitHeight(sizeValue);
-        imageView.setFitWidth(sizeValue);*/
         String log = "Ⓧ [Error]: ";
         Text t1 = new Text(log);
         t1.setStyle("-fx-fill: #fd6e00;-fx-font-weight:bold;");
         Text t2 = new Text(e.getMessage() + "\n");
         t2.setStyle("-fx-font-weight:normal;");
-        //logArea.getChildren().remove(imageView);
         logArea.getChildren().addAll(t1, t2);
         standardFontSizeMethod();
     }
 
     @Override
     public void handleWarning(String warning) {
-        /*Image image = new Image(getClass().getResource("/net/jchad/server/view/pictures/kisspng-warning-sign-exclamation-mark-warning-sign.png").toExternalForm());
-        ImageView imageView = new ImageView(image);
-        imageView.setFitHeight(sizeValue);
-        imageView.setFitWidth(sizeValue);*/
         String log = "⚠ [Warning]: ";
         Text t1 = new Text(log);
         t1.setStyle("-fx-fill: #d2c800;-fx-font-weight:bold;");
         Text t2 = new Text(warning + "\n");
         t2.setStyle("-fx-font-weight:normal;");
-        //logArea.getChildren().remove(imageView);
         logArea.getChildren().addAll(t1, t2);
         standardFontSizeMethod();
     }
 
     @Override
     public void handleInfo(String info) {
-        /*Image image = new Image(getClass().getResource("/net/jchad/server/view/pictures/kisspng-logo-information-library-business-information-5abe49fe3f2365.1117500215224202222586.png").toExternalForm());
-        ImageView imageView = new ImageView(image);
-        imageView.autosize();
-        imageView.setFitHeight(sizeValue);
-        imageView.setFitWidth(sizeValue);*/
         String log = "ⓘ [Info]: ";
         Text t1 = new Text(log);
         t1.setStyle("-fx-fill: #00bafd;-fx-font-weight:bold;");
         Text t2 = new Text(info + "\n");
         t2.setStyle("-fx-font-weight:normal;");
-        //logArea.getChildren().remove(imageView);
         logArea.getChildren().addAll(t1, t2);
         standardFontSizeMethod();
     }
