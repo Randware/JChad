@@ -10,75 +10,90 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
-import java.util.regex.Pattern;
 
 
 
-//TODO Implement the verifying and signing feature from the Crypter class
 /**
  * <h4>Abstraction of the {@link javax.crypto} and {@link java.security} class</h4>
  * Simplifies the encryption and decryption process by abstracting the {@link javax.crypto default Cryptography library} in java.
  * An example to use the {@code RSA} encryption and decryption:
  * <blockquote><pre>
  * CrypterManager crypterManager = new CrypterManager();
- *         String plainText = "Hello World I love RSA";
+ *         String plainText = "Hello World! I love RSA";
+ *         crypterManager.setRemotePublicKey(crypterManager.getPublicKey());
  *         String encryptedText = crypterManager.encryptRSA(plainText);
  *         String decryptedText = crypterManager.decryptRSA(encryptedText);
- *         System.out.println(decryptedText); //Output: Hello World I love RSA
+ *         System.out.println(decryptedText); //Output: Hello World! I love RSA
  * </pre></blockquote>
- * Here is an example on how to decrypt and encrypt using the Advanced Encryption Standard (The used AES mode is GCM/NoPadding)
+ * It is important to do {@code crypterManager.setRemotePublicKey(crypterManager.getPublicKey());} if
+ * you are encrypting your own messages (and decrypting them later).
+ * <p>This has to be done because the {@link net.jchad.server.model.cryptography.CrypterManager CrypterManager} uses the remote Public key for encryption.</p>
+ *
+ * <p>Here is an example on how to decrypt and encrypt using the Advanced Encryption Standard (The used AES mode is GCM/NoPadding)</p>
  * <blockquote><pre>
- *         String plainTextAES = "Hello World I love AES!";
+ *         String plainTextAES = "Hello World! I love AES";
  *         CrypterManager crypterManager = new CrypterManager();
  *         String encryptedString = crypterManager.encryptAES(plainTextAES);
  *         String decryptedString = crypterManager.decryptAES(encryptedString);
- *         System.out.println(decryptedString); //Output: Helle World I love AES!
+ *         System.out.println(decryptedString); //Output: Helle World! I love AES
  * </pre></blockquote>
+ * <p>Here is an example on how to sign and verify a string</p>
+ * <blockquote><pre>
+ *     String textToSign = "Hello World! I love RSA signatures";
+ *         CrypterManager crypterManager = new CrypterManager();
+ *         crypterManager.setRemotePublicKey(crypterManager.getPublicKey());
+ *         String signature = crypterManager.sign(textToSign);
+ *         boolean isSignedCorrectly = crypterManager.verify(signature, textToSign);
+ *         System.out.println(isSignedCorrectly); //Output: true
+ * </pre></blockquote>
+ * <p>As mentioned before it is important to set the remote public key to the current public key,
+ * because you are encrypting and decrypting on one "instance"</p>
  */
 public class CrypterManager {
     private KeyPair keyPair = null;
+
+    /**
+     * The public key of the client you are communicating with.
+     * This public key is used for encryption, allowing the other
+     * host to decrypt the data using their own private key.
+     */
+    private PublicKey remotePublicKey = null;
     private SecretKey secretKey = null;
     private String iv = ""; //InitializationVector
-    private String signature = null;
+
 
 
     public CrypterManager() {
-        this(CrypterUtil.getRandomByteArr(), null, null, null);
+        this(CrypterUtil.getRandomByteArr(), null, null);
     }
     public CrypterManager(byte[] initializationVector) {
-        this(initializationVector, null,null,null);
+        this(initializationVector, null,null);
     }
 
     public CrypterManager(byte[] iv, SecretKey secretKey) {
-        this(iv, null,  secretKey, null);
+        this(iv, null,  secretKey);
     }
 
     public CrypterManager(SecretKey secretKey) {
         this(CrypterUtil.getRandomByteArr(), secretKey);
     }
 
-    public CrypterManager(KeyPair keyPair, String signature) {
-        this(CrypterUtil.getRandomByteArr(), keyPair, null, signature);
-    }
-
     public CrypterManager(KeyPair keyPair) {
-        this(keyPair, null);
+        this(CrypterUtil.getRandomByteArr(), keyPair, null);
     }
 
-    public CrypterManager(PublicKey publicKey, PrivateKey privateKey, String signature) {
-        this(CrypterUtil.getRandomByteArr(), new KeyPair(publicKey, privateKey), null, signature);
-    }
+
 
     public CrypterManager(PublicKey publicKey, PrivateKey privateKey) {
-        this(publicKey, privateKey, null);
+        this(CrypterUtil.getRandomByteArr(), new KeyPair(publicKey, privateKey), null);
     }
 
 
-    public CrypterManager(byte[] iv, KeyPair keyPair, SecretKey secretKey, String signature) {
+
+    public CrypterManager(byte[] iv, KeyPair keyPair, SecretKey secretKey) {
         setIV(iv);
         setAESkey(secretKey);
         setKeyPair(keyPair);
-        this.signature = signature;
     }
 
     /**
@@ -145,6 +160,7 @@ public class CrypterManager {
 
     /**
      * Encrypts the given text using the RSA/NoPadding algorithm.
+     * <u>The REMOTE public key is used for encryption</u>. <b>BE SURE TO SET IT FIRST WITH</b> {@code setRemotePublicKey(RemotePublicKey)}.
      * After the encryption process <b>the text will be encoded to Base64</b>
      * @param plainText The text that gets encrypted and then encoded to base64
      * @return The encrypted and base64 encoded String
@@ -155,8 +171,8 @@ public class CrypterManager {
      * @throws InvalidKeyException
      */
     public String encryptRSA(String plainText) throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        initKeyPair();
-        return encryptRSA(plainText, keyPair.getPublic());
+        initRemotePublicKey();
+        return encryptRSA(plainText, remotePublicKey);
     }
 
     /**
@@ -196,6 +212,42 @@ public class CrypterManager {
         return CrypterUtil.bytesToString(encryptedBytes);
     }
 
+    /**
+     * Signs the provided String.
+     * This is done to prevent <b>MITM</b> (Man-in-the-middle attacks) because the server or
+     * client can verify that the string was sent from the correct host.
+     *
+     * @param textToSign The text/string that gets signed
+     * @return The signature of the provided private key and text
+     * @throws NoSuchAlgorithmException
+     * @throws SignatureException
+     * @throws InvalidKeyException
+     */
+    public String sign(String textToSign) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        initKeyPair();
+        byte[] signature = Crypter.sign(textToSign.getBytes(), keyPair.getPrivate());
+        String encodedSignature = CrypterUtil.bytesToBase64Str(signature);
+        return encodedSignature;
+    }
+
+    /**
+     * Verifies if the remote public key, the signature and the signed text match.
+     * <p><b>Ensure that the remote public key is set to the public key of the host with which you are attempting to communicate.</b></p>
+     *
+     * @param base64EncodedSignature The signature of the signedText
+     * @param signedText the signed text
+     * @return if the signature match with the signed text and the remote public key
+     * @throws ImpossibleConversionException This exception gets thrown if the base64EncodedSignature can not be decoded.
+     * @throws NoSuchAlgorithmException
+     * @throws SignatureException
+     * @throws InvalidKeyException
+     */
+    public boolean verify(String base64EncodedSignature, String signedText) throws ImpossibleConversionException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+        byte[] decodedSignature = CrypterUtil.base64StrToBytes(base64EncodedSignature);
+        boolean isCorrectlySigned = Crypter.verify(signedText.getBytes(),decodedSignature, getRemotePublicKey());
+        return isCorrectlySigned;
+    }
+
 
     /**
      * Sets the AES secret key
@@ -219,10 +271,32 @@ public class CrypterManager {
     }
 
     /**
-     * Sets the AES secret key
+     * Sets the AES secret key to a random new one
      */
     public boolean setAESkey() {
         return setAESkey(KeyUnit.DEFAULT);
+    }
+
+    /**
+     * Sets the AES-/SecretKey to the given base64 encoded String that has to represent a SecretKey
+     * The secret key is used for encryption and decryption from the client/server. Because AES is a symmetric key algorithm the client and server needs the same key.
+     * To get the base64 encoded String from the {@link net.jchad.server.model.cryptography.CrypterManager CrypterManager} class
+     * @param base64EncodedAESKey The base64 encoded Secret/AES key
+     * @return returns true, if the key got successfully set to the remote public key.
+     *         If an error occurs (like a {@link java.lang.NullPointerException NullPointerException}, {@link net.jchad.server.model.cryptography.ImpossibleConversionException ImpossibleConversionException}
+     *         or a {@link java.security.spec.InvalidKeySpecException InvalidKeySpecException})
+     *         this returns "false"
+     */
+    public boolean setAESkey(String base64EncodedAESKey) {
+        try {
+            byte[] decodedAESKey = CrypterUtil.base64StrToBytes(base64EncodedAESKey);
+            SecretKey newSecretKey = CrypterKey.getAESkeyFromBytes(decodedAESKey);
+            if (newSecretKey == null) return false;
+            this.secretKey = newSecretKey;
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     /**
@@ -319,6 +393,45 @@ public class CrypterManager {
     }
 
     /**
+     * Gets the Base64 encoded string representation of the public key
+     * @return Base64 encoded string representation of the public key
+     */
+    public String getPublicKey() {
+        return keyToBase64(keyPair.getPublic());
+    }
+    /**
+     * Gets the Base64 encoded string representation of the private ley
+     * @return Base64 encoded string representation of the private key
+     */
+    public String getPrivateKey() {
+        return keyToBase64(keyPair.getPrivate());
+    }
+    /**
+     * Gets the Base64 encoded string representation of the remote public key
+     * @return Base64 encoded string representation of the remote public key
+     */
+    public String getBase64RemotePublicKey() {
+        return keyToBase64(remotePublicKey);
+    }
+
+    /**
+     * Gets the Base64 encoded string representation of the SecretKey/AESKey
+     * @return Base64 encoded string representation of the SecretKey/AESKey
+     */
+    public String getAESKey() {
+        return keyToBase64(secretKey);
+    }
+
+    /**
+     * Converts the given key into a base64 encoded String
+     * @param key The key that should get encoded to a Base64 String
+     * @return The base64 encoded String
+     */
+    private String keyToBase64(Key key) {
+        return CrypterUtil.bytesToBase64Str(key.getEncoded());
+    }
+
+    /**
      * Sets the initialize vector
      * @param iv the new initialize vector
      */
@@ -376,5 +489,63 @@ public class CrypterManager {
     public SecretKey getAESkey() {
         initAESKey();
         return secretKey;
+    }
+
+    /**
+     * Sets the remote public key used for encryption.
+     * This should be the PublicKey from the other host you are communicating with.
+     * <b><u>If the provided public key is null a new random public key gets assigned instead of the given one</u></b>
+     * @param remotePublicKey The PublicKey that gets set
+     */
+    public void setRemotePublicKey(PublicKey remotePublicKey) {
+        this.remotePublicKey = remotePublicKey;
+        initRemotePublicKey();
+    }
+
+    /**
+     * Sets the remote public key to the given base64 encoded String that has to represent a PublicKey
+     * The remote public key gets used for encryption. It has to be the public key of the client you are communicating with.
+     * To get the base64 encoded String from the {@link net.jchad.server.model.cryptography.CrypterManager CrypterManager} class
+     * @param base64EncodedRemotePublicKey The base64 encoded Public Key
+     * @return returns true, if the key got successfully set to the remote public key.
+     *         If an error occurs (like a {@link java.lang.NullPointerException NullPointerException}, {@link net.jchad.server.model.cryptography.ImpossibleConversionException ImpossibleConversionException}
+     *         or a {@link java.security.spec.InvalidKeySpecException InvalidKeySpecException})
+     *         this returns "false"
+     */
+    public boolean setRemotePublicKey(String base64EncodedRemotePublicKey) {
+        try {
+            byte[] decodedRemotePublicKey = CrypterUtil.base64StrToBytes(base64EncodedRemotePublicKey);
+            PublicKey remotePublicKey = CrypterKey.getPublicKeyFromBytes(decodedRemotePublicKey);
+            if (remotePublicKey == null) return false;
+            this.remotePublicKey = remotePublicKey;
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Initializes the remote PublicKey if it is null.
+     * This is done, in order to prevent NullPointerExceptions
+     * @return If the remote PublicKey gets changed this methode returns true,
+     *         otherwise this returns false
+     */
+    public boolean initRemotePublicKey() {
+        initKeyPair();
+        if (remotePublicKey == null) {
+            this.remotePublicKey = CrypterKey.getRSAKeyPair().getPublic();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * returns the public key that gets used for encryption.
+     * The remote public key should be the key from the host you're communicating with.
+     * @return The remote public key
+     */
+    public PublicKey getRemotePublicKey() {
+        return remotePublicKey;
     }
 }

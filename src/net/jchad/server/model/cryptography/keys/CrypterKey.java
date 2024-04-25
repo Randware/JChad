@@ -134,7 +134,7 @@ public class CrypterKey {
      * @param publicKeyBytes the byte array that should be converted
      * @return the converted Public key or null if the byte array is not a Public Key
      */
-    public static PublicKey gePublicKeyFromBytes(byte[] publicKeyBytes) {
+    public static PublicKey getPublicKeyFromBytes(byte[] publicKeyBytes) {
         try {
             KeyFactory kf = KeyFactory.getInstance("RSA");
             return kf.generatePublic(new X509EncodedKeySpec(publicKeyBytes));
@@ -142,4 +142,5 @@ public class CrypterKey {
             return null;
         }
     }
+
 }
