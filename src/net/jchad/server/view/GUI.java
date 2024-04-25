@@ -81,16 +81,6 @@ public class GUI extends Application implements MessageHandler {
         stage.setScene(scene);
         stage.show();
 
-        test();
-    }
-
-    public void test(){
-        String warning = "WARNING ______ test _ test _ test _ test_ test_ test_ test test test______________________________________________________________________________________________________________  test";
-        handleFatalError(new Exception("Fatal error"));
-        handleError(new Exception("error"));
-        for (int i = 0; i < 1000; i++) {
-            handleWarning(warning);
-        }
     }
 
     private void changeFontSize(int size) {
