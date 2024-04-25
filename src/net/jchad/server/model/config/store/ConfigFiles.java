@@ -1,11 +1,12 @@
-package net.jchad.server.model.config;
+package net.jchad.server.model.config.store;
 
 import java.nio.file.Path;
 
 public enum ConfigFiles {
-    SERVER_CONFIG("server-config.yml"),
+    SERVER_SETTINGS_CONFIG("server-settings.yml"),
     WHITELISTED_IPS_CONFIG("whitelisted-ips.yml"),
-    BLACKLISTED_IPS_CONFIG("blacklisted-ips.yml");
+    BLACKLISTED_IPS_CONFIG("blacklisted-ips.yml"),
+    INTERNAL_SETTINGS_CONFIG("internal-settings.yml");
 
     /**
      * This is where the config files will be stored.

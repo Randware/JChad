@@ -19,4 +19,7 @@ module net.jchad {
     opens net.jchad.server.model.common to com.fasterxml.jackson.databind;
     exports net.jchad.server.view to javafx.graphics;
     exports net.jchad.tests;
+    opens net.jchad.server.model.config.store to com.fasterxml.jackson.databind;
+    opens net.jchad.server.model.config.store.internalSettings to com.fasterxml.jackson.databind;
+    opens net.jchad.server.model.config.store.serverSettings to com.fasterxml.jackson.databind;
 }

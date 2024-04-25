@@ -1,6 +1,8 @@
 package net.jchad.server.model.server;
 
 import net.jchad.server.model.config.*;
+import net.jchad.server.model.config.store.Config;
+import net.jchad.server.model.config.store.serverSettings.ServerSettings;
 import net.jchad.server.model.error.MessageHandler;
 
 // Contains all necessary server data
@@ -23,9 +25,9 @@ public class Server implements ConfigObserver {
         messageHandler.handleInfo("Loaded server config");
 
 
-        mainSocket = new MainSocket(config.getPort(), messageHandler);
+        mainSocket = new MainSocket(config.getServerSettings().getPort(), messageHandler);
         new Thread(mainSocket).start();
-        messageHandler.handleInfo("Server started on port " + config.getPort());
+        messageHandler.handleInfo("Server started on port " + config.getServerSettings().getPort());
     }
 
     @Override

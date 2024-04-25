@@ -34,7 +34,15 @@ public class ConfigWatcher extends Thread {
      */
     private boolean running = true;
 
+    /**
+     * Set true to stop the ConfigWatcher.
+     */
     private boolean exit = false;
+
+    /**
+     * Stores a timestamp of when this ConfigWatcher was started
+     */
+    private long startTimestamp;
 
     /**
      * Stores recently created files with a timestamp. This is used,
@@ -94,6 +102,8 @@ public class ConfigWatcher extends Thread {
      */
     @Override
     public void run() {
+        startTimestamp = System.currentTimeMillis();
+
         while (!exit) {
             try (WatchService watcher = FileSystems.getDefault().newWatchService()) {
                 path.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_CREATE);
@@ -135,5 +145,9 @@ public class ConfigWatcher extends Thread {
                 errorCallback.accept(e);
             }
         }
+    }
+
+    public long getStartTimestamp() {
+        return startTimestamp;
     }
 }
