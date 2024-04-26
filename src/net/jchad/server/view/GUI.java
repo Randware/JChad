@@ -2,10 +2,8 @@ package net.jchad.server.view;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Insets;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
@@ -13,6 +11,7 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import net.jchad.server.controller.ServerController;
 import net.jchad.server.model.error.MessageHandler;
@@ -23,22 +22,23 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
-//TODO: 1. Zeilenumbruch bei logArea finished
 //TODO: 2. Copy pasta bei logArea
-//TODO: 3. Menubar font size change finished
-//TODO: 4. Font size beim ersten öffnen an bildschirm anpassen
+//TODO: 1. Font size beim ersten öffnen an bildschirm anpassen
 
 // Responsible for displaying server output in GUI mode
 public class GUI extends Application implements MessageHandler {
     private ServerController server;
     private TextFlow logArea = new TextFlow();
     private TextField cmdField = new TextField();
-    private double sizeValue = 13;
+    private double sizeValue;// = 13;
     private ScrollPane scrollPane = new ScrollPane();
     private final KeyCombination crtlMinus = new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN);
     private final KeyCombination crtlPlus = new KeyCodeCombination(KeyCode.PLUS, KeyCombination.CONTROL_DOWN);
     private final KeyCombination crtlR = new KeyCodeCombination(KeyCode.R, KeyCombination.CONTROL_DOWN);
     private MenuBar menuBar = new MenuBar();
+    Rectangle2D screenBounds = Screen.getPrimary().getBounds();
+    double screenWidth = screenBounds.getWidth();
+    double screenHeight = screenBounds.getHeight();
     //launch method
     public static void main(String[] args) {
         Application.launch(args);
@@ -76,6 +76,12 @@ public class GUI extends Application implements MessageHandler {
 
         VBox vbox = new VBox(menuBar, scrollPane, cmdField);
 
+        double baseFontSize = screenWidth * 0.01; // 2% of screen width
+        double windowWidth = screenWidth * 0.5;
+        double windowHeight = screenHeight * 0.5;
+
+        this.sizeValue = baseFontSize;
+
         increaseFontSize.setOnAction(e -> changeFontSize(2));
         standardFontSize.setOnAction(e -> standardFontSizeMethod());
         decreaseFontSize.setOnAction(e -> changeFontSize(-2));
@@ -99,18 +105,14 @@ public class GUI extends Application implements MessageHandler {
             }
         });
 
-        DoubleProperty fontSize = new SimpleDoubleProperty(13);
 
-        // Binden der Schriftgröße an die Breite des Fensters
-        fontSize.bind(stage.widthProperty().divide(20));
 
-        // Anwenden der Schriftgröße auf vbox
-        vbox.styleProperty().bind(Bindings.concat("-fx-font-size: ", fontSize.intValue(), "px;"));
-
-        Scene scene = new Scene(vbox, 800, 600);
+        Scene scene = new Scene(vbox, windowWidth, windowHeight);
         stage.setTitle("Server GUI");
         stage.setScene(scene);
         stage.show();
+
+        changeFontSize((int) baseFontSize);
 
         scrollPane.prefWidthProperty().bind(scene.widthProperty());
         scrollPane.prefHeightProperty().bind(scene.heightProperty().subtract(menuBar.getHeight() + cmdField.getHeight() + 20));
@@ -128,11 +130,11 @@ public class GUI extends Application implements MessageHandler {
 
 
     private void standardFontSizeMethod() {
-        this.sizeValue = 13;
+        this.sizeValue = screenWidth * 0.01;
 
-        logArea.setStyle("-fx-font-size: " + 13);
-        cmdField.setStyle("-fx-font-size: " + 13);
-        menuBar.setStyle("-fx-font-size: " + 13);
+        logArea.setStyle("-fx-font-size: " + sizeValue);
+        cmdField.setStyle("-fx-font-size: " + sizeValue);
+        menuBar.setStyle("-fx-font-size: " + sizeValue);
     }
 
     @Override
