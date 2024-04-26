@@ -21,7 +21,11 @@ import java.nio.file.WatchEvent;
 import java.util.ArrayList;
 
 /*
-
+    TODO: Make config loading more modular
+        - Create load() and save() methods in ConfigFiles enum
+        - This requires the class the config should be loaded to, from to be stored in enum as well
+        - Error handling should still be done in the ConfigManager
+        - File creation still needs to be handled inside ConfigManager, as it makes logging easier
     TODO: Stop reloading server config, when whitelist is disabled and gets modified
         - Pass the current config to the isConfig() method in the ConfigFiles class and only check enabled files
     TODO: Investigate missing values in config (server uses default value for missing values,
@@ -72,14 +76,9 @@ public class ConfigManager {
     private ConfigWatcher configWatcher;
 
     /**
-     *
+     * Stores the restartAttempts for the {@link net.jchad.server.model.config.ConfigWatcher}
      */
     private int restartAttempts = 0;
-
-    /**
-     *
-     */
-    private final int MAX_RESTART_ATTEMPTS = 3;
 
     /**
      * Stores the instance of a {@link ConfigObserver} implementing class,
@@ -141,6 +140,7 @@ public class ConfigManager {
     public Config getConfig() {
         return config;
     }
+
 
     /**
      * Handles the file loading process and updates the config. Also logs accordingly.
@@ -214,17 +214,16 @@ public class ConfigManager {
     }
 
     private InternalSettings loadInternalSettingsConfig() throws IOException {
-        InternalSettings newInternalSettings;
-
         ConfigFiles internalSettingsConfig = ConfigFiles.INTERNAL_SETTINGS_CONFIG;
-        if (!Files.exists(internalSettingsConfig.getStoragePath())) {
+        if (!internalSettingsConfig.exists()) {
             messageHandler.handleInfo("Creating " + internalSettingsConfig.getFileName() + " file");
 
-            mapper.writeValue(Files.createFile(internalSettingsConfig.getStoragePath()).toFile(), new InternalSettings());
+            internalSettingsConfig.create();
+            internalSettingsConfig.save(new InternalSettings());
         }
 
         try {
-            newInternalSettings = mapper.readValue(internalSettingsConfig.getStoragePath().toFile(), InternalSettings.class);
+            return (InternalSettings) internalSettingsConfig.load();
         } catch (Exception e) {
             switch (e) {
                 case InvalidFormatException ife -> {
@@ -248,22 +247,19 @@ public class ConfigManager {
 
             throw new IOException("Failed loading config file", e);
         }
-
-        return newInternalSettings;
     }
 
     private ServerSettings loadServerSettingsConfig() throws IOException {
-        ServerSettings newServerSettings;
-
         ConfigFiles serverSettingsConfig = ConfigFiles.SERVER_SETTINGS_CONFIG;
-        if (!Files.exists(serverSettingsConfig.getStoragePath())) {
+        if (!serverSettingsConfig.exists()) {
             messageHandler.handleInfo("Creating " + serverSettingsConfig.getFileName() + " file");
 
-            mapper.writeValue(Files.createFile(serverSettingsConfig.getStoragePath()).toFile(), new ServerSettings());
+            serverSettingsConfig.create();
+            serverSettingsConfig.save(new ServerSettings());
         }
 
         try {
-            newServerSettings = mapper.readValue(serverSettingsConfig.getStoragePath().toFile(), ServerSettings.class);
+            return (ServerSettings) serverSettingsConfig.load();
         } catch (Exception e) {
             switch (e) {
                 case InvalidFormatException ife -> {
@@ -287,8 +283,6 @@ public class ConfigManager {
 
             throw new IOException("Failed loading config file", e);
         }
-
-        return newServerSettings;
     }
 
     /**
@@ -302,16 +296,15 @@ public class ConfigManager {
     private ArrayList<IPAddress> loadWhitelistedIPsConfig() throws IOException {
         ConfigFiles whitelistedIPsConfig = ConfigFiles.WHITELISTED_IPS_CONFIG;
 
-        if (!Files.exists(whitelistedIPsConfig.getStoragePath())) {
+        if (!whitelistedIPsConfig.exists()) {
             messageHandler.handleInfo("Creating " + whitelistedIPsConfig.getFileName() + " file");
 
-            mapper.writeValue(Files.createFile(whitelistedIPsConfig.getStoragePath()).toFile(),
-                    fromIPToString(config.getServerSettings().getWhitelistedIPs()));
+            whitelistedIPsConfig.create();
+            whitelistedIPsConfig.save(fromIPToString(config.getServerSettings().getWhitelistedIPs()));
         }
 
-        ArrayList<String> ipList;
         try {
-            ipList = mapper.readValue(whitelistedIPsConfig.getStoragePath().toFile(), ArrayList.class);
+            return fromStringToIP((ArrayList<String>) whitelistedIPsConfig.load());
         } catch (Exception e) {
             switch (e) {
                 case MarkedYAMLException mye -> {
@@ -330,8 +323,6 @@ public class ConfigManager {
 
             throw new IOException("Failed loading config file", e);
         }
-
-        return fromStringToIP(ipList);
     }
 
     /**
@@ -345,16 +336,15 @@ public class ConfigManager {
     private ArrayList<IPAddress> loadBlacklistedIPsConfig() throws IOException {
         ConfigFiles blacklistedIPsConfig = ConfigFiles.BLACKLISTED_IPS_CONFIG;
 
-        if (!Files.exists(blacklistedIPsConfig.getStoragePath())) {
+        if (!blacklistedIPsConfig.exists()) {
             messageHandler.handleInfo("Creating " + blacklistedIPsConfig.getFileName() + " file");
 
-            mapper.writeValue(Files.createFile(blacklistedIPsConfig.getStoragePath()).toFile(),
-                    fromIPToString(config.getServerSettings().getBlacklistedIPs()));
+            blacklistedIPsConfig.create();
+            blacklistedIPsConfig.save(fromIPToString(config.getServerSettings().getBlacklistedIPs()));
         }
 
-        ArrayList<String> ipList;
         try {
-            ipList = mapper.readValue(blacklistedIPsConfig.getStoragePath().toFile(), ArrayList.class);
+            return fromStringToIP((ArrayList<String>) blacklistedIPsConfig.load());
         } catch (Exception e) {
             switch (e) {
                 case MarkedYAMLException mye -> {
@@ -373,8 +363,6 @@ public class ConfigManager {
 
             throw new IOException("Failed loading config file", e);
         }
-
-        return fromStringToIP(ipList);
     }
 
     /**
