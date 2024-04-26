@@ -8,7 +8,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.dataformat.yaml.snakeyaml.error.MarkedYAMLException;
 import net.jchad.server.model.config.store.Config;
 import net.jchad.server.model.config.store.serverSettings.ServerSettings;
-import net.jchad.server.model.config.store.ConfigFiles;
+import net.jchad.server.model.config.store.ConfigFile;
 import net.jchad.server.model.config.store.internalSettings.InternalSettings;
 import net.jchad.server.model.error.MessageHandler;
 import net.jchad.server.model.networking.ip.IPAddress;
@@ -169,7 +169,7 @@ public class ConfigManager {
      * Initializes the ConfigWatcher for the config file directory.
      */
     private void initializeConfigWatcher() {
-        configWatcher = new ConfigWatcher(ConfigFiles.getStorageDirectory(), this::configUpdated, this::handleConfigWatcherError);
+        configWatcher = new ConfigWatcher(ConfigFile.getStorageDirectory(), this::configUpdated, this::handleConfigWatcherError);
 
         configWatcher.start();
     }
@@ -184,7 +184,7 @@ public class ConfigManager {
     private Config loadConfigFiles() throws IOException {
         Config newConfig = new Config();
 
-        Path storageDirectory = ConfigFiles.getStorageDirectory();
+        Path storageDirectory = ConfigFile.getStorageDirectory();
         if (!Files.exists(storageDirectory)) {
             Files.createDirectory(storageDirectory);
         }
@@ -214,7 +214,7 @@ public class ConfigManager {
     }
 
     private InternalSettings loadInternalSettingsConfig() throws IOException {
-        ConfigFiles internalSettingsConfig = ConfigFiles.INTERNAL_SETTINGS_CONFIG;
+        ConfigFile internalSettingsConfig = ConfigFile.INTERNAL_SETTINGS_CONFIG;
         if (!internalSettingsConfig.exists()) {
             messageHandler.handleInfo("Creating " + internalSettingsConfig.getFileName() + " file");
 
@@ -249,7 +249,7 @@ public class ConfigManager {
     }
 
     private ServerSettings loadServerSettingsConfig() throws IOException {
-        ConfigFiles serverSettingsConfig = ConfigFiles.SERVER_SETTINGS_CONFIG;
+        ConfigFile serverSettingsConfig = ConfigFile.SERVER_SETTINGS_CONFIG;
         if (!serverSettingsConfig.exists()) {
             messageHandler.handleInfo("Creating " + serverSettingsConfig.getFileName() + " file");
 
@@ -292,7 +292,7 @@ public class ConfigManager {
      */
     @SuppressWarnings("unchecked")
     private ArrayList<IPAddress> loadWhitelistedIPsConfig() throws IOException {
-        ConfigFiles whitelistedIPsConfig = ConfigFiles.WHITELISTED_IPS_CONFIG;
+        ConfigFile whitelistedIPsConfig = ConfigFile.WHITELISTED_IPS_CONFIG;
 
         if (!whitelistedIPsConfig.exists()) {
             messageHandler.handleInfo("Creating " + whitelistedIPsConfig.getFileName() + " file");
@@ -331,7 +331,7 @@ public class ConfigManager {
      */
     @SuppressWarnings("unchecked")
     private ArrayList<IPAddress> loadBlacklistedIPsConfig() throws IOException {
-        ConfigFiles blacklistedIPsConfig = ConfigFiles.BLACKLISTED_IPS_CONFIG;
+        ConfigFile blacklistedIPsConfig = ConfigFile.BLACKLISTED_IPS_CONFIG;
 
         if (!blacklistedIPsConfig.exists()) {
             messageHandler.handleInfo("Creating " + blacklistedIPsConfig.getFileName() + " file");
@@ -407,10 +407,10 @@ public class ConfigManager {
      * @param event event that was detected by the {@link ConfigWatcher}
      */
     private void configUpdated(WatchEvent<?> event) {
-        Path modifiedConfig = ConfigFiles.getStorageDirectory().resolve((Path) event.context());
+        Path modifiedConfig = ConfigFile.getStorageDirectory().resolve((Path) event.context());
         String configName = modifiedConfig.getFileName().toString();
 
-        if (!ConfigFiles.isConfig(configName)) {
+        if (!ConfigFile.isConfig(configName)) {
             return;
         }
 

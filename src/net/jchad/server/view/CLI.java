@@ -6,6 +6,7 @@ import net.jchad.server.model.error.MessageHandler;
 import java.awt.*;
 import java.awt.image.ImageObserver;
 import java.awt.image.ImageProducer;
+import java.util.Arrays;
 
 // Responsible for displaying server output in CLI mode
 public class CLI implements MessageHandler {
@@ -23,8 +24,7 @@ public class CLI implements MessageHandler {
 
     @Override
     public void handleFatalError(Exception e) {
-        System.out.println("[FATAL ERROR] " + e);
-        e.printStackTrace();
+        System.out.println("[FATAL ERROR] " + Arrays.toString(e.getStackTrace()));
         System.out.println("STOPPING EXECUTION");
         System.exit(1);
     }
