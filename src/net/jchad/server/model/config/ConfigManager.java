@@ -219,7 +219,6 @@ public class ConfigManager {
             messageHandler.handleInfo("Creating " + internalSettingsConfig.getFileName() + " file");
 
             internalSettingsConfig.create();
-            internalSettingsConfig.save(new InternalSettings());
         }
 
         try {
@@ -255,7 +254,6 @@ public class ConfigManager {
             messageHandler.handleInfo("Creating " + serverSettingsConfig.getFileName() + " file");
 
             serverSettingsConfig.create();
-            serverSettingsConfig.save(new ServerSettings());
         }
 
         try {
@@ -300,7 +298,6 @@ public class ConfigManager {
             messageHandler.handleInfo("Creating " + whitelistedIPsConfig.getFileName() + " file");
 
             whitelistedIPsConfig.create();
-            whitelistedIPsConfig.save(fromIPToString(config.getServerSettings().getWhitelistedIPs()));
         }
 
         try {
@@ -340,7 +337,6 @@ public class ConfigManager {
             messageHandler.handleInfo("Creating " + blacklistedIPsConfig.getFileName() + " file");
 
             blacklistedIPsConfig.create();
-            blacklistedIPsConfig.save(fromIPToString(config.getServerSettings().getBlacklistedIPs()));
         }
 
         try {

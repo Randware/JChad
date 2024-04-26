@@ -91,7 +91,7 @@ public enum ConfigFiles {
     }
 
     public void create() throws IOException {
-        Files.createFile(getStoragePath());
+        mapper.writeValue(Files.createFile(getStoragePath()).toFile(), storageObject);
     }
 
     public boolean exists() {
