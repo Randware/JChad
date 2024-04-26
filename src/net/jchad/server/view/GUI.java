@@ -2,6 +2,9 @@ package net.jchad.server.view;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
@@ -20,15 +23,9 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
-
-import java.awt.*;
-import java.awt.image.ImageObserver;
-import java.awt.image.ImageProducer;
-import java.util.ArrayList;
-
-//TODO: 1. Zeilenumbruch bei logArea
+//TODO: 1. Zeilenumbruch bei logArea finished
 //TODO: 2. Copy pasta bei logArea
-//TODO: 3. Menubar font size change
+//TODO: 3. Menubar font size change finished
 //TODO: 4. Font size beim ersten öffnen an bildschirm anpassen
 
 // Responsible for displaying server output in GUI mode
@@ -36,12 +33,12 @@ public class GUI extends Application implements MessageHandler {
     private ServerController server;
     private TextFlow logArea = new TextFlow();
     private TextField cmdField = new TextField();
-    private double sizeValue= 13;
+    private double sizeValue = 13;
     private ScrollPane scrollPane = new ScrollPane();
     private final KeyCombination crtlMinus = new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN);
     private final KeyCombination crtlPlus = new KeyCodeCombination(KeyCode.PLUS, KeyCombination.CONTROL_DOWN);
     private final KeyCombination crtlR = new KeyCodeCombination(KeyCode.R, KeyCombination.CONTROL_DOWN);
-
+    private MenuBar menuBar = new MenuBar();
     //launch method
     public static void main(String[] args) {
         Application.launch(args);
@@ -54,7 +51,7 @@ public class GUI extends Application implements MessageHandler {
 
         cmdField.setPromptText("Enter command here...");
 
-        MenuBar menuBar = new MenuBar();
+
         menuBar.setPadding(Insets.EMPTY);
 
         Menu settingsMenu = new Menu("Settings");
@@ -63,7 +60,7 @@ public class GUI extends Application implements MessageHandler {
 
         MenuItem increaseFontSize = new MenuItem("increase Font size (ctrl & +)");
         MenuItem standardFontSize = new MenuItem("standard Font size (crtl & R)");
-        MenuItem decreaseFontSize = new MenuItem("decrease Font size (crtl & -)" );
+        MenuItem decreaseFontSize = new MenuItem("decrease Font size (crtl & -)");
 
         fontsSubMenu.getItems().addAll(increaseFontSize, standardFontSize, decreaseFontSize);
 
@@ -72,6 +69,8 @@ public class GUI extends Application implements MessageHandler {
         menuBar.getMenus().add(settingsMenu);
 
         scrollPane.setContent(logArea);
+        scrollPane.setFitToHeight(true);
+        scrollPane.setFitToWidth(true);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
 
@@ -84,8 +83,8 @@ public class GUI extends Application implements MessageHandler {
         vbox.setSpacing(10);
         vbox.setPadding(new Insets(0, 10, 10, 10));
         VBox.setVgrow(logArea, Priority.ALWAYS);
-        vbox.setMaxHeight(Double.MAX_VALUE);
-        vbox.setStyle("-fx-font-size: 13px;");
+        //vbox.setMaxHeight(Double.MAX_VALUE);
+        //vbox.setStyle("-fx-font-size: 13px;");
 
         vbox.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
             if (crtlPlus.match(event)) {
@@ -100,6 +99,14 @@ public class GUI extends Application implements MessageHandler {
             }
         });
 
+        DoubleProperty fontSize = new SimpleDoubleProperty(13);
+
+        // Binden der Schriftgröße an die Breite des Fensters
+        fontSize.bind(stage.widthProperty().divide(20));
+
+        // Anwenden der Schriftgröße auf vbox
+        vbox.styleProperty().bind(Bindings.concat("-fx-font-size: ", fontSize.intValue(), "px;"));
+
         Scene scene = new Scene(vbox, 800, 600);
         stage.setTitle("Server GUI");
         stage.setScene(scene);
@@ -107,23 +114,25 @@ public class GUI extends Application implements MessageHandler {
 
         scrollPane.prefWidthProperty().bind(scene.widthProperty());
         scrollPane.prefHeightProperty().bind(scene.heightProperty().subtract(menuBar.getHeight() + cmdField.getHeight() + 20));
+
+
     }
 
     private void changeFontSize(int size) {
         this.sizeValue = sizeValue + size;
 
-        logArea.setStyle("-fx-font-size: " +sizeValue);
-        cmdField.setStyle("-fx-font-size: " +sizeValue);
-
+        logArea.setStyle("-fx-font-size: " + sizeValue);
+        cmdField.setStyle("-fx-font-size: " + sizeValue);
+        menuBar.setStyle("-fx-font-size: " + sizeValue);
     }
 
 
-    private void standardFontSizeMethod(){
+    private void standardFontSizeMethod() {
         this.sizeValue = 13;
 
         logArea.setStyle("-fx-font-size: " + 13);
         cmdField.setStyle("-fx-font-size: " + 13);
-
+        menuBar.setStyle("-fx-font-size: " + 13);
     }
 
     @Override
