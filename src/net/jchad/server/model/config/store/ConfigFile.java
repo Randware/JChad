@@ -11,7 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
-public enum ConfigFiles {
+public enum ConfigFile {
     SERVER_SETTINGS_CONFIG("server-settings.yml", new ServerSettings()),
     INTERNAL_SETTINGS_CONFIG("internal-settings.yml", new InternalSettings()),
     WHITELISTED_IPS_CONFIG("whitelisted-ips.yml", new ArrayList<>()),
@@ -44,7 +44,7 @@ public enum ConfigFiles {
      *
      * @param fileName the file name this specific config will be stored under
      */
-    ConfigFiles(String fileName, Object storageObject) {
+    ConfigFile(String fileName, Object storageObject) {
         this.storagePath = storageDirectory + fileName;
         this.fileName = fileName;
         this.storageObject = storageObject;
@@ -105,7 +105,7 @@ public enum ConfigFiles {
      * @return <code>true</code> if this is a config, <code>false</code> if not
      */
     public static boolean isConfig(String configName) {
-        for(ConfigFiles config : ConfigFiles.values()) {
+        for(ConfigFile config : ConfigFile.values()) {
             if(config.getFileName().equals(configName)) {
                 return true;
             }
