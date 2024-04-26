@@ -238,7 +238,7 @@ public class ConfigManager {
                 }
 
                 case MismatchedInputException mie -> {
-                    messageHandler.handleWarning(internalSettingsConfig.getFileName() + " is empty");
+                    messageHandler.handleWarning(internalSettingsConfig.getFileName() + " couldn't be parsed: " + mie.getOriginalMessage());
                 }
 
                 default -> {
@@ -277,7 +277,7 @@ public class ConfigManager {
                 }
 
                 case MismatchedInputException mie -> {
-                    messageHandler.handleWarning(serverSettingsConfig.getFileName() + " is empty");
+                    messageHandler.handleWarning(serverSettingsConfig.getFileName() + " couldn't be parsed: " + mie.getMessage());
                 }
 
                 default -> {
@@ -320,7 +320,7 @@ public class ConfigManager {
                 }
 
                 case MismatchedInputException mie -> {
-                    messageHandler.handleWarning(whitelistedIPsConfig.getFileName() + " is empty");
+                    messageHandler.handleWarning(whitelistedIPsConfig.getFileName() + " couldn't be parsed: " + mie.getMessage());
                 }
 
                 default -> {
@@ -363,7 +363,7 @@ public class ConfigManager {
                 }
 
                 case MismatchedInputException mie -> {
-                    messageHandler.handleWarning(blacklistedIPsConfig.getFileName() + " is empty");
+                    messageHandler.handleWarning(blacklistedIPsConfig.getFileName() + " couldn't be parsed: " + mie.getMessage());
                 }
 
                 default -> {
