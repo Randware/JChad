@@ -61,8 +61,8 @@ public class GUI extends Application implements MessageHandler {
         menuBar.getMenus().add(settingsMenu);
 
         scrollPane.setContent(logArea);
-        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
-        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
 
         VBox vbox = new VBox(menuBar, scrollPane, cmdField);
 
@@ -81,6 +81,8 @@ public class GUI extends Application implements MessageHandler {
         stage.setScene(scene);
         stage.show();
 
+        scrollPane.prefWidthProperty().bind(scene.widthProperty());
+        scrollPane.prefHeightProperty().bind(scene.heightProperty().subtract(menuBar.getHeight() + cmdField.getHeight() + 20));
     }
 
     private void changeFontSize(int size) {
