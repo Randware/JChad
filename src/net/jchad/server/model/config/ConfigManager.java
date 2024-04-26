@@ -1,10 +1,7 @@
 package net.jchad.server.model.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.dataformat.yaml.snakeyaml.error.MarkedYAMLException;
 import net.jchad.server.model.config.store.Config;
 import net.jchad.server.model.config.store.serverSettings.ServerSettings;
@@ -26,6 +23,7 @@ import java.util.ArrayList;
         - This requires the class the config should be loaded to, from to be stored in enum as well
         - Error handling should still be done in the ConfigManager
         - File creation still needs to be handled inside ConfigManager, as it makes logging easier
+        - Make the ConfigFile enum store the config files
     TODO: Stop reloading server config, when whitelist is disabled and gets modified
         - Pass the current config to the isConfig() method in the ConfigFiles class and only check enabled files
     TODO: Investigate missing values in config (server uses default value for missing values,
@@ -64,10 +62,7 @@ import java.util.ArrayList;
  */
 
 public class ConfigManager {
-    /**
-     * Used for YAML file reading and writing using the {@link com.fasterxml.jackson} library
-     */
-    private final ObjectMapper mapper;
+
 
     /**
      * Stores the instance of the {@link net.jchad.server.model.config.ConfigWatcher} instance,
@@ -93,17 +88,12 @@ public class ConfigManager {
     private MessageHandler messageHandler;
 
     /**
-     * Stores the server settings.
+     * Stores the {@link ConfigEditor} instance responsible for modifying the config.
      */
-    private ServerSettings serverSettings;
+    private ConfigEditor configEditor;
 
     /**
-     * Stores the internal server settings.
-     */
-    private InternalSettings internalSettings;
-
-    /**
-     * Stores the server configuration
+     * Stores the entire server configuration
      */
     private Config config;
 
@@ -122,12 +112,12 @@ public class ConfigManager {
      *                       which gets notified when config file changes are detected.
      */
     public ConfigManager(MessageHandler messageHandler, ConfigObserver configObserver) {
-        this.mapper = new ObjectMapper(new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
-
         this.messageHandler = messageHandler;
         this.configObserver = configObserver;
 
         loadServerConfig();
+
+        this.configEditor = new ConfigEditor(this);
 
         initializeConfigWatcher();
     }
@@ -139,6 +129,15 @@ public class ConfigManager {
      */
     public Config getConfig() {
         return config;
+    }
+
+    /**
+     * Returns the {@link ConfigEditor} instance responsible for modifying the config.
+     *
+     * @return the {@link ConfigEditor} instance responsible for modifying the config.
+     */
+    public ConfigEditor editor() {
+        return configEditor;
     }
 
 
@@ -163,6 +162,10 @@ public class ConfigManager {
         }
 
         return false;
+    }
+
+    public void saveServerConfig() {
+        // Implement saving here
     }
 
     /**
@@ -200,14 +203,14 @@ public class ConfigManager {
          * Load whitelist if feature is enabled
          */
         if (newConfig.getServerSettings().isWhitelist()) {
-            newConfig.getServerSettings().setWhitelistedIPs(loadWhitelistedIPsConfig());
+            newConfig.setWhitelist(loadWhitelistedIPsConfig());
         }
 
         /*
          * Load blacklist if feature is enabled
          */
         if (newConfig.getServerSettings().isBlacklist()) {
-            newConfig.getServerSettings().setBlacklistedIPs(loadBlacklistedIPsConfig());
+            newConfig.setBlacklist(loadBlacklistedIPsConfig());
         }
 
         return newConfig;
@@ -429,14 +432,14 @@ public class ConfigManager {
      * @param e Exception that was thrown
      */
     private void handleConfigWatcherError(Exception e) {
-        int restartMillis = internalSettings.getConfigWatcherRestartCountResetMilliseconds();
+        int restartMillis = config.getInternalSettings().getConfigWatcherRestartCountResetMilliseconds();
         if (System.currentTimeMillis() - configWatcher.getStartTimestamp() >= restartMillis) {
             restartAttempts = 0;
         }
 
         restartAttempts++;
 
-        int maxRestarts = internalSettings.getMaxConfigWatcherRestarts();
+        int maxRestarts = config.getInternalSettings().getMaxConfigWatcherRestarts();
 
         if (restartAttempts <= maxRestarts) {
             messageHandler.handleError(new IOException("The ConfigWatcher thread has run into an unexpected error: " + e));

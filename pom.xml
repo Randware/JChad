@@ -101,10 +101,12 @@
             <version>5.10.2</version>
 
         </dependency>
-
-
-
-
+        <!-- https://mvnrepository.com/artifact/org.jline/jline -->
+        <dependency>
+            <groupId>org.jline</groupId>
+            <artifactId>jline</artifactId>
+            <version>3.26.1</version>
+        </dependency>
     </dependencies>
 
     <build>

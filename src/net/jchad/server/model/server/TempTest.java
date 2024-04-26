@@ -31,5 +31,4 @@ public class TempTest implements MessageHandler {
     public void handleInfo(String info) {
         System.out.println("[CLIENT] " + info);
     }
-
 }

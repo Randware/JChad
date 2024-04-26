@@ -10,6 +10,7 @@ module net.jchad {
     requires org.junit.jupiter.api;
     requires org.junit.jupiter.engine;
     requires org.junit.jupiter.params;
+    requires org.jline;
 
     opens net.jchad.client to javafx.fxml;
     opens net.jchad.server.model.config to com.fasterxml.jackson.databind;
