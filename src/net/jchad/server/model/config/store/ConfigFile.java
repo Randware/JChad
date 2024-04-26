@@ -37,7 +37,10 @@ public enum ConfigFile {
      */
     private Object storageObject;
 
-    private ObjectMapper mapper;
+    /**
+     * Used for YAML file reading and writing using the {@link com.fasterxml.jackson} library
+     */
+    private final ObjectMapper mapper;
 
     /**
      * This creates the ConfigFiles enums by combining the <code>storageDirectory</code> string with their file name.

@@ -2,11 +2,11 @@ package net.jchad.server.view;
 
 import net.jchad.server.controller.ServerController;
 import net.jchad.server.model.error.MessageHandler;
-
-import java.awt.*;
-import java.awt.image.ImageObserver;
-import java.awt.image.ImageProducer;
 import java.util.Arrays;
+
+/**
+ * TODO: Implement user input reading
+ */
 
 // Responsible for displaying server output in CLI mode
 public class CLI implements MessageHandler {
@@ -43,5 +43,4 @@ public class CLI implements MessageHandler {
     public void handleInfo(String info) {
         System.out.println("[INFO] " + info);
     }
-
 }
