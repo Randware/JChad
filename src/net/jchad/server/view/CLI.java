@@ -44,23 +44,4 @@ public class CLI implements MessageHandler {
         System.out.println("[INFO] " + info);
     }
 
-    @Override
-    public int getWidth(ImageObserver observer) {
-        return 0;
-    }
-
-    @Override
-    public int getHeight(ImageObserver observer) {
-        return 0;
-    }
-
-    @Override
-    public ImageProducer getSource() {
-        return null;
-    }
-
-    @Override
-    public Graphics getGraphics() {
-        return null;
-    }
 }

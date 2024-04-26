@@ -49,7 +49,6 @@ public class GUI extends Application implements MessageHandler {
 
     @Override
     public void start(Stage stage) throws Exception {
-        System.out.println("Current working directory: " + System.getProperty("user.dir"));
         server = new ServerController(this);
         server.startServer();
 
@@ -62,9 +61,9 @@ public class GUI extends Application implements MessageHandler {
 
         Menu fontsSubMenu = new Menu("Fonts");
 
-        MenuItem increaseFontSize = new MenuItem("increase Font size");
-        MenuItem standardFontSize = new MenuItem("standard Font size");
-        MenuItem decreaseFontSize = new MenuItem("decrease Font size");
+        MenuItem increaseFontSize = new MenuItem("increase Font size (ctrl & +)");
+        MenuItem standardFontSize = new MenuItem("standard Font size (crtl & R)");
+        MenuItem decreaseFontSize = new MenuItem("decrease Font size (crtl & -)" );
 
         fontsSubMenu.getItems().addAll(increaseFontSize, standardFontSize, decreaseFontSize);
 
@@ -129,66 +128,54 @@ public class GUI extends Application implements MessageHandler {
 
     @Override
     public void handleFatalError(Exception e) {
-        String log = "Ⓧ [Fatal Error]: ";
-        Text t1 = new Text(log);
-        t1.setStyle("-fx-fill: #fd0000;-fx-font-weight:bold;");
-        Text t2 = new Text(e.getMessage() + "\n");
-        t2.setStyle("-fx-font-weight:normal;");
-        logArea.getChildren().addAll(t1, t2);
-        standardFontSizeMethod();
+        Platform.runLater(() -> {
+            String log = "Ⓧ [Fatal Error]: ";
+            Text t1 = new Text(log);
+            t1.setStyle("-fx-fill: #fd0000;-fx-font-weight:bold;");
+            Text t2 = new Text(e.getMessage() + "\n");
+            t2.setStyle("-fx-font-weight:normal;");
+            logArea.getChildren().addAll(t1, t2);
+            standardFontSizeMethod();
+        });
     }
 
     @Override
     public void handleError(Exception e) {
-        String log = "Ⓧ [Error]: ";
-        Text t1 = new Text(log);
-        t1.setStyle("-fx-fill: #fd6e00;-fx-font-weight:bold;");
-        Text t2 = new Text(e.getMessage() + "\n");
-        t2.setStyle("-fx-font-weight:normal;");
-        logArea.getChildren().addAll(t1, t2);
-        standardFontSizeMethod();
+        Platform.runLater(() -> {
+            String log = "Ⓧ [Error]: ";
+            Text t1 = new Text(log);
+            t1.setStyle("-fx-fill: #fd6e00;-fx-font-weight:bold;");
+            Text t2 = new Text(e.getMessage() + "\n");
+            t2.setStyle("-fx-font-weight:normal;");
+            logArea.getChildren().addAll(t1, t2);
+            standardFontSizeMethod();
+        });
     }
 
     @Override
     public void handleWarning(String warning) {
-        String log = "⚠ [Warning]: ";
-        Text t1 = new Text(log);
-        t1.setStyle("-fx-fill: #d2c800;-fx-font-weight:bold;");
-        Text t2 = new Text(warning + "\n");
-        t2.setStyle("-fx-font-weight:normal;");
-        logArea.getChildren().addAll(t1, t2);
-        standardFontSizeMethod();
+        Platform.runLater(() -> {
+            String log = "⚠ [Warning]: ";
+            Text t1 = new Text(log);
+            t1.setStyle("-fx-fill: #d2c800;-fx-font-weight:bold;");
+            Text t2 = new Text(warning + "\n");
+            t2.setStyle("-fx-font-weight:normal;");
+            logArea.getChildren().addAll(t1, t2);
+            standardFontSizeMethod();
+        });
     }
 
     @Override
     public void handleInfo(String info) {
-        String log = "ⓘ [Info]: ";
-        Text t1 = new Text(log);
-        t1.setStyle("-fx-fill: #00bafd;-fx-font-weight:bold;");
-        Text t2 = new Text(info + "\n");
-        t2.setStyle("-fx-font-weight:normal;");
-        logArea.getChildren().addAll(t1, t2);
-        standardFontSizeMethod();
-    }
-
-    @Override
-    public int getWidth(ImageObserver observer) {
-        return 0;
-    }
-
-    @Override
-    public int getHeight(ImageObserver observer) {
-        return 0;
-    }
-
-    @Override
-    public ImageProducer getSource() {
-        return null;
-    }
-
-    @Override
-    public Graphics getGraphics() {
-        return null;
+        Platform.runLater(() -> {
+            String log = "ⓘ [Info]: ";
+            Text t1 = new Text(log);
+            t1.setStyle("-fx-fill: #00bafd;-fx-font-weight:bold;");
+            Text t2 = new Text(info + "\n");
+            t2.setStyle("-fx-font-weight:normal;");
+            logArea.getChildren().addAll(t1, t2);
+            standardFontSizeMethod();
+        });
     }
 
 }

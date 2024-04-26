@@ -19,11 +19,4 @@ public interface MessageHandler {
     // An info used for displaying status, info, etc.
     void handleInfo(String info);
 
-    int getWidth(ImageObserver observer);
-
-    int getHeight(ImageObserver observer);
-
-    ImageProducer getSource();
-
-    Graphics getGraphics();
 }
