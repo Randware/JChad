@@ -38,12 +38,13 @@ public class ClientSampleCode {
         // is not typed at client
         while (!(str = kb.readLine()).equals("exit")) {
             // send to the server
-            dos.writeBytes(str + "\n");
+            dos.writeBytes(str);
+            dos.flush();
 
             // receive from the server
-            str1 = br.readLine();
+            //str1 = br.readLine();
 
-            System.out.println("[SERVER] " + str1);
+            //System.out.println("[SERVER] " + str1);
         }
 
         // close connection.

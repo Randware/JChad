@@ -11,8 +11,10 @@ module net.jchad {
     requires org.junit.jupiter.engine;
     requires org.junit.jupiter.params;
 
+
     opens net.jchad.client to javafx.fxml;
     opens net.jchad.server.model.config to com.fasterxml.jackson.databind;
+    opens net.jchad.server.model.networking.versioning to com.google.gson;
     exports net.jchad.installer.gui;
     exports net.jchad.installer.serializable to com.google.gson;
     opens net.jchad.client.model.client to javafx.fxml;
