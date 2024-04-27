@@ -101,10 +101,19 @@
             <version>5.10.2</version>
 
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.jline/jline -->
+        <dependency>
+            <groupId>org.jline</groupId>
+            <artifactId>jline</artifactId>
+            <version>3.26.1</version>
+        </dependency>
 
-
-
-
+        <!-- https://mvnrepository.com/artifact/org.fxmisc.richtext/richtextfx -->
+        <dependency>
+            <groupId>org.fxmisc.richtext</groupId>
+            <artifactId>richtextfx</artifactId>
+            <version>0.11.2</version>
+        </dependency>
     </dependencies>
 
     <build>

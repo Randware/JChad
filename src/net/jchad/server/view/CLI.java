@@ -2,10 +2,11 @@ package net.jchad.server.view;
 
 import net.jchad.server.controller.ServerController;
 import net.jchad.server.model.error.MessageHandler;
+import java.util.Arrays;
 
-import java.awt.*;
-import java.awt.image.ImageObserver;
-import java.awt.image.ImageProducer;
+/**
+ * TODO: Implement user input reading
+ */
 
 // Responsible for displaying server output in CLI mode
 public class CLI implements MessageHandler {
@@ -23,8 +24,7 @@ public class CLI implements MessageHandler {
 
     @Override
     public void handleFatalError(Exception e) {
-        System.out.println("[FATAL ERROR] " + e);
-        e.printStackTrace();
+        System.out.println("[FATAL ERROR] " + Arrays.toString(e.getStackTrace()));
         System.out.println("STOPPING EXECUTION");
         System.exit(1);
     }
@@ -42,25 +42,5 @@ public class CLI implements MessageHandler {
     @Override
     public void handleInfo(String info) {
         System.out.println("[INFO] " + info);
-    }
-
-    @Override
-    public int getWidth(ImageObserver observer) {
-        return 0;
-    }
-
-    @Override
-    public int getHeight(ImageObserver observer) {
-        return 0;
-    }
-
-    @Override
-    public ImageProducer getSource() {
-        return null;
-    }
-
-    @Override
-    public Graphics getGraphics() {
-        return null;
     }
 }

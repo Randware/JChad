@@ -2,33 +2,37 @@ package net.jchad.server.view;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
+import javafx.geometry.Rectangle2D;
+import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.input.*;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import net.jchad.server.controller.ServerController;
 import net.jchad.server.model.error.MessageHandler;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.ScrollPane;
-
-import java.awt.*;
-import java.awt.image.ImageObserver;
-import java.awt.image.ImageProducer;
-
+import org.fxmisc.richtext.*;
 
 // Responsible for displaying server output in GUI mode
 public class GUI extends Application implements MessageHandler {
     private ServerController server;
     private TextFlow logArea = new TextFlow();
     private TextField cmdField = new TextField();
-    private double sizeValue= 13;
+    private double sizeValue;// = 13;
     private ScrollPane scrollPane = new ScrollPane();
+    private final KeyCombination crtlMinus = new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN);
+    private final KeyCombination crtlPlus = new KeyCodeCombination(KeyCode.PLUS, KeyCombination.CONTROL_DOWN);
+    private final KeyCombination crtlR = new KeyCodeCombination(KeyCode.R, KeyCombination.CONTROL_DOWN);
+    private MenuBar menuBar = new MenuBar();
+    Rectangle2D screenBounds = Screen.getPrimary().getBounds();
+    double screenWidth = screenBounds.getWidth();
+    double screenHeight = screenBounds.getHeight();
 
     //launch method
     public static void main(String[] args) {
@@ -37,34 +41,40 @@ public class GUI extends Application implements MessageHandler {
 
     @Override
     public void start(Stage stage) throws Exception {
-        System.out.println("Current working directory: " + System.getProperty("user.dir"));
         server = new ServerController(this);
         server.startServer();
 
         cmdField.setPromptText("Enter command here...");
 
-        MenuBar menuBar = new MenuBar();
         menuBar.setPadding(Insets.EMPTY);
 
         Menu settingsMenu = new Menu("Settings");
 
         Menu fontsSubMenu = new Menu("Fonts");
 
-        MenuItem increaseFontSize = new MenuItem("increase Font size");
-        MenuItem standardFontSize = new MenuItem("standard Font size");
-        MenuItem decreaseFontSize = new MenuItem("decrease Font size");
+        MenuItem increaseFontSize = new MenuItem("increase Font size (ctrl & +)");
+        MenuItem standardFontSize = new MenuItem("standard Font size (crtl & R)");
+        MenuItem decreaseFontSize = new MenuItem("decrease Font size (crtl & -)");
 
         fontsSubMenu.getItems().addAll(increaseFontSize, standardFontSize, decreaseFontSize);
 
         settingsMenu.getItems().add(fontsSubMenu);
-        
+
         menuBar.getMenus().add(settingsMenu);
 
         scrollPane.setContent(logArea);
-        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
-        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setFitToHeight(true);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
 
         VBox vbox = new VBox(menuBar, scrollPane, cmdField);
+
+        double baseFontSize = screenWidth * 0.007;
+        double windowWidth = screenWidth * 0.5;
+        double windowHeight = screenHeight * 0.5;
+
+        this.sizeValue = baseFontSize;
 
         increaseFontSize.setOnAction(e -> changeFontSize(2));
         standardFontSize.setOnAction(e -> standardFontSizeMethod());
@@ -73,95 +83,206 @@ public class GUI extends Application implements MessageHandler {
         vbox.setSpacing(10);
         vbox.setPadding(new Insets(0, 10, 10, 10));
         VBox.setVgrow(logArea, Priority.ALWAYS);
-        vbox.setMaxHeight(Double.MAX_VALUE);
-        vbox.setStyle("-fx-font-size: 13px;");
+        //vbox.setMaxHeight(Double.MAX_VALUE);
+        //vbox.setStyle("-fx-font-size: 13px;");
 
-        Scene scene = new Scene(vbox, 800, 600);
+        vbox.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (crtlPlus.match(event)) {
+                changeFontSize(2);
+                event.consume();
+            } else if (crtlMinus.match(event)) {
+                changeFontSize(-2);
+                event.consume();
+            } else if (crtlR.match(event)) {
+                standardFontSizeMethod();
+                event.consume();
+            }
+        });
+
+        logArea.setOnMouseClicked(event -> {
+            if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
+                // Logik zum Extrahieren und Kopieren des Textes von t2
+            }
+        });
+
+        Scene scene = new Scene(vbox, windowWidth, windowHeight);
         stage.setTitle("Server GUI");
         stage.setScene(scene);
         stage.show();
+
+        changeFontSize((int) baseFontSize);
+
+        scrollPane.prefWidthProperty().bind(scene.widthProperty());
+        scrollPane.prefHeightProperty().bind(scene.heightProperty().subtract(menuBar.getHeight() + cmdField.getHeight() + 20));
 
     }
 
     private void changeFontSize(int size) {
         this.sizeValue = sizeValue + size;
+        if (sizeValue < 0) {
+            this.sizeValue = 1;
+        } else if (sizeValue > 50) {
+            this.sizeValue = 50;
+        }
 
-        logArea.setStyle("-fx-font-size: " +sizeValue);
-        cmdField.setStyle("-fx-font-size: " +sizeValue);
-
+        logArea.setStyle("-fx-font-size: " + sizeValue);
+        cmdField.setStyle("-fx-font-size: " + sizeValue);
+        menuBar.setStyle("-fx-font-size: " + sizeValue);
     }
 
+    private void standardFontSizeMethod() {
+        this.sizeValue = screenWidth * 0.01;
 
-    private void standardFontSizeMethod(){
-        this.sizeValue = 13;
-
-        logArea.setStyle("-fx-font-size: " + 13);
-        cmdField.setStyle("-fx-font-size: " + 13);
-
+        logArea.setStyle("-fx-font-size: " + sizeValue);
+        cmdField.setStyle("-fx-font-size: " + sizeValue);
+        menuBar.setStyle("-fx-font-size: " + sizeValue);
     }
 
     @Override
     public void handleFatalError(Exception e) {
-        String log = "Ⓧ [Fatal Error]: ";
-        Text t1 = new Text(log);
-        t1.setStyle("-fx-fill: #fd0000;-fx-font-weight:bold;");
-        Text t2 = new Text(e.getMessage() + "\n");
-        t2.setStyle("-fx-font-weight:normal;");
-        logArea.getChildren().addAll(t1, t2);
-        standardFontSizeMethod();
+        Platform.runLater(() -> {
+            String log = "  Ⓧ [Fatal Error]: ";
+            Text t1 = new Text(log);
+            t1.setStyle("-fx-fill: #fd0000;-fx-font-weight:bold;");
+            Text t2 = new Text(e.getMessage() + "\n");
+            t2.setStyle("-fx-font-weight:normal;");
+
+            t2.setOnMouseClicked(event -> {
+                if (event.getButton() == MouseButton.SECONDARY) {
+                    ContextMenu contextMenu = new ContextMenu();
+                    MenuItem copyMenuItem = new MenuItem("Kopieren");
+                    contextMenu.getItems().add(copyMenuItem);
+
+                    copyMenuItem.setOnAction(copyEvent -> {
+                        Clipboard clipboard = Clipboard.getSystemClipboard();
+                        ClipboardContent content = new ClipboardContent();
+                        content.putString(t2.getText());
+                        clipboard.setContent(content);
+                    });
+
+                    contextMenu.show(t2, event.getScreenX(), event.getScreenY());
+                }
+            });
+
+            logArea.getChildren().addAll(t1, t2);
+            logArea.getChildren().addListener((ListChangeListener<Node>) change -> {
+                logArea.layout(); // Aktualisieren Sie das Layout des TextFlow
+                scrollPane.layout(); // Aktualisieren Sie das Layout des ScrollPane
+                scrollPane.setVvalue(Double.MAX_VALUE); // Scrollen Sie nach unten
+                changeFontSize(0);
+            });
+            changeFontSize(0);
+        });
     }
 
     @Override
     public void handleError(Exception e) {
-        String log = "Ⓧ [Error]: ";
-        Text t1 = new Text(log);
-        t1.setStyle("-fx-fill: #fd6e00;-fx-font-weight:bold;");
-        Text t2 = new Text(e.getMessage() + "\n");
-        t2.setStyle("-fx-font-weight:normal;");
-        logArea.getChildren().addAll(t1, t2);
-        standardFontSizeMethod();
+        Platform.runLater(() -> {
+            String log = "  Ⓧ [Error]: ";
+            Text t1 = new Text(log);
+            t1.setStyle("-fx-fill: #fd6e00;-fx-font-weight:bold;");
+            Text t2 = new Text(e.getMessage() + "\n");
+            t2.setStyle("-fx-font-weight:normal;");
+
+            t2.setOnMouseClicked(event -> {
+                if (event.getButton() == MouseButton.SECONDARY) {
+                    ContextMenu contextMenu = new ContextMenu();
+                    MenuItem copyMenuItem = new MenuItem("Kopieren");
+                    contextMenu.getItems().add(copyMenuItem);
+
+                    copyMenuItem.setOnAction(copyEvent -> {
+                        Clipboard clipboard = Clipboard.getSystemClipboard();
+                        ClipboardContent content = new ClipboardContent();
+                        content.putString(t2.getText());
+                        clipboard.setContent(content);
+                    });
+
+                    contextMenu.show(t2, event.getScreenX(), event.getScreenY());
+                }
+            });
+
+            logArea.getChildren().addAll(t1, t2);
+            logArea.getChildren().addListener((ListChangeListener<Node>) change -> {
+                logArea.layout(); // Aktualisieren Sie das Layout des TextFlow
+                scrollPane.layout(); // Aktualisieren Sie das Layout des ScrollPane
+                scrollPane.setVvalue(Double.MAX_VALUE); // Scrollen Sie nach unten
+                changeFontSize(0);
+            });
+            changeFontSize(0);
+        });
     }
 
     @Override
     public void handleWarning(String warning) {
-        String log = "⚠ [Warning]: ";
-        Text t1 = new Text(log);
-        t1.setStyle("-fx-fill: #d2c800;-fx-font-weight:bold;");
-        Text t2 = new Text(warning + "\n");
-        t2.setStyle("-fx-font-weight:normal;");
-        logArea.getChildren().addAll(t1, t2);
-        standardFontSizeMethod();
+        Platform.runLater(() -> {
+            String log = "  ⚠ [Warning]: ";
+            Text t1 = new Text(log);
+            t1.setStyle("-fx-fill: #d2c800;-fx-font-weight:bold;");
+            Text t2 = new Text(warning + "\n");
+            t2.setStyle("-fx-font-weight:normal;");
+
+            t2.setOnMouseClicked(event -> {
+                if (event.getButton() == MouseButton.SECONDARY) {
+                    ContextMenu contextMenu = new ContextMenu();
+                    MenuItem copyMenuItem = new MenuItem("Kopieren");
+                    contextMenu.getItems().add(copyMenuItem);
+
+                    copyMenuItem.setOnAction(copyEvent -> {
+                        Clipboard clipboard = Clipboard.getSystemClipboard();
+                        ClipboardContent content = new ClipboardContent();
+                        content.putString(t2.getText());
+                        clipboard.setContent(content);
+                    });
+
+                    contextMenu.show(t2, event.getScreenX(), event.getScreenY());
+                }
+            });
+
+            logArea.getChildren().addAll(t1, t2);
+            logArea.layout(); // Aktualisieren Sie das Layout des TextFlow
+            logArea.getChildren().addListener((ListChangeListener<Node>) change -> {
+                logArea.layout(); // Aktualisieren Sie das Layout des TextFlow
+                scrollPane.layout(); // Aktualisieren Sie das Layout des ScrollPane
+                scrollPane.setVvalue(Double.MAX_VALUE); // Scrollen Sie nach unten
+                changeFontSize(0);
+            });
+        });
     }
 
     @Override
     public void handleInfo(String info) {
-        String log = "ⓘ [Info]: ";
-        Text t1 = new Text(log);
-        t1.setStyle("-fx-fill: #00bafd;-fx-font-weight:bold;");
-        Text t2 = new Text(info + "\n");
-        t2.setStyle("-fx-font-weight:normal;");
-        logArea.getChildren().addAll(t1, t2);
-        standardFontSizeMethod();
-    }
+        Platform.runLater(() -> {
+            String log = "  ⓘ [Info]: ";
+            Text t1 = new Text(log);
+            t1.setStyle("-fx-fill: #00bafd;-fx-font-weight:bold;");
+            Text t2 = new Text(info + "\n");
+            t2.setStyle("-fx-font-weight:normal;");
 
-    @Override
-    public int getWidth(ImageObserver observer) {
-        return 0;
-    }
+            t2.setOnMouseClicked(event -> {
+                if (event.getButton() == MouseButton.SECONDARY) {
+                    ContextMenu contextMenu = new ContextMenu();
+                    MenuItem copyMenuItem = new MenuItem("Kopieren");
+                    contextMenu.getItems().add(copyMenuItem);
 
-    @Override
-    public int getHeight(ImageObserver observer) {
-        return 0;
-    }
+                    copyMenuItem.setOnAction(copyEvent -> {
+                        Clipboard clipboard = Clipboard.getSystemClipboard();
+                        ClipboardContent content = new ClipboardContent();
+                        content.putString(t2.getText());
+                        clipboard.setContent(content);
+                    });
 
-    @Override
-    public ImageProducer getSource() {
-        return null;
-    }
+                    contextMenu.show(t2, event.getScreenX(), event.getScreenY());
+                }
+            });
 
-    @Override
-    public Graphics getGraphics() {
-        return null;
-    }
+            logArea.getChildren().addAll(t1, t2);
+            logArea.getChildren().addListener((ListChangeListener<Node>) change -> {
+                logArea.layout(); // Aktualisieren Sie das Layout des TextFlow
+                scrollPane.layout(); // Aktualisieren Sie das Layout des ScrollPane
+                scrollPane.setVvalue(Double.MAX_VALUE); // Scrollen Sie nach unten
+                changeFontSize(0);
+            });
+        });
 
+    }
 }
