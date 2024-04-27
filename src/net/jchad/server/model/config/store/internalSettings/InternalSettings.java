@@ -19,6 +19,18 @@ public class InternalSettings {
     private int configWatcherRestartCountResetMilliseconds;
 
     /**
+     *     This variable controls the {@code Thread.sleep()} duration in every iteration of a loop on each server-client connection:
+     *     <ul>
+     *     <li>The variable specifies the delay (in milliseconds) between each iteration of the loop.</li>
+     *     <li>For each connection, the server pauses for this duration before attempting to read/write data from the socket streams again.</li>
+     *     <li>Increasing this value will reduce the performance impact of a single connection.</li>
+     *     <li>However, be aware that higher values can lead to increased latency between the server and the client.</li>
+     *     <li>If this value is set to less than 0, a default value of 100 milliseconds will be used.</li>
+     *     </ul>
+     */
+    private long connectionRefreshIntervalMillis;
+
+    /**
      * Default {@link InternalSettings} constructor
      */
     public InternalSettings() {
@@ -35,9 +47,10 @@ public class InternalSettings {
      * @param configWatcherRestartCountResetMilliseconds The amount of milliseconds after which the restart counter for the {@link ConfigWatcher} gets reset.
      *                                                   Set to negative number to never reset the restart counter.
      */
-    public InternalSettings(int maxConfigWatcherRestarts, int configWatcherRestartCountResetMilliseconds) {
+    public InternalSettings(int maxConfigWatcherRestarts, int configWatcherRestartCountResetMilliseconds, long connectionRefreshIntervalMillis) {
         this.maxConfigWatcherRestarts = maxConfigWatcherRestarts;
         this.configWatcherRestartCountResetMilliseconds = configWatcherRestartCountResetMilliseconds;
+        this.connectionRefreshIntervalMillis = connectionRefreshIntervalMillis;
     }
 
     /**
