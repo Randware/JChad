@@ -81,4 +81,18 @@ public class InternalSettings {
     public void setConfigWatcherRestartCountResetMilliseconds(int configWatcherRestartCountResetMilliseconds) {
         this.configWatcherRestartCountResetMilliseconds = configWatcherRestartCountResetMilliseconds;
     }
+
+    /**
+     * @return The delay in milliseconds between each loop iteration in each connection.
+     */
+    public long getConnectionRefreshIntervalMillis() {
+        return connectionRefreshIntervalMillis;
+    }
+
+    /**
+     * @param connectionRefreshIntervalMillis The delay in milliseconds between each loop iteration in each connection.
+     */
+    public void setConnectionRefreshIntervalMillis(long connectionRefreshIntervalMillis) {
+        this.connectionRefreshIntervalMillis = connectionRefreshIntervalMillis;
+    }
 }
