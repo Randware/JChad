@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.util.Random;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -36,12 +38,17 @@ public final class MainSocket implements Runnable{
             while (true) {
 
                 Socket socket = serverSocket.accept();
+                socket.setSoTimeout(1000 * 1000); //TODO Use config values for the timeout
+
                 messageHandler.handleInfo("Socket connected: " + socket);
                 // Same as "new ServerThread(socket, handler).start();
-                executor.execute(new ServerThread(socket,  messageHandler));
+                executor.submit(new ServerThread(socket,  messageHandler));
+
 
             }
 
+        } catch (SocketTimeoutException ste) {
+            messageHandler.handleError(ste);
         } catch (Exception e) {
             messageHandler.handleFatalError(new Exception("An unknown error occurred", e));
         } finally {

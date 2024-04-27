@@ -14,17 +14,17 @@ public class TempTest implements MessageHandler {
 
     @Override
     public void handleFatalError(Exception e) {
-
+        e.printStackTrace();
     }
 
     @Override
     public void handleError(Exception e) {
-
+        e.printStackTrace();
     }
 
     @Override
     public void handleWarning(String warning) {
-
+        System.out.println(warning);
     }
 
     @Override
