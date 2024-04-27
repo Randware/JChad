@@ -7,14 +7,12 @@ import net.jchad.server.model.networking.versioning.VersionMatcher;
 
 import java.io.*;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ServerThread implements Runnable{
+    private final Server server;
     private final MessageHandler messageHandler;
     private final static List<ServerThread> serverThreadList = new ArrayList<>();
     private final PrintWriter printWriter;
@@ -24,9 +22,11 @@ public class ServerThread implements Runnable{
     private final Socket socket;
     private String remoteAddress = "Unknown"; //The ip address of the client
 
-    public ServerThread(Socket socket, MessageHandler messageHandler) throws IOException {
-        if (messageHandler == null) {throw new IllegalArgumentException("Could not connect to [%s]: The MessageHandler is null".formatted(remoteAddress));}
-        this.messageHandler = messageHandler;
+    public ServerThread(Socket socket, Server server) throws IOException {
+        if (server == null) throw new IllegalArgumentException("Could not connect to [%s]: The MessageHandler is null".formatted(remoteAddress));
+        this.server = server;
+        if (server.getMessageHandler() == null) {throw new IllegalArgumentException("Could not connect to [%s]: The MessageHandler is null".formatted(remoteAddress));}
+        this.messageHandler = server.getMessageHandler();
         if (socket == null) {
             messageHandler.handleError(new IllegalArgumentException("Could not connect to [%s]: The Socket is null".formatted(remoteAddress)));
             close("The provided socket is null!");

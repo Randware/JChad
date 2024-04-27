@@ -11,6 +11,7 @@ module net.jchad {
     requires org.junit.jupiter.engine;
     requires org.junit.jupiter.params;
     requires org.jline;
+    requires org.fxmisc.richtext;
 
 
     opens net.jchad.client to javafx.fxml;

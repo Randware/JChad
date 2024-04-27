@@ -25,7 +25,7 @@ public class Server implements ConfigObserver {
         messageHandler.handleInfo("Loaded server config");
 
 
-        mainSocket = new MainSocket(config.getServerSettings().getPort(), messageHandler);
+        mainSocket = new MainSocket(config.getServerSettings().getPort(), this);
         new Thread(mainSocket).start();
         messageHandler.handleInfo("Server started on port " + config.getServerSettings().getPort());
     }
@@ -35,5 +35,13 @@ public class Server implements ConfigObserver {
         config = configManager.getConfig();
 
         messageHandler.handleInfo("Updated server configuration");
+    }
+
+    public Config getConfig() {
+        return config;
+    }
+
+    public MessageHandler getMessageHandler() {
+        return messageHandler;
     }
 }

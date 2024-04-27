@@ -8,7 +8,9 @@ import java.awt.image.ImageProducer;
 
 public class TempTest implements MessageHandler {
     public static void main(String[] args) {
-        MainSocket ms = new MainSocket(13814, new TempTest());
+        TempTest tempTest = new TempTest();
+        Server server = new Server(tempTest);
+        MainSocket ms = new MainSocket(13814, server);
         new Thread(ms).start();
     }
 
