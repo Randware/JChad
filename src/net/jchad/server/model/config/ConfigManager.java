@@ -1,14 +1,11 @@
 package net.jchad.server.model.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.dataformat.yaml.snakeyaml.error.MarkedYAMLException;
 import net.jchad.server.model.config.store.Config;
 import net.jchad.server.model.config.store.serverSettings.ServerSettings;
-import net.jchad.server.model.config.store.ConfigFiles;
+import net.jchad.server.model.config.store.ConfigFile;
 import net.jchad.server.model.config.store.internalSettings.InternalSettings;
 import net.jchad.server.model.error.MessageHandler;
 import net.jchad.server.model.networking.ip.IPAddress;
@@ -21,7 +18,12 @@ import java.nio.file.WatchEvent;
 import java.util.ArrayList;
 
 /*
-
+    TODO: Make config loading more modular
+        - Create load() and save() methods in ConfigFiles enum
+        - This requires the class the config should be loaded to, from to be stored in enum as well
+        - Error handling should still be done in the ConfigManager
+        - File creation still needs to be handled inside ConfigManager, as it makes logging easier
+        - Make the ConfigFile enum store the config files
     TODO: Stop reloading server config, when whitelist is disabled and gets modified
         - Pass the current config to the isConfig() method in the ConfigFiles class and only check enabled files
     TODO: Investigate missing values in config (server uses default value for missing values,
@@ -60,10 +62,7 @@ import java.util.ArrayList;
  */
 
 public class ConfigManager {
-    /**
-     * Used for YAML file reading and writing using the {@link com.fasterxml.jackson} library
-     */
-    private final ObjectMapper mapper;
+
 
     /**
      * Stores the instance of the {@link net.jchad.server.model.config.ConfigWatcher} instance,
@@ -72,14 +71,9 @@ public class ConfigManager {
     private ConfigWatcher configWatcher;
 
     /**
-     *
+     * Stores the restartAttempts for the {@link net.jchad.server.model.config.ConfigWatcher}
      */
     private int restartAttempts = 0;
-
-    /**
-     *
-     */
-    private final int MAX_RESTART_ATTEMPTS = 3;
 
     /**
      * Stores the instance of a {@link ConfigObserver} implementing class,
@@ -94,17 +88,12 @@ public class ConfigManager {
     private MessageHandler messageHandler;
 
     /**
-     * Stores the server settings.
+     * Stores the {@link ConfigEditor} instance responsible for modifying the config.
      */
-    private ServerSettings serverSettings;
+    private ConfigEditor configEditor;
 
     /**
-     * Stores the internal server settings.
-     */
-    private InternalSettings internalSettings;
-
-    /**
-     * Stores the server configuration
+     * Stores the entire server configuration
      */
     private Config config;
 
@@ -123,12 +112,12 @@ public class ConfigManager {
      *                       which gets notified when config file changes are detected.
      */
     public ConfigManager(MessageHandler messageHandler, ConfigObserver configObserver) {
-        this.mapper = new ObjectMapper(new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
-
         this.messageHandler = messageHandler;
         this.configObserver = configObserver;
 
         loadServerConfig();
+
+        this.configEditor = new ConfigEditor(this);
 
         initializeConfigWatcher();
     }
@@ -141,6 +130,16 @@ public class ConfigManager {
     public Config getConfig() {
         return config;
     }
+
+    /**
+     * Returns the {@link ConfigEditor} instance responsible for modifying the config.
+     *
+     * @return the {@link ConfigEditor} instance responsible for modifying the config.
+     */
+    public ConfigEditor editor() {
+        return configEditor;
+    }
+
 
     /**
      * Handles the file loading process and updates the config. Also logs accordingly.
@@ -165,11 +164,15 @@ public class ConfigManager {
         return false;
     }
 
+    public void saveServerConfig() {
+        // Implement saving here
+    }
+
     /**
      * Initializes the ConfigWatcher for the config file directory.
      */
     private void initializeConfigWatcher() {
-        configWatcher = new ConfigWatcher(ConfigFiles.getStorageDirectory(), this::configUpdated, this::handleConfigWatcherError);
+        configWatcher = new ConfigWatcher(ConfigFile.getStorageDirectory(), this::configUpdated, this::handleConfigWatcherError);
 
         configWatcher.start();
     }
@@ -184,7 +187,7 @@ public class ConfigManager {
     private Config loadConfigFiles() throws IOException {
         Config newConfig = new Config();
 
-        Path storageDirectory = ConfigFiles.getStorageDirectory();
+        Path storageDirectory = ConfigFile.getStorageDirectory();
         if (!Files.exists(storageDirectory)) {
             Files.createDirectory(storageDirectory);
         }
@@ -200,31 +203,29 @@ public class ConfigManager {
          * Load whitelist if feature is enabled
          */
         if (newConfig.getServerSettings().isWhitelist()) {
-            newConfig.getServerSettings().setWhitelistedIPs(loadWhitelistedIPsConfig());
+            newConfig.setWhitelist(loadWhitelistedIPsConfig());
         }
 
         /*
          * Load blacklist if feature is enabled
          */
         if (newConfig.getServerSettings().isBlacklist()) {
-            newConfig.getServerSettings().setBlacklistedIPs(loadBlacklistedIPsConfig());
+            newConfig.setBlacklist(loadBlacklistedIPsConfig());
         }
 
         return newConfig;
     }
 
     private InternalSettings loadInternalSettingsConfig() throws IOException {
-        InternalSettings newInternalSettings;
-
-        ConfigFiles internalSettingsConfig = ConfigFiles.INTERNAL_SETTINGS_CONFIG;
-        if (!Files.exists(internalSettingsConfig.getStoragePath())) {
+        ConfigFile internalSettingsConfig = ConfigFile.INTERNAL_SETTINGS_CONFIG;
+        if (!internalSettingsConfig.exists()) {
             messageHandler.handleInfo("Creating " + internalSettingsConfig.getFileName() + " file");
 
-            mapper.writeValue(Files.createFile(internalSettingsConfig.getStoragePath()).toFile(), new InternalSettings());
+            internalSettingsConfig.create();
         }
 
         try {
-            newInternalSettings = mapper.readValue(internalSettingsConfig.getStoragePath().toFile(), InternalSettings.class);
+            return (InternalSettings) internalSettingsConfig.load();
         } catch (Exception e) {
             switch (e) {
                 case InvalidFormatException ife -> {
@@ -238,7 +239,7 @@ public class ConfigManager {
                 }
 
                 case MismatchedInputException mie -> {
-                    messageHandler.handleWarning(internalSettingsConfig.getFileName() + " is empty");
+                    messageHandler.handleWarning(internalSettingsConfig.getFileName() + " couldn't be parsed: " + mie.getOriginalMessage());
                 }
 
                 default -> {
@@ -248,22 +249,18 @@ public class ConfigManager {
 
             throw new IOException("Failed loading config file", e);
         }
-
-        return newInternalSettings;
     }
 
     private ServerSettings loadServerSettingsConfig() throws IOException {
-        ServerSettings newServerSettings;
-
-        ConfigFiles serverSettingsConfig = ConfigFiles.SERVER_SETTINGS_CONFIG;
-        if (!Files.exists(serverSettingsConfig.getStoragePath())) {
+        ConfigFile serverSettingsConfig = ConfigFile.SERVER_SETTINGS_CONFIG;
+        if (!serverSettingsConfig.exists()) {
             messageHandler.handleInfo("Creating " + serverSettingsConfig.getFileName() + " file");
 
-            mapper.writeValue(Files.createFile(serverSettingsConfig.getStoragePath()).toFile(), new ServerSettings());
+            serverSettingsConfig.create();
         }
 
         try {
-            newServerSettings = mapper.readValue(serverSettingsConfig.getStoragePath().toFile(), ServerSettings.class);
+            return (ServerSettings) serverSettingsConfig.load();
         } catch (Exception e) {
             switch (e) {
                 case InvalidFormatException ife -> {
@@ -277,7 +274,7 @@ public class ConfigManager {
                 }
 
                 case MismatchedInputException mie -> {
-                    messageHandler.handleWarning(serverSettingsConfig.getFileName() + " is empty");
+                    messageHandler.handleWarning(serverSettingsConfig.getFileName() + " couldn't be parsed: " + mie.getMessage());
                 }
 
                 default -> {
@@ -287,8 +284,6 @@ public class ConfigManager {
 
             throw new IOException("Failed loading config file", e);
         }
-
-        return newServerSettings;
     }
 
     /**
@@ -300,18 +295,16 @@ public class ConfigManager {
      */
     @SuppressWarnings("unchecked")
     private ArrayList<IPAddress> loadWhitelistedIPsConfig() throws IOException {
-        ConfigFiles whitelistedIPsConfig = ConfigFiles.WHITELISTED_IPS_CONFIG;
+        ConfigFile whitelistedIPsConfig = ConfigFile.WHITELISTED_IPS_CONFIG;
 
-        if (!Files.exists(whitelistedIPsConfig.getStoragePath())) {
+        if (!whitelistedIPsConfig.exists()) {
             messageHandler.handleInfo("Creating " + whitelistedIPsConfig.getFileName() + " file");
 
-            mapper.writeValue(Files.createFile(whitelistedIPsConfig.getStoragePath()).toFile(),
-                    fromIPToString(config.getServerSettings().getWhitelistedIPs()));
+            whitelistedIPsConfig.create();
         }
 
-        ArrayList<String> ipList;
         try {
-            ipList = mapper.readValue(whitelistedIPsConfig.getStoragePath().toFile(), ArrayList.class);
+            return fromStringToIP((ArrayList<String>) whitelistedIPsConfig.load());
         } catch (Exception e) {
             switch (e) {
                 case MarkedYAMLException mye -> {
@@ -320,7 +313,7 @@ public class ConfigManager {
                 }
 
                 case MismatchedInputException mie -> {
-                    messageHandler.handleWarning(whitelistedIPsConfig.getFileName() + " is empty");
+                    messageHandler.handleWarning(whitelistedIPsConfig.getFileName() + " couldn't be parsed: " + mie.getMessage());
                 }
 
                 default -> {
@@ -330,8 +323,6 @@ public class ConfigManager {
 
             throw new IOException("Failed loading config file", e);
         }
-
-        return fromStringToIP(ipList);
     }
 
     /**
@@ -343,18 +334,16 @@ public class ConfigManager {
      */
     @SuppressWarnings("unchecked")
     private ArrayList<IPAddress> loadBlacklistedIPsConfig() throws IOException {
-        ConfigFiles blacklistedIPsConfig = ConfigFiles.BLACKLISTED_IPS_CONFIG;
+        ConfigFile blacklistedIPsConfig = ConfigFile.BLACKLISTED_IPS_CONFIG;
 
-        if (!Files.exists(blacklistedIPsConfig.getStoragePath())) {
+        if (!blacklistedIPsConfig.exists()) {
             messageHandler.handleInfo("Creating " + blacklistedIPsConfig.getFileName() + " file");
 
-            mapper.writeValue(Files.createFile(blacklistedIPsConfig.getStoragePath()).toFile(),
-                    fromIPToString(config.getServerSettings().getBlacklistedIPs()));
+            blacklistedIPsConfig.create();
         }
 
-        ArrayList<String> ipList;
         try {
-            ipList = mapper.readValue(blacklistedIPsConfig.getStoragePath().toFile(), ArrayList.class);
+            return fromStringToIP((ArrayList<String>) blacklistedIPsConfig.load());
         } catch (Exception e) {
             switch (e) {
                 case MarkedYAMLException mye -> {
@@ -363,7 +352,7 @@ public class ConfigManager {
                 }
 
                 case MismatchedInputException mie -> {
-                    messageHandler.handleWarning(blacklistedIPsConfig.getFileName() + " is empty");
+                    messageHandler.handleWarning(blacklistedIPsConfig.getFileName() + " couldn't be parsed: " + mie.getMessage());
                 }
 
                 default -> {
@@ -373,8 +362,6 @@ public class ConfigManager {
 
             throw new IOException("Failed loading config file", e);
         }
-
-        return fromStringToIP(ipList);
     }
 
     /**
@@ -423,10 +410,10 @@ public class ConfigManager {
      * @param event event that was detected by the {@link ConfigWatcher}
      */
     private void configUpdated(WatchEvent<?> event) {
-        Path modifiedConfig = ConfigFiles.getStorageDirectory().resolve((Path) event.context());
+        Path modifiedConfig = ConfigFile.getStorageDirectory().resolve((Path) event.context());
         String configName = modifiedConfig.getFileName().toString();
 
-        if (!ConfigFiles.isConfig(configName)) {
+        if (!ConfigFile.isConfig(configName)) {
             return;
         }
 
@@ -445,14 +432,14 @@ public class ConfigManager {
      * @param e Exception that was thrown
      */
     private void handleConfigWatcherError(Exception e) {
-        int restartMillis = internalSettings.getConfigWatcherRestartCountResetMilliseconds();
+        int restartMillis = config.getInternalSettings().getConfigWatcherRestartCountResetMilliseconds();
         if (System.currentTimeMillis() - configWatcher.getStartTimestamp() >= restartMillis) {
             restartAttempts = 0;
         }
 
         restartAttempts++;
 
-        int maxRestarts = internalSettings.getMaxConfigWatcherRestarts();
+        int maxRestarts = config.getInternalSettings().getMaxConfigWatcherRestarts();
 
         if (restartAttempts <= maxRestarts) {
             messageHandler.handleError(new IOException("The ConfigWatcher thread has run into an unexpected error: " + e));
