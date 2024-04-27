@@ -17,6 +17,7 @@ import net.jchad.server.controller.ServerController;
 import net.jchad.server.model.error.MessageHandler;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Priority;
+import org.fxmisc.richtext.*;
 
 // Responsible for displaying server output in GUI mode
 public class GUI extends Application implements MessageHandler {
@@ -114,10 +115,6 @@ public class GUI extends Application implements MessageHandler {
         scrollPane.prefWidthProperty().bind(scene.widthProperty());
         scrollPane.prefHeightProperty().bind(scene.heightProperty().subtract(menuBar.getHeight() + cmdField.getHeight() + 20));
 
-        handleInfo("test");
-        handleWarning("test2");
-        handleError(new Exception("test3"));
-        handleFatalError(new Exception("test4"));
     }
 
     private void changeFontSize(int size) {
