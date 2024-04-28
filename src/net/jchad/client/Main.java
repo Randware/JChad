@@ -1,6 +1,6 @@
 package net.jchad.client;
 
-import net.jchad.server.view.CLI;
+import net.jchad.server.view.cli.CLI;
 import net.jchad.server.view.GUI;
 
 public class Main {

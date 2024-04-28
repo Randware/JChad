@@ -19,4 +19,10 @@ ServerController {
     public void sendCommand(String command) {
         // Send command to server here
     }
+
+    public void stopServer() {
+        server.getMessageHandler().handleInfo("STOPPING EXECUTION");
+
+        // Implement proper server stopping logic
+    }
 }
