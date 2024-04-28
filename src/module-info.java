@@ -13,7 +13,6 @@ module net.jchad {
     requires org.jline;
     requires org.fxmisc.richtext;
 
-
     opens net.jchad.client to javafx.fxml;
     opens net.jchad.server.model.config to com.fasterxml.jackson.databind;
     opens net.jchad.server.model.networking.versioning to com.google.gson;

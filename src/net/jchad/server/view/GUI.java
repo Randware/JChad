@@ -14,13 +14,11 @@ import javafx.scene.text.TextFlow;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import net.jchad.server.controller.ServerController;
+import net.jchad.server.model.common.Util;
 import net.jchad.server.model.error.MessageHandler;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Priority;
 import org.fxmisc.richtext.*;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
 // Responsible for displaying server output in GUI mode
 public class GUI extends Application implements MessageHandler {
@@ -147,10 +145,7 @@ public class GUI extends Application implements MessageHandler {
             String log = "  Ⓧ [Fatal Error]: ";
             Text t1 = new Text(log);
             t1.setStyle("-fx-fill: #fd0000;-fx-font-weight:bold;");
-            StringWriter stringWriter = new StringWriter(); // These 3 lines convert the stacktrace of the exception into a string
-            PrintWriter printWriter = new PrintWriter(stringWriter);
-            e.printStackTrace(printWriter);
-            Text t2 = new Text(stringWriter.toString() + "\n");
+            Text t2 = new Text(Util.stackTraceToString(e)+ "\n");
             t2.setStyle("-fx-font-weight:normal;");
 
             t2.setOnMouseClicked(event -> {
@@ -179,6 +174,8 @@ public class GUI extends Application implements MessageHandler {
             });
             changeFontSize(0);
         });
+
+        server.stopServer();
     }
 
     @Override
