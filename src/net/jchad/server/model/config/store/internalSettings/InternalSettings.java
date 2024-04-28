@@ -19,16 +19,23 @@ public class InternalSettings {
     private int configWatcherRestartCountResetMilliseconds;
 
     /**
-     *     This variable controls the {@code Thread.sleep()} duration in every iteration of a loop on each server-client connection:
-     *     <ul>
-     *     <li>The variable specifies the delay (in milliseconds) between each iteration of the loop.</li>
-     *     <li>For each connection, the server pauses for this duration before attempting to read/write data from the socket streams again.</li>
-     *     <li>Increasing this value will reduce the performance impact of a single connection.</li>
-     *     <li>However, be aware that higher values can lead to increased latency between the server and the client.</li>
-     *     <li>If this value is set to less than 0, a default value of 100 milliseconds will be used.</li>
-     *     </ul>
+     * This variable controls the {@code Thread.sleep()} duration in every iteration of a loop on each server-client connection:
+     * <ul>
+     * <li>The variable specifies the delay (in milliseconds) between each iteration of the loop.</li>
+     * <li>For each connection, the server pauses for this duration before attempting to read/write data from the socket streams again.</li>
+     * <li>Increasing this value will reduce the performance impact of a single connection.</li>
+     * <li>However, be aware that higher values can lead to increased latency between the server and the client.</li>
+     * <li>If this value is set to less than 0, a default value of 100 milliseconds will be used.</li>
+     * </ul>
      */
     private long connectionRefreshIntervalMillis;
+
+    /**
+     * This determines how many times the client is allowed to send falsy data to the server during the {@link net.jchad.server.model.networking.versioning versioning} process.
+     * If this limit gets exceeded the connection will close.
+     * If this gets set to a negative number the default value (3) get used instead.
+     */
+    private int retriesOnMalformedJSONduringVersioning;
 
     /**
      * Default {@link InternalSettings} constructor
@@ -38,6 +45,8 @@ public class InternalSettings {
 
         this.maxConfigWatcherRestarts = defaultInternalSettings.getMaxConfigWatcherRestarts();
         this.configWatcherRestartCountResetMilliseconds = defaultInternalSettings.getConfigWatcherRestartCountResetMilliseconds();
+        this.connectionRefreshIntervalMillis = defaultInternalSettings.connectionRefreshIntervalMillis;
+        this.retriesOnMalformedJSONduringVersioning = defaultInternalSettings.retriesOnMalformedJSONduringVersioning;
     }
 
     /**
@@ -47,10 +56,11 @@ public class InternalSettings {
      * @param configWatcherRestartCountResetMilliseconds The amount of milliseconds after which the restart counter for the {@link ConfigWatcher} gets reset.
      *                                                   Set to negative number to never reset the restart counter.
      */
-    public InternalSettings(int maxConfigWatcherRestarts, int configWatcherRestartCountResetMilliseconds, long connectionRefreshIntervalMillis) {
+    public InternalSettings(int maxConfigWatcherRestarts, int configWatcherRestartCountResetMilliseconds, long connectionRefreshIntervalMillis, int retriesOnMalformedJSONduringVersioning) {
         this.maxConfigWatcherRestarts = maxConfigWatcherRestarts;
         this.configWatcherRestartCountResetMilliseconds = configWatcherRestartCountResetMilliseconds;
         this.connectionRefreshIntervalMillis = connectionRefreshIntervalMillis;
+        this.retriesOnMalformedJSONduringVersioning = retriesOnMalformedJSONduringVersioning;
     }
 
     /**
@@ -94,5 +104,21 @@ public class InternalSettings {
      */
     public void setConnectionRefreshIntervalMillis(long connectionRefreshIntervalMillis) {
         this.connectionRefreshIntervalMillis = connectionRefreshIntervalMillis;
+    }
+
+    /**
+     *
+     * @return how many times the client is allowed to send falsy data to the server during the {@link net.jchad.server.model.networking.versioning versioning} process.
+     */
+    public int getRetriesOnMalformedJSONduringVersioning() {
+        return retriesOnMalformedJSONduringVersioning;
+    }
+
+    /**
+     *
+     * @param retriesOnMalformedJSONduringVersioning how many times the client is allowed to send falsy data to the server during the {@link net.jchad.server.model.networking.versioning versioning} process.
+     */
+    public void setRetriesOnMalformedJSONduringVersioning(int retriesOnMalformedJSONduringVersioning) {
+        this.retriesOnMalformedJSONduringVersioning = retriesOnMalformedJSONduringVersioning;
     }
 }

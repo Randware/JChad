@@ -10,8 +10,7 @@ public class TempTest implements MessageHandler {
     public static void main(String[] args) {
         TempTest tempTest = new TempTest();
         Server server = new Server(tempTest);
-        MainSocket ms = new MainSocket(13814, server);
-        new Thread(ms).start();
+       server.runServer();
     }
 
     @Override

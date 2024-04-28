@@ -2,6 +2,8 @@ package net.jchad.server.model.server;
 
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import net.jchad.server.model.config.store.Config;
+import net.jchad.server.model.config.store.internalSettings.DefaultInternalSettings;
 import net.jchad.server.model.error.MessageHandler;
 import net.jchad.server.model.networking.versioning.VersionMatcher;
 
@@ -48,11 +50,9 @@ public class ServerThread implements Runnable{
         listOperation(list -> list.add(this));
         try {
             VersionMatcher.matchVersion(this);
-            if (1==2) {
-                throw new IOException();
-            }
-        }  catch (IOException e) {
-            messageHandler.handleError(new IOException("An error occurred while connected to [%s]".formatted(remoteAddress), e));
+
+        }  catch (Exception e) {
+            messageHandler.handleError(new Exception("An error occurred while connected to [%s]: %s".formatted(remoteAddress,e.getMessage()), e));
         } finally {
             close();
         }
@@ -156,5 +156,22 @@ public class ServerThread implements Runnable{
 
     public Socket getSocket() {
         return socket;
+    }
+    public Config getConfig() {
+        return server.getConfig();
+    }
+
+    /** //TODO I am unsure if this is a permanent solution. Checking if the config values are correct should not be done in the ServerThread.
+     * Returns a value from the config or the default one if the user set value is invalid
+     * @return
+     */
+    public long getConnectionRefreshIntervalMillis() {
+        if (server.getConfig().getInternalSettings().getConnectionRefreshIntervalMillis() < 0) return DefaultInternalSettings.get().getConnectionRefreshIntervalMillis();
+        else return server.getConfig().getInternalSettings().getConnectionRefreshIntervalMillis();
+    }
+
+    public int  getRetriesOnMalformedJSONduringVersioning() {
+        if (server.getConfig().getInternalSettings().getRetriesOnMalformedJSONduringVersioning() <= 0) return DefaultInternalSettings.get().getRetriesOnMalformedJSONduringVersioning();
+        else return server.getConfig().getInternalSettings().getRetriesOnMalformedJSONduringVersioning();
     }
 }

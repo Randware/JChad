@@ -17,68 +17,17 @@ import java.util.concurrent.TimeUnit;
 
 public class VersionMatcher {
     /**
-     * Gson gson = new Gson();
-     *
-     *         int retries = 3;
-     *         for (int i = 0; i < retries; i++) {
-     *             try {
-     *
-     *                 while (serverThread.getJsonReader().hasNext()) {
-     *                     Thread.currentThread().sleep(100);
-     *                     JsonToken jsonToken = serverThread.getJsonReader().peek();
-     *                     if (JsonToken.BEGIN_OBJECT.equals(jsonToken)) {
-     *                             serverThread.getJsonReader().beginObject();
-     *                             ClientVersionMatcherPacket vmp = gson.fromJson(serverThread.getJsonReader(), ClientVersionMatcherPacket.class);
-     *                             System.out.println(vmp);
-     *                             serverThread.getJsonReader().endObject();
-     *                             serverThread.getJsonReader().skipValue();
-     *                     }
-     *
-     *                 }
-     *
-     *             } catch (JsonSyntaxException | MalformedJsonException jse) {
-     *
-     *                 System.out.println("Invalid");
-     *                 serverThread.getMessageHandler().handleError(new InvalidPacketException("The received json packet cannot be read from "
-     *                         + serverThread.getRemoteAddress() + ".The connection will be terminated" +
-     *                         ((i == retries - 1) ? " now" : (" after " + (retries - (i + 1)) + " more failed attempt(s)")), jse));
-     *
-     *                 if (i == retries-1) {
-     *                     serverThread.close();
-     *                     return null;
-     *                 } else {
-     *                     try {
-     *                         serverThread.getJsonReader().skipValue();
-     *                         System.out.println("skips");
-     *                     } catch (IOException e) {
-     *                         System.out.println("error");
-     *                         System.out.println(e.getMessage());
-     *                     }
-     *                 }
-     *             } catch (InterruptedException ie) {
-     *                 serverThread.getMessageHandler().handleError(new InterruptedException("The thread got suddenly interrupted: " + ie.getMessage()));
-     *             } catch (IOException e) {
-     *                 if (e instanceof SocketTimeoutException) {
-     *                     serverThread.getMessageHandler().handleError(new SocketTimeoutException("The connection timed out with " + serverThread.getRemoteAddress()));
-     *                 } else {
-     *                     serverThread.getMessageHandler().handleError(new IOException("An unknown error occurred", e));
-     *                 }
-     *                 serverThread.close();
-     *                 return null;
-     *             }
-     *         }
-     *         gson.
-     *         return null;
      * @param serverThread
      * @return
      */
     public static Double matchVersion(ServerThread serverThread) {
         final Gson gson = new Gson();
-        int attempts = 3;
+        long intervals = serverThread.getConnectionRefreshIntervalMillis();
+        int attempts = serverThread.getRetriesOnMalformedJSONduringVersioning();
         for(int i = 1; i <= attempts; i++) {
             try {
                 while (serverThread.getJsonReader().hasNext()) {
-                    try {
+
                         System.out.println("Has next");
                         JsonToken jt = serverThread.getJsonReader().peek();
                         if (JsonToken.BEGIN_OBJECT.equals(jt)) {
@@ -88,26 +37,33 @@ public class VersionMatcher {
                             System.out.println(c);
                             //serverThread.getJsonReader().endObject();
                         } else {
-                            serverThread.getJsonReader().skipValue();
+                           serverThread.getJsonReader().skipValue(); //<-- idk why but this is a factory of problems
+                            System.out.println("Except");
+                            throw new MalformedJsonException("The given data is not representable as JSON");
                         }
 
-                        Thread.sleep(100);
-                    } catch (JsonSyntaxException | MalformedJsonException syntaxExcpetion) {
-                        serverThread.getJsonReader().skipValue();
-                        System.out.println(syntaxExcpetion.getMessage() + " 1");
-                    }
+                        Thread.sleep(intervals);
+
                 }
 
             }
-             catch (JsonSyntaxException | MalformedJsonException syntaxE) {
-                 System.out.println(syntaxE.getMessage() + " 2");
-                 syntaxE.printStackTrace();
+             catch (JsonSyntaxException | MalformedJsonException ije) {
+                 if (i >= attempts) {
+                    serverThread.getMessageHandler().handleError(new MalformedJsonException("The received data from " + serverThread.getRemoteAddress()
+                            + " could not be parsed to JSON, during the versioning process. The connection will be terminated now!", ije));
+                    serverThread.close("Data could not be parsed into JSON, during the versioning process. ");
+                 } else {
+                     serverThread.getMessageHandler().handleWarning("The received data from %s could not be parsed to JSON, during the versioning process. The connection gets terminated after %d more failed attempt(s)"
+                             .formatted(serverThread.getRemoteAddress(), attempts - i));
+                 }
 
 
-            } catch (IOException jioe) {
-                System.out.println(jioe.getMessage());
+            } catch (IOException io) {
+                serverThread.getMessageHandler().handleError(new IOException("An IOException occurred unexpectedly, during the versioning process. (Connection closed)", io));
+                serverThread.close("IOException while versioning");
             } catch (InterruptedException ie) {
-                System.out.println(ie.getMessage());
+                serverThread.getMessageHandler().handleError(new Exception("The current connection thread got interrupted unexpectedly, during the versioning process during the versioning process. (Connection closed)" , ie));
+                serverThread.close("Thread got interrupted while versioning");
             }
         }
 
