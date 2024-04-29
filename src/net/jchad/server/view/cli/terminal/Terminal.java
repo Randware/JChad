@@ -29,10 +29,10 @@ public abstract class Terminal {
 
     /**
      * This method initializes the input reader for this terminal.
-     * Read commands get returned via a {@link Consumer<String>}.
+     * Read inputs get returned via a {@link Consumer<String>}.
      *
-     * @param inputHandler the method responsible for handling the read command.
-     * @param exitHandler this method will be called if the user terminates the CLI (using CTRL + C)
+     * @param inputHandler the method responsible for handling the read input.
+     * @param exitHandler this method will be called if the user interrupts the CLI (using CTRL + C)
      */
     public abstract void initInputReading(Consumer<String> inputHandler, Runnable exitHandler);
 

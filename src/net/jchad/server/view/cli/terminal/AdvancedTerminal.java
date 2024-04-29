@@ -16,7 +16,7 @@ import java.util.function.Consumer;
  */
 public class AdvancedTerminal extends Terminal {
     /**
-     * The {@link LineReader} instance used to read inputs and display output in a nicely formatted way.
+     * The {@link LineReader} instance used to read input and display output in a nicely formatted way.
      */
     private final LineReader reader;
 
