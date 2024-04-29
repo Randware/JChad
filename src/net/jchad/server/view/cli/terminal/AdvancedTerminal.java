@@ -7,6 +7,7 @@ import org.jline.terminal.TerminalBuilder;
 import org.jline.utils.InfoCmp;
 
 import java.io.IOException;
+import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
 /**
@@ -39,14 +40,16 @@ public class AdvancedTerminal extends Terminal {
     }
 
     @Override
-    public void initInputReading(Consumer<String> inputHandler) throws UserExitedException {
+    public void initInputReading(Consumer<String> inputHandler, Runnable exitHandler){
         run = true;
         while (run) {
             String input;
             try {
                  input = reader.readLine("> ").trim();
             } catch (UserInterruptException e) {
-                throw new UserExitedException();
+                clearPreviousLine();
+                exitHandler.run();
+                return;
             }
 
             if (!input.isBlank()) {
