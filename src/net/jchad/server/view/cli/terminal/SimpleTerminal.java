@@ -1,5 +1,7 @@
 package net.jchad.server.view.cli.terminal;
 
+import sun.misc.Signal;
+
 import java.util.Scanner;
 import java.util.function.Consumer;
 
@@ -28,8 +30,10 @@ public class SimpleTerminal extends Terminal {
     }
 
     @Override
-    public void initInputReading(Consumer<String> inputHandler) {
+    public void initInputReading(Consumer<String> inputHandler, Runnable exitHandler) {
         run = true;
+
+        Signal.handle(new Signal("INT"), signal -> exitHandler.run());
 
         inputReader = new Thread(() -> {
             while (run) {

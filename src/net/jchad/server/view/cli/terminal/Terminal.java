@@ -32,8 +32,9 @@ public abstract class Terminal {
      * Read commands get returned via a {@link Consumer<String>}.
      *
      * @param inputHandler the method responsible for handling the read command.
+     * @param exitHandler this method will be called if the user terminates the CLI (using CTRL + C)
      */
-    public abstract void initInputReading(Consumer<String> inputHandler) throws UserExitedException;
+    public abstract void initInputReading(Consumer<String> inputHandler, Runnable exitHandler);
 
     /**
      * Close a terminal instance.

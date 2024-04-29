@@ -40,17 +40,17 @@ public class CLI implements MessageHandler {
 
         server.startServer();
 
-        try {
-            terminal.initInputReading(this::handleInput);
-        } catch (UserExitedException e) {
-            server.stopServer();
-            System.exit(0);
-        }
+        terminal.initInputReading(this::handleInput, this::handleExit);
     }
 
     private void handleInput(String command) {
         server.sendCommand(command);
         System.out.println("Sent command: " + command);
+    }
+
+    private void handleExit() {
+        server.stopServer();
+        System.exit(0);
     }
 
     @Override
