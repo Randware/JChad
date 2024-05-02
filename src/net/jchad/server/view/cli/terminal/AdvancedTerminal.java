@@ -7,7 +7,6 @@ import org.jline.terminal.TerminalBuilder;
 import org.jline.utils.InfoCmp;
 
 import java.io.IOException;
-import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
 /**

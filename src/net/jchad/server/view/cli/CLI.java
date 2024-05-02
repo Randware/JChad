@@ -33,6 +33,7 @@ public class CLI implements MessageHandler {
         server = new ServerController(this);
         try {
             terminal = new AdvancedTerminal();
+            throw new IOException();
         } catch (IOException e) {
             terminal = new SimpleTerminal();
             handleWarning("Terminal is not supported, using simplified terminal interface");
