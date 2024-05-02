@@ -166,6 +166,14 @@ public class ConfigManager {
 
     public void saveServerConfig() {
         // Implement saving here
+        try {
+            ConfigFile.SERVER_SETTINGS_CONFIG.save(this.getConfig().getServerSettings());
+            ConfigFile.INTERNAL_SETTINGS_CONFIG.save(this.getConfig().getInternalSettings());
+            ConfigFile.WHITELISTED_IPS_CONFIG.save(this.getConfig().getWhitelist());
+            ConfigFile.BLACKLISTED_IPS_CONFIG.save(this.getConfig().getBlacklist());
+        } catch (IOException e) {
+            messageHandler.handleError(new IOException("Failed saving server config to files", e));
+        }
     }
 
     /**

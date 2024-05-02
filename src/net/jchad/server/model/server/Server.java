@@ -2,7 +2,6 @@ package net.jchad.server.model.server;
 
 import net.jchad.server.model.config.*;
 import net.jchad.server.model.config.store.Config;
-import net.jchad.server.model.config.store.serverSettings.ServerSettings;
 import net.jchad.server.model.error.MessageHandler;
 
 // Contains all necessary server data
@@ -28,6 +27,10 @@ public class Server implements ConfigObserver {
         mainSocket = new MainSocket(config.getServerSettings().getPort(), this);
         new Thread(mainSocket).start();
         messageHandler.handleInfo("Server started on port " + config.getServerSettings().getPort());
+    }
+
+    private void executeCommand(String command) {
+
     }
 
     @Override
