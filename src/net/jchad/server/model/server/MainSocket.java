@@ -39,17 +39,12 @@ public final class MainSocket implements Runnable{
             while (true) {
 
                 Socket socket = serverSocket.accept();
-                socket.setSoTimeout(1000 * 1000); //TODO Use config values for the timeout
-
                 messageHandler.handleInfo("Socket connected: " + socket);
                 // Same as "new ServerThread(socket, handler).start();
                 executor.submit(new ServerThread(socket,  server));
 
-
             }
 
-        } catch (SocketTimeoutException ste) {
-            messageHandler.handleError(ste);
         } catch (Exception e) {
             messageHandler.handleFatalError(new Exception("An unknown error occurred", e));
         } finally {

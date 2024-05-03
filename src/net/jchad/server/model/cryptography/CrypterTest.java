@@ -48,12 +48,6 @@ public class CrypterTest {
         String decryptedString = crypterManager.decryptRSA(encryptedString);
         System.out.println(decryptedString); //Output: Helle World I love AES!*/
 
-        String textToSign = "Hello World! I love RSA signatures";
-        CrypterManager crypterManager = new CrypterManager();
-        crypterManager.setRemotePublicKey(crypterManager.getPublicKey());
-        String signature = crypterManager.sign(textToSign);
-        boolean isSignedCorrectly = crypterManager.verify(signature, textToSign);
-        System.out.println(isSignedCorrectly); //Output: true
 
 
     }
