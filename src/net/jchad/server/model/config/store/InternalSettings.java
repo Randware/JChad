@@ -1,4 +1,4 @@
-package net.jchad.server.model.config.store.internalSettings;
+package net.jchad.server.model.config.store;
 
 import net.jchad.shared.files.PathWatcher;
 
@@ -10,13 +10,13 @@ public class InternalSettings {
     /**
      * The maximum restart attempts for the {@link PathWatcher}, if it crashes.
      */
-    private int maxPathWatcherRestarts;
+    private int maxPathWatcherRestarts = 3;
 
     /**
      * The amount of milliseconds after which the restart counter for the {@link PathWatcher} gets reset.
      * Set to negative number to never reset the restart counter.
      */
-    private int pathWatcherRestartCountResetMilliseconds;
+    private int pathWatcherRestartCountResetMilliseconds = 5000;
 
     /**
      * This variable controls the {@code Thread.sleep()} duration in every iteration of a loop on each server-client connection:
@@ -28,26 +28,20 @@ public class InternalSettings {
      * <li>If this value is set to less than 0, a default value of 100 milliseconds will be used.</li>
      * </ul>
      */
-    private long connectionRefreshIntervalMillis;
+    private long connectionRefreshIntervalMillis = 100;
 
     /**
      * This determines how many times the client is allowed to send falsy data to the server .
      * If this limit gets exceeded the connection will close.
      * If this gets set to a negative number the default value (3) get used instead.
      */
-    private int retriesOnMalformedJSON;
+    private int retriesOnMalformedJSON = 3;
 
     /**
      * Default {@link InternalSettings} constructor
      */
     public InternalSettings() {
-        InternalSettings defaultInternalSettings = DefaultInternalSettings.get();
-
-        this.maxPathWatcherRestarts = defaultInternalSettings.getMaxPathWatcherRestarts();
-        this.pathWatcherRestartCountResetMilliseconds = defaultInternalSettings.getPathWatcherRestartCountResetMilliseconds();
-        this.connectionRefreshIntervalMillis = defaultInternalSettings.connectionRefreshIntervalMillis;
-        this.retriesOnMalformedJSON = defaultInternalSettings.retriesOnMalformedJSON;
-    }
+            }
 
     /**
      * Parameterized {@link InternalSettings} constructor

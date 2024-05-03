@@ -1,7 +1,5 @@
 package net.jchad.server.model.config.store;
 
-import net.jchad.server.model.config.store.internalSettings.InternalSettings;
-import net.jchad.server.model.config.store.serverSettings.ServerSettings;
 import net.jchad.server.model.networking.ip.IPAddress;
 
 import java.util.ArrayList;
