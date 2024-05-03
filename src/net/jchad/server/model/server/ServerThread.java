@@ -7,8 +7,7 @@ import net.jchad.server.model.config.store.InternalSettings;
 import net.jchad.server.model.error.MessageHandler;
 import net.jchad.server.model.networking.ip.IPAddress;
 import net.jchad.server.model.networking.ip.InvalidIPAddressException;
-import net.jchad.server.model.networking.packets.DefaultPacket;
-import net.jchad.server.model.networking.packets.PacketType;
+import net.jchad.server.model.networking.packets.*;
 
 
 import java.io.*;
@@ -25,7 +24,6 @@ public class ServerThread implements Runnable{
     private final PrintWriter printWriter;
     private final BufferedReader bufferedReader;
     private final JsonReader jsonReader;
-    private final JsonWriter jsonWriter;
     private final Socket socket;
     private final InetSocketAddress inetAddress;
     private String remoteAddress = "Unknown"; //The ip address of the client
@@ -52,19 +50,23 @@ public class ServerThread implements Runnable{
         bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         jsonReader = new JsonReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
         jsonReader.setLenient(true);
-        jsonWriter = new JsonWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));
     }
 
     public void run() {
+        messageHandler.handleInfo(remoteAddress + " tries to establish a connection to the Server");
         listOperation(list -> list.add(this));
         try {
-        if (isBanned()) {}
-        if (!isWhitelisted()) {}
+        if (isBanned()) {
+            printWriter.println(new BannedPacket().toJSON());
+            printWriter.flush();
+            close(remoteAddress + " is banned on this server");
+        }
+        if (!isWhitelisted()) {
+            printWriter.println(new NotWhitelistedPacket().toJSON());
+            printWriter.flush();
+            close(remoteAddress + " is banned on this server");
+        }
 
-            DefaultPacket dp = new DefaultPacket(PacketType.BANNED, "YOU ARE BANNED");
-            String json = dp.toJSON();
-            System.out.println(json);
-            System.out.println(dp.fromJSON(json));
 
 
 
@@ -96,12 +98,6 @@ public class ServerThread implements Runnable{
         }
         try {
             listOperation(list -> list.remove(this));
-            if (jsonWriter != null) {
-                jsonWriter.beginObject(); //This prevents an exception (Incomplete document)
-                jsonWriter.endObject(); //An empty stream counts as incomplete document. TO prevent this, this gets added to the stream
-                jsonWriter.flush();
-                jsonWriter.close();
-            }
             if (printWriter != null) {
                 printWriter.flush();
                 printWriter.close();
@@ -167,9 +163,7 @@ public class ServerThread implements Runnable{
         return jsonReader;
     }
 
-    public JsonWriter getJsonWriter() {
-        return jsonWriter;
-    }
+
 
     public String getRemoteAddress() {
         return remoteAddress;
