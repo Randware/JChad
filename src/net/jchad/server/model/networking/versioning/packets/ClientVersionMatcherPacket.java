@@ -1,4 +1,4 @@
-package net.jchad.server.model.networking.versioning;
+package net.jchad.server.model.networking.versioning.packets;
 
 import java.util.Arrays;
 

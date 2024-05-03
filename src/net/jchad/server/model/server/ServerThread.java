@@ -8,6 +8,7 @@ import net.jchad.server.model.error.MessageHandler;
 import net.jchad.server.model.networking.versioning.VersionMatcher;
 
 import java.io.*;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ public class ServerThread implements Runnable{
     private final JsonReader jsonReader;
     private final JsonWriter jsonWriter;
     private final Socket socket;
+    private final InetSocketAddress inetAddress;
     private String remoteAddress = "Unknown"; //The ip address of the client
 
     public ServerThread(Socket socket, Server server) throws IOException {
@@ -34,7 +36,10 @@ public class ServerThread implements Runnable{
             close("The provided socket is null!");
         }
         this.socket = socket;
-        this.remoteAddress = socket.getRemoteSocketAddress().toString();
+        this.inetAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
+        this.remoteAddress = inetAddress.toString();
+
+
         if (socket.getOutputStream() == null) {
             messageHandler.handleError(new NullPointerException("Could not connect to [%s]: The OutputStream is null".formatted(remoteAddress)));
             close("The output stream of the socket is null!");
@@ -73,20 +78,24 @@ public class ServerThread implements Runnable{
      * @throws IOException If an I/O error occurs. Should be caught by the MainSocket
      */
     public void close(String reason) {
+        if (Thread.currentThread().isInterrupted()) {
+            Thread.currentThread().interrupt();
+            return;
+        }
         try {
             listOperation(list -> list.remove(this));
+            if (jsonWriter != null) {
+                jsonWriter.beginObject(); //This prevents an exception (Incomplete document)
+                jsonWriter.endObject(); //An empty stream counts as incomplete document. TO prevent this, this gets added to the stream
+                jsonWriter.flush();
+                jsonWriter.close();
+            }
             if (printWriter != null) {
                 printWriter.flush();
                 printWriter.close();
             }
             if (bufferedReader != null) {
                 bufferedReader.close();
-            }
-            if (jsonWriter != null) {
-                jsonWriter.endArray();
-                jsonWriter.endObject();
-                jsonWriter.flush();
-                jsonWriter.close();
             }
             if (jsonReader != null) {
                 jsonReader.close();
@@ -154,6 +163,10 @@ public class ServerThread implements Runnable{
         return remoteAddress;
     }
 
+    public InetSocketAddress getInetAddress() {
+        return inetAddress;
+    }
+
     public Socket getSocket() {
         return socket;
     }
@@ -174,4 +187,6 @@ public class ServerThread implements Runnable{
         if (server.getConfig().getInternalSettings().getRetriesOnMalformedJSONduringVersioning() <= 0) return DefaultInternalSettings.get().getRetriesOnMalformedJSONduringVersioning();
         else return server.getConfig().getInternalSettings().getRetriesOnMalformedJSONduringVersioning();
     }
+
+
 }
