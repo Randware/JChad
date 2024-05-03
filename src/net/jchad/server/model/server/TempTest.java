@@ -2,9 +2,6 @@ package net.jchad.server.model.server;
 
 import net.jchad.server.model.error.MessageHandler;
 
-import java.awt.*;
-import java.awt.image.ImageObserver;
-import java.awt.image.ImageProducer;
 
 public class TempTest implements MessageHandler {
     public static void main(String[] args) {
