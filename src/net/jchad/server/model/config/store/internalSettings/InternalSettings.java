@@ -1,6 +1,6 @@
 package net.jchad.server.model.config.store.internalSettings;
 
-import net.jchad.server.model.config.ConfigWatcher;
+import net.jchad.shared.files.PathWatcher;
 
 /**
  * Stores internal settings the server uses to function.
@@ -8,15 +8,15 @@ import net.jchad.server.model.config.ConfigWatcher;
  */
 public class InternalSettings {
     /**
-     * The maximum restart attempts for the {@link ConfigWatcher}, if it crashes.
+     * The maximum restart attempts for the {@link PathWatcher}, if it crashes.
      */
-    private int maxConfigWatcherRestarts;
+    private int maxPathWatcherRestarts;
 
     /**
-     * The amount of milliseconds after which the restart counter for the {@link ConfigWatcher} gets reset.
+     * The amount of milliseconds after which the restart counter for the {@link PathWatcher} gets reset.
      * Set to negative number to never reset the restart counter.
      */
-    private int configWatcherRestartCountResetMilliseconds;
+    private int pathWatcherRestartCountResetMilliseconds;
 
     /**
      * This variable controls the {@code Thread.sleep()} duration in every iteration of a loop on each server-client connection:
@@ -43,8 +43,8 @@ public class InternalSettings {
     public InternalSettings() {
         InternalSettings defaultInternalSettings = DefaultInternalSettings.get();
 
-        this.maxConfigWatcherRestarts = defaultInternalSettings.getMaxConfigWatcherRestarts();
-        this.configWatcherRestartCountResetMilliseconds = defaultInternalSettings.getConfigWatcherRestartCountResetMilliseconds();
+        this.maxPathWatcherRestarts = defaultInternalSettings.getMaxPathWatcherRestarts();
+        this.pathWatcherRestartCountResetMilliseconds = defaultInternalSettings.getPathWatcherRestartCountResetMilliseconds();
         this.connectionRefreshIntervalMillis = defaultInternalSettings.connectionRefreshIntervalMillis;
         this.retriesOnMalformedJSON = defaultInternalSettings.retriesOnMalformedJSON;
     }
@@ -52,44 +52,44 @@ public class InternalSettings {
     /**
      * Parameterized {@link InternalSettings} constructor
      *
-     * @param maxConfigWatcherRestarts The maximum restart attempts for the {@link ConfigWatcher}, if it crashes.
-     * @param configWatcherRestartCountResetMilliseconds The amount of milliseconds after which the restart counter for the {@link ConfigWatcher} gets reset.
+     * @param maxPathWatcherRestarts The maximum restart attempts for the {@link PathWatcher}, if it crashes.
+     * @param PathWatcherRestartCountResetMilliseconds The amount of milliseconds after which the restart counter for the {@link PathWatcher} gets reset.
      *                                                   Set to negative number to never reset the restart counter.
      */
-    public InternalSettings(int maxConfigWatcherRestarts, int configWatcherRestartCountResetMilliseconds, long connectionRefreshIntervalMillis, int retriesOnMalformedJSON) {
-        this.maxConfigWatcherRestarts = maxConfigWatcherRestarts;
-        this.configWatcherRestartCountResetMilliseconds = configWatcherRestartCountResetMilliseconds;
+    public InternalSettings(int maxPathWatcherRestarts, int PathWatcherRestartCountResetMilliseconds, long connectionRefreshIntervalMillis, int retriesOnMalformedJSON) {
+        this.maxPathWatcherRestarts = maxPathWatcherRestarts;
+        this.pathWatcherRestartCountResetMilliseconds = PathWatcherRestartCountResetMilliseconds;
         this.connectionRefreshIntervalMillis = connectionRefreshIntervalMillis;
         this.retriesOnMalformedJSON = retriesOnMalformedJSON;
     }
 
     /**
-     * @return The maximum restart attempts for the {@link ConfigWatcher}, if it crashes.
+     * @return The maximum restart attempts for the {@link PathWatcher}, if it crashes.
      */
-    public int getMaxConfigWatcherRestarts() {
-        return maxConfigWatcherRestarts;
+    public int getMaxPathWatcherRestarts() {
+        return maxPathWatcherRestarts;
     }
 
     /**
-     * @param maxConfigWatcherRestarts The maximum restart attempts for the {@link ConfigWatcher}, if it crashes.
+     * @param maxPathWatcherRestarts The maximum restart attempts for the {@link PathWatcher}, if it crashes.
      */
-    public void setMaxConfigWatcherRestarts(int maxConfigWatcherRestarts) {
-        this.maxConfigWatcherRestarts = maxConfigWatcherRestarts;
+    public void setMaxPathWatcherRestarts(int maxPathWatcherRestarts) {
+        this.maxPathWatcherRestarts = maxPathWatcherRestarts;
     }
 
     /**
-     * @return The amount of milliseconds after which the restart counter for the {@link ConfigWatcher} gets reset.
+     * @return The amount of milliseconds after which the restart counter for the {@link PathWatcher} gets reset.
      */
-    public int getConfigWatcherRestartCountResetMilliseconds() {
-        return configWatcherRestartCountResetMilliseconds;
+    public int getPathWatcherRestartCountResetMilliseconds() {
+        return pathWatcherRestartCountResetMilliseconds;
     }
 
     /**
-     * @param configWatcherRestartCountResetMilliseconds The amount of milliseconds after which the restart counter for the {@link ConfigWatcher} gets reset.
+     * @param PathWatcherRestartCountResetMilliseconds The amount of milliseconds after which the restart counter for the {@link PathWatcher} gets reset.
      *                                                   Set to negative number to never reset the restart counter.
      */
-    public void setConfigWatcherRestartCountResetMilliseconds(int configWatcherRestartCountResetMilliseconds) {
-        this.configWatcherRestartCountResetMilliseconds = configWatcherRestartCountResetMilliseconds;
+    public void setPathWatcherRestartCountResetMilliseconds(int PathWatcherRestartCountResetMilliseconds) {
+        this.pathWatcherRestartCountResetMilliseconds = PathWatcherRestartCountResetMilliseconds;
     }
 
     /**

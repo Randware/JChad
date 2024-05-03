@@ -50,13 +50,13 @@ public class ConfigEditor {
         saveConfig();
     }
 
-    public void setMaxConfigWatcherRestarts(int maxConfigWatcherRestarts) {
-        internalSettings.setMaxConfigWatcherRestarts(maxConfigWatcherRestarts);
+    public void setMaxPathWatcherRestarts(int maxPathWatcherRestarts) {
+        internalSettings.setMaxPathWatcherRestarts(maxPathWatcherRestarts);
         saveConfig();
     }
 
-    public void setConfigWatcherRestartCountResetMilliseconds(int configWatcherRestartCountResetMilliseconds) {
-        internalSettings.setConfigWatcherRestartCountResetMilliseconds(configWatcherRestartCountResetMilliseconds);
+    public void setPathWatcherRestartCountResetMilliseconds(int PathWatcherRestartCountResetMilliseconds) {
+        internalSettings.setPathWatcherRestartCountResetMilliseconds(PathWatcherRestartCountResetMilliseconds);
         saveConfig();
     }
 
