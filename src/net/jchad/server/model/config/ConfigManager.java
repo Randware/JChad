@@ -169,8 +169,8 @@ public class ConfigManager {
         try {
             ConfigFile.SERVER_SETTINGS_CONFIG.save(this.getConfig().getServerSettings());
             ConfigFile.INTERNAL_SETTINGS_CONFIG.save(this.getConfig().getInternalSettings());
-            ConfigFile.WHITELISTED_IPS_CONFIG.save(this.getConfig().getWhitelist());
-            ConfigFile.BLACKLISTED_IPS_CONFIG.save(this.getConfig().getBlacklist());
+            ConfigFile.WHITELISTED_IPS_CONFIG.save(this.getConfig().getServerSettings().getWhitelistedIPs());
+            ConfigFile.BLACKLISTED_IPS_CONFIG.save(this.getConfig().getServerSettings().getBlacklistedIPs());
         } catch (IOException e) {
             messageHandler.handleError(new IOException("Failed saving server config to files", e));
         }
@@ -211,14 +211,14 @@ public class ConfigManager {
          * Load whitelist if feature is enabled
          */
         if (newConfig.getServerSettings().isWhitelist()) {
-            newConfig.setWhitelist(loadWhitelistedIPsConfig());
+            newConfig.getServerSettings().setWhitelistedIPs(loadWhitelistedIPsConfig());
         }
 
         /*
          * Load blacklist if feature is enabled
          */
         if (newConfig.getServerSettings().isBlacklist()) {
-            newConfig.setBlacklist(loadBlacklistedIPsConfig());
+            newConfig.getServerSettings().setBlacklistedIPs(loadBlacklistedIPsConfig());
         }
 
         return newConfig;

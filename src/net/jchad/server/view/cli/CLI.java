@@ -1,11 +1,11 @@
 package net.jchad.server.view.cli;
 
 import net.jchad.server.controller.ServerController;
-import net.jchad.shared.common.Util;
 import net.jchad.server.model.error.MessageHandler;
 import net.jchad.server.view.cli.terminal.AdvancedTerminal;
 import net.jchad.server.view.cli.terminal.SimpleTerminal;
 import net.jchad.server.view.cli.terminal.Terminal;
+import net.jchad.shared.common.Util;
 
 import java.io.IOException;
 

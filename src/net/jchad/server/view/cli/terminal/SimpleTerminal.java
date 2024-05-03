@@ -17,7 +17,6 @@ public class SimpleTerminal extends Terminal {
     private final Scanner scanner;
     private Thread inputReader;
 
-
     private boolean run;
 
     public SimpleTerminal() {

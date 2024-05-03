@@ -49,20 +49,4 @@ public class Config {
     public void setInternalSettings(InternalSettings internalSettings) {
         this.internalSettings = internalSettings;
     }
-
-    public ArrayList<IPAddress> getWhitelist() {
-        return whitelist;
-    }
-
-    public void setWhitelist(ArrayList<IPAddress> whitelist) {
-        this.whitelist = whitelist;
-    }
-
-    public ArrayList<IPAddress> getBlacklist() {
-        return blacklist;
-    }
-
-    public void setBlacklist(ArrayList<IPAddress> blacklist) {
-        this.blacklist = blacklist;
-    }
 }
