@@ -1,6 +1,6 @@
 package net.jchad.server.model.networking.packets;
 
-public class DefaultPacket implements Packet<DefaultPacket>{
+public class DefaultPacket implements Packet{
     private final PacketType packet_type;
     private final String message;
 
