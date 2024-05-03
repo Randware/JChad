@@ -45,6 +45,10 @@ public class Server implements ConfigObserver {
         return config;
     }
 
+    public MainSocket getMainSocket() {
+        return mainSocket;
+    }
+
     public MessageHandler getMessageHandler() {
         return messageHandler;
     }
