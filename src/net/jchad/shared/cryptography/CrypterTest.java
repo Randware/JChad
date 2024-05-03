@@ -1,12 +1,9 @@
-package net.jchad.server.model.cryptography;
-
-import net.jchad.server.model.cryptography.crypterUnits.TagUnit;
+package net.jchad.shared.cryptography;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.security.*;
-import java.util.Base64;
 
 public class CrypterTest {
     public static void main(String[] args) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, ImpossibleConversionException {

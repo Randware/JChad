@@ -1,4 +1,4 @@
-package net.jchad.server.model.common;
+package net.jchad.shared.common;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

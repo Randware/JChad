@@ -1,4 +1,4 @@
-package net.jchad.server.model.cryptography.crypterUnits;
+package net.jchad.shared.cryptography.crypterUnits;
 
 /**
  * These are different units to avoid exception

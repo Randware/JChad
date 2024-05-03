@@ -1,6 +1,4 @@
-package net.jchad.server.model.cryptography;
-
-import net.jchad.installer.exceptions.InvalidArgumentException;
+package net.jchad.shared.cryptography;
 
 public class ImpossibleConversionException extends Exception{
     public ImpossibleConversionException() {

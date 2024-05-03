@@ -54,7 +54,8 @@ public class ServerThread implements Runnable{
     public void run() {
         listOperation(list -> list.add(this));
         try {
-            VersionMatcher.matchVersion(this);
+
+
 
         }  catch (Exception e) {
             messageHandler.handleError(new Exception("An error occurred while connected to [%s]: %s".formatted(remoteAddress,e.getMessage()), e));

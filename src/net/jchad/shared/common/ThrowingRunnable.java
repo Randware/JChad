@@ -1,4 +1,4 @@
-package net.jchad.server.model.common;
+package net.jchad.shared.common;
 
 /**
  * Similar to {@link java.lang.Runnable} interface, but throws an {@link java.lang.Exception}

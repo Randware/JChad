@@ -1,7 +1,6 @@
-package net.jchad.server.model.cryptography;
+package net.jchad.shared.cryptography;
 
 import java.security.SecureRandom;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.HexFormat;
 import java.util.regex.Pattern;
