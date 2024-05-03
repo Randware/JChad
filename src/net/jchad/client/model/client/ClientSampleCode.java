@@ -32,6 +32,8 @@ public class ClientSampleCode {
         String str, str1;
 
 
+        str1 = br.readLine();
+
 
 
         // repeat as long as exit
@@ -42,9 +44,9 @@ public class ClientSampleCode {
             dos.flush();
 
             // receive from the server
-            //str1 = br.readLine();
+            str1 = br.readLine();
 
-            //System.out.println("[SERVER] " + str1);
+            System.out.println("[SERVER] " + str1);
         }
 
         // close connection.
