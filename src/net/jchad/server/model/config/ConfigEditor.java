@@ -1,7 +1,7 @@
 package net.jchad.server.model.config;
 
-import net.jchad.server.model.config.store.internalSettings.InternalSettings;
-import net.jchad.server.model.config.store.serverSettings.ServerSettings;
+import net.jchad.server.model.config.store.InternalSettings;
+import net.jchad.server.model.config.store.ServerSettings;
 
 // TODO: implement functionality for writing changed values to config files
 public class ConfigEditor {

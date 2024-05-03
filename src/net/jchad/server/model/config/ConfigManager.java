@@ -4,13 +4,12 @@ import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.dataformat.yaml.snakeyaml.error.MarkedYAMLException;
 import net.jchad.server.model.config.store.Config;
-import net.jchad.server.model.config.store.serverSettings.ServerSettings;
+import net.jchad.server.model.config.store.ServerSettings;
 import net.jchad.server.model.config.store.ConfigFile;
-import net.jchad.server.model.config.store.internalSettings.InternalSettings;
+import net.jchad.server.model.config.store.InternalSettings;
 import net.jchad.server.model.error.MessageHandler;
 import net.jchad.server.model.networking.ip.IPAddress;
 import net.jchad.server.model.networking.ip.InvalidIPAddressException;
-import net.jchad.server.model.networking.packets.DefaultPacket;
 import net.jchad.shared.files.PathWatcher;
 
 import java.io.IOException;

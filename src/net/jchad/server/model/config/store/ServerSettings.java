@@ -1,4 +1,4 @@
-package net.jchad.server.model.config.store.serverSettings;
+package net.jchad.server.model.config.store;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import net.jchad.server.model.networking.ip.IPAddress;
@@ -12,63 +12,53 @@ public class ServerSettings {
     /**
      * Require password to connect.
      */
-    private boolean requiresPassword;
+    private boolean requiresPassword = false;
 
     /**
      * Password required to connect.
      */
-    private String password;
+    private String password = "";
 
     /**
      * Only whitelisted IPs can connect.
      */
-    private boolean whitelist;
+    private boolean whitelist = false;
 
     /**
      * Whitelisted IPs (stored in separate "whitelisted-ips.yml" file).
      */
-    private ArrayList<IPAddress> whitelistedIPs;
+    private ArrayList<IPAddress> whitelistedIPs = new ArrayList<>();
 
     /**
      * Blacklisted IPs can't connect.
      */
-    private boolean blacklist;
+    private boolean blacklist = false;
 
     /**
      * Blacklisted IPs (stored in separate "blacklisted-ips.yml").
      */
-    private ArrayList<IPAddress> blacklistedIPs;
+    private ArrayList<IPAddress> blacklistedIPs = new ArrayList<>();
 
     /**
      * Hide usernames in all channels.
      */
-    private boolean strictlyAnonymous;
+    private boolean strictlyAnonymous = false;
 
     /**
      * Encrypt messages.
      */
-    private boolean encrypted;
+    private boolean encrypted = true;
 
     /**
      * Port the server runs on.
      */
-    private int port;
+    private int port = 13814;
 
     /**
      * Default constructor for default configuration.
      */
     public ServerSettings() {
-        ServerSettings defaultServerSettings = DefaultServerSettings.get();
 
-        this.requiresPassword = defaultServerSettings.isRequiresPassword();
-        this.password = defaultServerSettings.getPassword();
-        this.whitelist = defaultServerSettings.isWhitelist();
-        this.whitelistedIPs = defaultServerSettings.getWhitelistedIPs();
-        this.blacklist = defaultServerSettings.isBlacklist();
-        this.blacklistedIPs = defaultServerSettings.getBlacklistedIPs();
-        this.strictlyAnonymous = defaultServerSettings.isStrictlyAnonymous();
-        this.encrypted = defaultServerSettings.isEncrypted();
-        this.port = defaultServerSettings.getPort();
     }
 
     /**
