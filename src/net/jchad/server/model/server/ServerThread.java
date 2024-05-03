@@ -2,7 +2,7 @@ package net.jchad.server.model.server;
 
 import com.google.gson.stream.JsonReader;
 import net.jchad.server.model.config.store.Config;
-import net.jchad.server.model.config.store.internalSettings.DefaultInternalSettings;
+import net.jchad.server.model.config.store.InternalSettings;
 import net.jchad.server.model.error.MessageHandler;
 import net.jchad.server.model.networking.ip.IPAddress;
 import net.jchad.server.model.networking.ip.InvalidIPAddressException;
@@ -185,12 +185,12 @@ public class ServerThread implements Runnable{
      * @return
      */
     public long getConnectionRefreshIntervalMillis() {
-        if (server.getConfig().getInternalSettings().getConnectionRefreshIntervalMillis() < 0) return DefaultInternalSettings.get().getConnectionRefreshIntervalMillis();
+        if (server.getConfig().getInternalSettings().getConnectionRefreshIntervalMillis() < 0) return new InternalSettings().getConnectionRefreshIntervalMillis();
         else return server.getConfig().getInternalSettings().getConnectionRefreshIntervalMillis();
     }
 
-    public int  getRetriesOnMalformedJSON() {
-        if (server.getConfig().getInternalSettings().getRetriesOnMalformedJSON() <= 0) return DefaultInternalSettings.get().getRetriesOnMalformedJSON();
+    public int getRetriesOnMalformedJSON() {
+        if (server.getConfig().getInternalSettings().getRetriesOnMalformedJSON() <= 0) return new InternalSettings().getRetriesOnMalformedJSON();
         else return server.getConfig().getInternalSettings().getRetriesOnMalformedJSON();
     }
 
