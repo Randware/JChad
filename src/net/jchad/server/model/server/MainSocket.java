@@ -39,7 +39,7 @@ public final class MainSocket implements Runnable{
             while (true) {
 
                 Socket socket = serverSocket.accept();
-                messageHandler.handleInfo("Socket connected: " + socket);
+                //messageHandler.handleInfo("Socket connected: " + socket);
                 // Same as "new ServerThread(socket, handler).start();
                 executor.submit(new ServerThread(socket,  server));
 
