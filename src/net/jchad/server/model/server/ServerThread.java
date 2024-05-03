@@ -1,10 +1,15 @@
 package net.jchad.server.model.server;
 
+import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import net.jchad.server.model.config.store.Config;
 import net.jchad.server.model.config.store.internalSettings.DefaultInternalSettings;
 import net.jchad.server.model.error.MessageHandler;
+import net.jchad.server.model.networking.ip.IPAddress;
+import net.jchad.server.model.networking.ip.InvalidIPAddressException;
+import net.jchad.server.model.networking.packets.DefaultPacket;
+import net.jchad.server.model.networking.packets.PacketType;
 
 
 import java.io.*;
@@ -54,6 +59,13 @@ public class ServerThread implements Runnable{
     public void run() {
         listOperation(list -> list.add(this));
         try {
+        if (isBanned()) {}
+        if (!isWhitelisted()) {}
+
+            DefaultPacket dp = new DefaultPacket(PacketType.BANNED, "YOU ARE BANNED");
+            String json = dp.toJSON();
+            System.out.println(json);
+            System.out.println(dp.fromJSON(json));
 
 
 
@@ -184,10 +196,29 @@ public class ServerThread implements Runnable{
         else return server.getConfig().getInternalSettings().getConnectionRefreshIntervalMillis();
     }
 
-    public int  getRetriesOnMalformedJSONduringVersioning() {
+    public int  getRetriesOnMalformedJSON() {
         if (server.getConfig().getInternalSettings().getRetriesOnMalformedJSON() <= 0) return DefaultInternalSettings.get().getRetriesOnMalformedJSON();
         else return server.getConfig().getInternalSettings().getRetriesOnMalformedJSON();
     }
 
+    public boolean isBanned() {
+        try {
+            if (server.getConfig().getServerSettings().isBlacklist() && server.getConfig().getServerSettings().getBlacklistedIPs().contains(IPAddress.fromInetAddress(inetAddress.getAddress()))) {
+                return true;
+            }
+        } catch (InvalidIPAddressException e) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isWhitelisted() {
+        try {
+            if (server.getConfig().getServerSettings().isWhitelist() && server.getConfig().getServerSettings().getBlacklistedIPs().contains(IPAddress.fromInetAddress(inetAddress.getAddress()))) {
+                return true;
+            }
+        } catch (InvalidIPAddressException ignored) {}
+        return false;
+    }
 
 }

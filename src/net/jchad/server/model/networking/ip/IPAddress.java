@@ -1,5 +1,7 @@
 package net.jchad.server.model.networking.ip;
 
+import java.net.InetAddress;
+
 public interface IPAddress {
     static IPAddress fromString(String ipAddress) throws InvalidIPAddressException {
         try {
@@ -12,7 +14,9 @@ public interface IPAddress {
 
         throw new InvalidIPAddressException();
     }
-
+    static IPAddress fromInetAddress(InetAddress ipAddress) throws InvalidIPAddressException {
+        return fromString(ipAddress.getHostAddress());
+    }
     String getString();
 
     static boolean isValid(String ipAddress) {
