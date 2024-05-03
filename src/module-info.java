@@ -20,7 +20,7 @@ module net.jchad {
     exports net.jchad.installer.gui;
     exports net.jchad.installer.serializable to com.google.gson;
     opens net.jchad.client.model.client to javafx.fxml;
-    opens net.jchad.server.model.common to com.fasterxml.jackson.databind;
+    opens net.jchad.shared.common to com.fasterxml.jackson.databind;
     exports net.jchad.server.view to javafx.graphics;
     exports net.jchad.tests;
     opens net.jchad.server.model.config.store to com.fasterxml.jackson.databind;

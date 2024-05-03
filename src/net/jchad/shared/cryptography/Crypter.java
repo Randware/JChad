@@ -1,6 +1,6 @@
-package net.jchad.server.model.cryptography;
+package net.jchad.shared.cryptography;
 
-import net.jchad.server.model.cryptography.crypterUnits.TagUnit;
+import net.jchad.shared.cryptography.crypterUnits.TagUnit;
 
 import javax.crypto.*;
 import javax.crypto.spec.GCMParameterSpec;

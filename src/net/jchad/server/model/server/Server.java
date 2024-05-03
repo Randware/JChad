@@ -8,6 +8,7 @@ import net.jchad.server.model.error.MessageHandler;
 public class Server implements ConfigObserver {
     private final MessageHandler messageHandler;
     private ConfigManager configManager;
+    private final double version = 1.00;
 
     private MainSocket mainSocket;
     private Config config;

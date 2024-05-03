@@ -1,20 +1,13 @@
 package net.jchad.server.view.cli;
 
 import net.jchad.server.controller.ServerController;
-import net.jchad.server.model.common.Util;
+import net.jchad.shared.common.Util;
 import net.jchad.server.model.error.MessageHandler;
 import net.jchad.server.view.cli.terminal.AdvancedTerminal;
 import net.jchad.server.view.cli.terminal.SimpleTerminal;
 import net.jchad.server.view.cli.terminal.Terminal;
-import net.jchad.server.view.cli.terminal.UserExitedException;
-import org.jline.reader.LineReader;
-import org.jline.reader.LineReaderBuilder;
-import org.jline.terminal.TerminalBuilder;
-import org.jline.utils.InfoCmp;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Scanner;
 
 /**
  * TODO: Implement user input reading

@@ -14,11 +14,10 @@ import javafx.scene.text.TextFlow;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import net.jchad.server.controller.ServerController;
-import net.jchad.server.model.common.Util;
+import net.jchad.shared.common.Util;
 import net.jchad.server.model.error.MessageHandler;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Priority;
-import org.fxmisc.richtext.*;
 
 // Responsible for displaying server output in GUI mode
 public class GUI extends Application implements MessageHandler {
