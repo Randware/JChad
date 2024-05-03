@@ -14,6 +14,7 @@ module net.jchad {
     requires org.fxmisc.richtext;
     requires jdk.unsupported;
 
+
     opens net.jchad.client to javafx.fxml;
     opens net.jchad.server.model.config to com.fasterxml.jackson.databind;
     exports net.jchad.installer.gui;
@@ -24,5 +25,4 @@ module net.jchad {
     opens net.jchad.server.model.config.store to com.fasterxml.jackson.databind;
     opens net.jchad.server.model.config.store.internalSettings to com.fasterxml.jackson.databind;
     opens net.jchad.server.model.config.store.serverSettings to com.fasterxml.jackson.databind;
-    opens net.jchad.server.model.networking.packets to com.google.gson;
 }

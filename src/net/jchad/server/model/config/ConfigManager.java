@@ -10,10 +10,13 @@ import net.jchad.server.model.config.store.internalSettings.InternalSettings;
 import net.jchad.server.model.error.MessageHandler;
 import net.jchad.server.model.networking.ip.IPAddress;
 import net.jchad.server.model.networking.ip.InvalidIPAddressException;
+import net.jchad.server.model.networking.packets.DefaultPacket;
+import net.jchad.shared.files.PathWatcher;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.util.ArrayList;
 
@@ -31,11 +34,11 @@ import java.util.ArrayList;
         - Log missing value warning
     TODO: Implement configuration modification during runtime from within the program
         - Create set methods that modify config values directly, then notify server of changed config
-        - Need to write the changes to file without notifying the ConfigWatcher (maybe bring back the runUnsupervised() concept?)
-        - create method that pauses ConfigWatcher, then saves config, then continues ConfigWatcher
-    DONE: Make ConfigWatcher restart itself, when an error occurs
-        - As soon as ConfigWatcher fails, try restarting (maybe twice),
-        if it still fails, stop attempting to restart and disable the ConfigWatcher feature
+        - Need to write the changes to file without notifying the PathWatcher (maybe bring back the runUnsupervised() concept?)
+        - create method that pauses PathWatcher, then saves config, then continues PathWatcher
+    DONE: Make PathWatcher restart itself, when an error occurs
+        - As soon as PathWatcher fails, try restarting (maybe twice),
+        if it still fails, stop attempting to restart and disable the PathWatcher feature
     DONE: Fix IP string parsing ("192.168.0.1" for example is not valid) -> Wrote own implementation
         - This happens because the InetAddress class does a ip lookup every time and if it doesn't find the ip,
         it is deemed invalid. In addition to that, the validation process is very slow because of that.
@@ -45,7 +48,7 @@ import java.util.ArrayList;
     CANCELED: Maybe don't dynamically load whitelisted and blacklisted files
     DONE: Fix bug, where the program "fails" updating the config when creating it
         - Only happens if config directory not created yet, only happens in jar outside of IDE
-            - Creating config directory before running ConfigWatcher on it seems to fix it
+            - Creating config directory before running PathWatcher on it seems to fix it
     DONE: Rewrite structure, so error handling and logging becomes easier and less hacky
     DONE: Handle MismatchedInputException
         - This exception occurs when the ObjectMapper tries to parse an empty file
@@ -58,20 +61,20 @@ import java.util.ArrayList;
     DONE: Inform ConfigManager which WatchEvent has occurred
         - can check if the updated file is an actual config file (mentioned in previous entry)
         - can also log which file was changed
-    DONE: Fix live reloading multiple times -> pause ConfigWatcher when saving configs from program
+    DONE: Fix live reloading multiple times -> pause PathWatcher when saving configs from program
  */
 
 public class ConfigManager {
 
 
     /**
-     * Stores the instance of the {@link net.jchad.server.model.config.ConfigWatcher} instance,
+     * Stores the instance of the {@link PathWatcher} instance,
      * used for watching for file changes in config files.
      */
-    private ConfigWatcher configWatcher;
+    private PathWatcher pathWatcher;
 
     /**
-     * Stores the restartAttempts for the {@link net.jchad.server.model.config.ConfigWatcher}
+     * Stores the restartAttempts for the {@link PathWatcher}
      */
     private int restartAttempts = 0;
 
@@ -119,7 +122,7 @@ public class ConfigManager {
 
         this.configEditor = new ConfigEditor(this);
 
-        initializeConfigWatcher();
+        initializePathWatcher();
     }
 
     /**
@@ -177,12 +180,12 @@ public class ConfigManager {
     }
 
     /**
-     * Initializes the ConfigWatcher for the config file directory.
+     * Initializes the PathWatcher for the config file directory.
      */
-    private void initializeConfigWatcher() {
-        configWatcher = new ConfigWatcher(ConfigFile.getStorageDirectory(), this::configUpdated, this::handleConfigWatcherError);
+    private void initializePathWatcher() {
+        pathWatcher = new PathWatcher(ConfigFile.getStorageDirectory(), this::configUpdated, this::handlePathWatcherError);
 
-        configWatcher.start();
+        pathWatcher.start();
     }
 
     /**
@@ -415,9 +418,13 @@ public class ConfigManager {
     /**
      * This method gets called when a config was updated
      *
-     * @param event event that was detected by the {@link ConfigWatcher}
+     * @param event event that was detected by the {@link PathWatcher}
      */
     private void configUpdated(WatchEvent<?> event) {
+        if(event.kind() != StandardWatchEventKinds.ENTRY_MODIFY) {
+            return;
+        }
+
         Path modifiedConfig = ConfigFile.getStorageDirectory().resolve((Path) event.context());
         String configName = modifiedConfig.getFileName().toString();
 
@@ -435,34 +442,34 @@ public class ConfigManager {
     }
 
     /**
-     * This method gets called when an error occurred in the {@link ConfigWatcher}
+     * This method gets called when an error occurred in the {@link PathWatcher}
      *
      * @param e Exception that was thrown
      */
-    private void handleConfigWatcherError(Exception e) {
-        int restartMillis = config.getInternalSettings().getConfigWatcherRestartCountResetMilliseconds();
-        if (System.currentTimeMillis() - configWatcher.getStartTimestamp() >= restartMillis) {
+    private void handlePathWatcherError(Exception e) {
+        int restartMillis = config.getInternalSettings().getPathWatcherRestartCountResetMilliseconds();
+        if (System.currentTimeMillis() - pathWatcher.getStartTimestamp() >= restartMillis) {
             restartAttempts = 0;
         }
 
         restartAttempts++;
 
-        int maxRestarts = config.getInternalSettings().getMaxConfigWatcherRestarts();
+        int maxRestarts = config.getInternalSettings().getMaxPathWatcherRestarts();
 
         if (restartAttempts <= maxRestarts) {
-            messageHandler.handleError(new IOException("The ConfigWatcher thread has run into an unexpected error: " + e));
+            messageHandler.handleError(new IOException("The PathWatcher thread has run into an unexpected error: " + e));
             messageHandler.handleWarning("Attempting restart " + restartAttempts + " ...");
 
-            if (configWatcher != null) {
-                configWatcher.stopWatcher();
+            if (pathWatcher != null) {
+                pathWatcher.stopWatcher();
             }
 
-            initializeConfigWatcher();
+            initializePathWatcher();
         } else {
-            messageHandler.handleError(new IOException("Failed ConfigWatcher restart after " + maxRestarts + " attempts: " + e));
+            messageHandler.handleError(new IOException("Failed PathWatcher restart after " + maxRestarts + " attempts: " + e));
             messageHandler.handleWarning("Registering live updates in config files is no longer possible.");
 
-            configWatcher.stopWatcher();
+            pathWatcher.stopWatcher();
         }
     }
 }

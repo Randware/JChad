@@ -1,7 +1,6 @@
-package net.jchad.server.model.config;
+package net.jchad.shared.files;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,9 +8,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
- * Can be used to run a separate {@link Thread} checking for file changes in a specific directory.
+ * Can be used to run a separate {@link Thread} checking for file system changes in a specific directory.
  */
-public class ConfigWatcher extends Thread {
+public class PathWatcher extends Thread {
     /**
      * Path which will be watched.
      */
@@ -35,12 +34,12 @@ public class ConfigWatcher extends Thread {
     private boolean running = true;
 
     /**
-     * Set true to stop the ConfigWatcher.
+     * Set true to stop the PathWatcher.
      */
     private boolean exit = false;
 
     /**
-     * Stores a timestamp of when this ConfigWatcher was started
+     * Stores a timestamp of when this PathWatcher was started
      */
     private long startTimestamp;
 
@@ -57,8 +56,10 @@ public class ConfigWatcher extends Thread {
      * @param path     {@link Path} which will be watched
      * @param callback Code that gets called when an event was registered.
      *                 Also returns the {@link WatchEvent} that got registered.
+     * @param errorCallback The method which will be called when the PathWatcher
+     *                      runs into an error.
      */
-    public ConfigWatcher(Path path, Consumer<WatchEvent<?>> callback, Consumer<Exception> errorCallback) {
+    public PathWatcher(Path path, Consumer<WatchEvent<?>> callback, Consumer<Exception> errorCallback) {
         this.path = path;
         this.callback = callback;
         this.errorCallback = errorCallback;
@@ -88,7 +89,7 @@ public class ConfigWatcher extends Thread {
     }
 
     /**
-     * Stops the ConfigWatcher thread gracefully.
+     * Stops the PathWatcher thread gracefully.
      */
     public void stopWatcher() {
         exit = true;
@@ -96,9 +97,7 @@ public class ConfigWatcher extends Thread {
     }
 
     /**
-     * Run the actual loop checking for file modifications in the specified path.
-     *
-     * @throws UncheckedIOException If the thread runs into a file system error
+     * Run the actual loop checking for file system modifications and creations in the specified path.
      */
     @Override
     public void run() {
@@ -123,19 +122,21 @@ public class ConfigWatcher extends Thread {
                     } catch (InterruptedException ignore) {
                     }
 
-
                     for (final WatchEvent<?> event : key.pollEvents()) {
                         Path modifiedConfig = path.resolve((Path) event.context());
 
                         if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE) {
                             // Add newly created file to map with timestamp
                             recentlyCreatedFiles.put(modifiedConfig, System.currentTimeMillis());
+                            callback.accept(event);
                         } else if (event.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
                             if (!recentlyCreatedFiles.containsKey(modifiedConfig) ||
                                     System.currentTimeMillis() - recentlyCreatedFiles.get(modifiedConfig) > TimeUnit.MILLISECONDS.toMillis(100)) {
                                 recentlyCreatedFiles.remove(modifiedConfig);
                                 callback.accept(event);
                             }
+                        } else {
+                            callback.accept(event);
                         }
                     }
 
