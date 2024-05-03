@@ -61,10 +61,11 @@ public class ServerThread implements Runnable{
             close(remoteAddress + " is banned on this server");
             return;
         }
+
         if (!isWhitelisted()) {
             printWriter.println(new NotWhitelistedPacket().toJSON());
             printWriter.flush();
-            close(remoteAddress + " is banned on this server");
+            close(remoteAddress + " is not whitelisted on this server");
             return;
         }
 
@@ -90,12 +91,12 @@ public class ServerThread implements Runnable{
      * @throws IOException If an I/O error occurs. Should be caught by the MainSocket
      */
     public void close(String reason) {
-        printWriter.println(new ConnectionClosedPacket(reason).toJSON()); //Sends the client a notification that the connection gets closed
-        printWriter.flush();
         if (Thread.currentThread().isInterrupted()) {
             Thread.currentThread().interrupt();
             return;
         }
+        printWriter.println(new ConnectionClosedPacket(reason).toJSON());//Sends the client a notification that the connection gets closed
+        printWriter.flush();
         try {
             listOperation(list -> list.remove(this));
             if (printWriter != null) {
@@ -206,15 +207,17 @@ public class ServerThread implements Runnable{
         return false;
     }
 
+    /**
+     * Returns if the ip address is allowed to join
+     * @return When the whitelist is true and the ip of the client is in the allowed ips this returns true
+     */
     public boolean isWhitelisted() {
         try {
-            if (server.getConfig().getServerSettings().isWhitelist() && server.getConfig().getServerSettings().getBlacklistedIPs().contains(IPAddress.fromString(remoteAddress.substring(0, remoteAddress.lastIndexOf(":"))))) {
-                return false;
-            }
-        } catch (InvalidIPAddressException ignored) {
-            return false;
-        }
-        return true;
+            if (server.getConfig().getServerSettings().isWhitelist() && server.getConfig().getServerSettings().getWhitelistedIPs().contains(IPAddress.fromString(remoteAddress.substring(0, remoteAddress.lastIndexOf(":"))))) {
+                return true;
+            } else return !server.getConfig().getServerSettings().isWhitelist();
+        } catch (InvalidIPAddressException ignored) {}
+        return false;
     }
 
 }

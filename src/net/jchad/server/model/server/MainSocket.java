@@ -1,7 +1,9 @@
 package net.jchad.server.model.server;
 
 import net.jchad.server.model.error.MessageHandler;
+import net.jchad.shared.cryptography.CrypterManager;
 
+import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
@@ -19,6 +21,7 @@ public final class MainSocket implements Runnable{
     private final int port;
     private ExecutorService executor;
     private final Server server;
+    private final String base64AESkey;
 
 
     protected MainSocket(int port, Server server) {
@@ -30,6 +33,8 @@ public final class MainSocket implements Runnable{
         if (1024 > port || port > 49151) messageHandler.handleWarning("Server-Port is outside of the User ports! Refer to https://en.wikipedia.org/wiki/Registered_port");
         this.port = port;
         executor = Executors.newVirtualThreadPerTaskExecutor();
+        base64AESkey = new CrypterManager().getAESKey();
+
     }
 
 

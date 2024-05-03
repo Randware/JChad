@@ -34,7 +34,7 @@ public class ClientSampleCode {
 
         str1 = br.readLine();
 
-
+        System.out.println(str1);
 
         // repeat as long as exit
         // is not typed at client
