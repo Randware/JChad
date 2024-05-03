@@ -22,9 +22,7 @@ module net.jchad {
     opens net.jchad.client.model.client to javafx.fxml;
     opens net.jchad.shared.common to com.fasterxml.jackson.databind;
     exports net.jchad.server.view to javafx.graphics;
-    exports net.jchad.tests;
     opens net.jchad.server.model.config.store to com.fasterxml.jackson.databind;
     opens net.jchad.server.model.config.store.internalSettings to com.fasterxml.jackson.databind;
     opens net.jchad.server.model.config.store.serverSettings to com.fasterxml.jackson.databind;
-    opens net.jchad.server.model.networking.versioning.packets to com.google.gson;
 }

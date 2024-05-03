@@ -5,7 +5,7 @@ import com.google.gson.stream.JsonWriter;
 import net.jchad.server.model.config.store.Config;
 import net.jchad.server.model.config.store.internalSettings.DefaultInternalSettings;
 import net.jchad.server.model.error.MessageHandler;
-import net.jchad.server.model.networking.versioning.VersionMatcher;
+
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -185,8 +185,8 @@ public class ServerThread implements Runnable{
     }
 
     public int  getRetriesOnMalformedJSONduringVersioning() {
-        if (server.getConfig().getInternalSettings().getRetriesOnMalformedJSONduringVersioning() <= 0) return DefaultInternalSettings.get().getRetriesOnMalformedJSONduringVersioning();
-        else return server.getConfig().getInternalSettings().getRetriesOnMalformedJSONduringVersioning();
+        if (server.getConfig().getInternalSettings().getRetriesOnMalformedJSON() <= 0) return DefaultInternalSettings.get().getRetriesOnMalformedJSON();
+        else return server.getConfig().getInternalSettings().getRetriesOnMalformedJSON();
     }
 
 

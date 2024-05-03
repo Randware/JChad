@@ -114,7 +114,7 @@ public class GUI extends Application implements MessageHandler {
 
         scrollPane.prefWidthProperty().bind(scene.widthProperty());
         scrollPane.prefHeightProperty().bind(scene.heightProperty().subtract(menuBar.getHeight() + cmdField.getHeight() + 20));
-
+        standardFontSizeMethod();
     }
 
     private void changeFontSize(int size) {

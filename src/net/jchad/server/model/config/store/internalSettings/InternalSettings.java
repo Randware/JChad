@@ -31,11 +31,11 @@ public class InternalSettings {
     private long connectionRefreshIntervalMillis;
 
     /**
-     * This determines how many times the client is allowed to send falsy data to the server during the {@link net.jchad.server.model.networking.versioning versioning} process.
+     * This determines how many times the client is allowed to send falsy data to the server .
      * If this limit gets exceeded the connection will close.
      * If this gets set to a negative number the default value (3) get used instead.
      */
-    private int retriesOnMalformedJSONduringVersioning;
+    private int retriesOnMalformedJSON;
 
     /**
      * Default {@link InternalSettings} constructor
@@ -46,7 +46,7 @@ public class InternalSettings {
         this.maxConfigWatcherRestarts = defaultInternalSettings.getMaxConfigWatcherRestarts();
         this.configWatcherRestartCountResetMilliseconds = defaultInternalSettings.getConfigWatcherRestartCountResetMilliseconds();
         this.connectionRefreshIntervalMillis = defaultInternalSettings.connectionRefreshIntervalMillis;
-        this.retriesOnMalformedJSONduringVersioning = defaultInternalSettings.retriesOnMalformedJSONduringVersioning;
+        this.retriesOnMalformedJSON = defaultInternalSettings.retriesOnMalformedJSON;
     }
 
     /**
@@ -56,11 +56,11 @@ public class InternalSettings {
      * @param configWatcherRestartCountResetMilliseconds The amount of milliseconds after which the restart counter for the {@link ConfigWatcher} gets reset.
      *                                                   Set to negative number to never reset the restart counter.
      */
-    public InternalSettings(int maxConfigWatcherRestarts, int configWatcherRestartCountResetMilliseconds, long connectionRefreshIntervalMillis, int retriesOnMalformedJSONduringVersioning) {
+    public InternalSettings(int maxConfigWatcherRestarts, int configWatcherRestartCountResetMilliseconds, long connectionRefreshIntervalMillis, int retriesOnMalformedJSON) {
         this.maxConfigWatcherRestarts = maxConfigWatcherRestarts;
         this.configWatcherRestartCountResetMilliseconds = configWatcherRestartCountResetMilliseconds;
         this.connectionRefreshIntervalMillis = connectionRefreshIntervalMillis;
-        this.retriesOnMalformedJSONduringVersioning = retriesOnMalformedJSONduringVersioning;
+        this.retriesOnMalformedJSON = retriesOnMalformedJSON;
     }
 
     /**
@@ -108,17 +108,17 @@ public class InternalSettings {
 
     /**
      *
-     * @return how many times the client is allowed to send falsy data to the server during the {@link net.jchad.server.model.networking.versioning versioning} process.
+     * @return how many times the client is allowed to send falsy data to the server.
      */
-    public int getRetriesOnMalformedJSONduringVersioning() {
-        return retriesOnMalformedJSONduringVersioning;
+    public int getRetriesOnMalformedJSON() {
+        return retriesOnMalformedJSON;
     }
 
     /**
      *
-     * @param retriesOnMalformedJSONduringVersioning how many times the client is allowed to send falsy data to the server during the {@link net.jchad.server.model.networking.versioning versioning} process.
+     * @param retriesOnMalformedJSON how many times the client is allowed to send falsy data to the server process.
      */
-    public void setRetriesOnMalformedJSONduringVersioning(int retriesOnMalformedJSONduringVersioning) {
-        this.retriesOnMalformedJSONduringVersioning = retriesOnMalformedJSONduringVersioning;
+    public void setRetriesOnMalformedJSON(int retriesOnMalformedJSON) {
+        this.retriesOnMalformedJSON = retriesOnMalformedJSON;
     }
 }
