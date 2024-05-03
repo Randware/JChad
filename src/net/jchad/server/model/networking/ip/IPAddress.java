@@ -14,9 +14,7 @@ public interface IPAddress {
 
         throw new InvalidIPAddressException();
     }
-    static IPAddress fromInetAddress(InetAddress ipAddress) throws InvalidIPAddressException {
-        return fromString(ipAddress.getHostAddress());
-    }
+
     String getString();
 
     static boolean isValid(String ipAddress) {

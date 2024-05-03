@@ -1,8 +1,9 @@
-package net.jchad.server.model.networking.packets;
+package net.jchad.shared.packets;
 
 public enum PacketType {
     BANNED ,
-    NOT_WHITELISTED;
+    NOT_WHITELISTED,
+    CONNECTION_CLOSED;
 
 
 
