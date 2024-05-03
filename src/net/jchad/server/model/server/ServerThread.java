@@ -1,13 +1,12 @@
 package net.jchad.server.model.server;
 
 import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
 import net.jchad.server.model.config.store.Config;
-import net.jchad.server.model.config.store.InternalSettings;
+import net.jchad.server.model.config.store.internalSettings.DefaultInternalSettings;
 import net.jchad.server.model.error.MessageHandler;
 import net.jchad.server.model.networking.ip.IPAddress;
 import net.jchad.server.model.networking.ip.InvalidIPAddressException;
-import net.jchad.server.model.networking.packets.*;
+import net.jchad.shared.packets.*;
 
 
 import java.io.*;
@@ -39,7 +38,7 @@ public class ServerThread implements Runnable{
         }
         this.socket = socket;
         this.inetAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
-        this.remoteAddress = inetAddress.toString();
+        this.remoteAddress = inetAddress.toString().replace("/", "");
 
 
         if (socket.getOutputStream() == null) {
@@ -60,15 +59,14 @@ public class ServerThread implements Runnable{
             printWriter.println(new BannedPacket().toJSON());
             printWriter.flush();
             close(remoteAddress + " is banned on this server");
+            return;
         }
         if (!isWhitelisted()) {
             printWriter.println(new NotWhitelistedPacket().toJSON());
             printWriter.flush();
             close(remoteAddress + " is banned on this server");
+            return;
         }
-
-
-
 
         }  catch (Exception e) {
             messageHandler.handleError(new Exception("An error occurred while connected to [%s]: %s".formatted(remoteAddress,e.getMessage()), e));
@@ -92,6 +90,8 @@ public class ServerThread implements Runnable{
      * @throws IOException If an I/O error occurs. Should be caught by the MainSocket
      */
     public void close(String reason) {
+        printWriter.println(new ConnectionClosedPacket(reason).toJSON()); //Sends the client a notification that the connection gets closed
+        printWriter.flush();
         if (Thread.currentThread().isInterrupted()) {
             Thread.currentThread().interrupt();
             return;
@@ -185,18 +185,19 @@ public class ServerThread implements Runnable{
      * @return
      */
     public long getConnectionRefreshIntervalMillis() {
-        if (server.getConfig().getInternalSettings().getConnectionRefreshIntervalMillis() < 0) return new InternalSettings().getConnectionRefreshIntervalMillis();
+        if (server.getConfig().getInternalSettings().getConnectionRefreshIntervalMillis() < 0) return DefaultInternalSettings.get().getConnectionRefreshIntervalMillis();
         else return server.getConfig().getInternalSettings().getConnectionRefreshIntervalMillis();
     }
 
     public int  getRetriesOnMalformedJSON() {
-        if (server.getConfig().getInternalSettings().getRetriesOnMalformedJSON() <= 0) return new InternalSettings().getRetriesOnMalformedJSON();
+        if (server.getConfig().getInternalSettings().getRetriesOnMalformedJSON() <= 0) return DefaultInternalSettings.get().getRetriesOnMalformedJSON();
         else return server.getConfig().getInternalSettings().getRetriesOnMalformedJSON();
     }
 
     public boolean isBanned() {
         try {
-            if (server.getConfig().getServerSettings().isBlacklist() && server.getConfig().getServerSettings().getBlacklistedIPs().contains(IPAddress.fromInetAddress(inetAddress.getAddress()))) {
+
+            if (server.getConfig().getServerSettings().isBlacklist() && server.getConfig().getServerSettings().getBlacklistedIPs().contains(IPAddress.fromString(remoteAddress.substring(0, remoteAddress.lastIndexOf(":"))))) {
                 return true;
             }
         } catch (InvalidIPAddressException e) {
@@ -207,11 +208,13 @@ public class ServerThread implements Runnable{
 
     public boolean isWhitelisted() {
         try {
-            if (server.getConfig().getServerSettings().isWhitelist() && server.getConfig().getServerSettings().getBlacklistedIPs().contains(IPAddress.fromInetAddress(inetAddress.getAddress()))) {
-                return true;
+            if (server.getConfig().getServerSettings().isWhitelist() && server.getConfig().getServerSettings().getBlacklistedIPs().contains(IPAddress.fromString(remoteAddress.substring(0, remoteAddress.lastIndexOf(":"))))) {
+                return false;
             }
-        } catch (InvalidIPAddressException ignored) {}
-        return false;
+        } catch (InvalidIPAddressException ignored) {
+            return false;
+        }
+        return true;
     }
 
 }
