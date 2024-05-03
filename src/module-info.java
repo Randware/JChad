@@ -13,7 +13,7 @@ module net.jchad {
     requires org.jline;
     requires org.fxmisc.richtext;
     requires jdk.unsupported;
-    requires info.picocli;
+
 
     opens net.jchad.client to javafx.fxml;
     opens net.jchad.server.model.config to com.fasterxml.jackson.databind;
