@@ -1,6 +1,6 @@
 package net.jchad.server.model.chats;
 
-import net.jchad.server.model.networking.ip.IPAddress;
+import net.jchad.shared.networking.ip.IPAddress;
 
 public class ChatMessage {
     private long id;
@@ -20,5 +20,21 @@ public class ChatMessage {
         this.timestamp = timestamp;
         this.senderName = null;
         this.senderIP = null;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public String getSenderName() {
+        return senderName;
+    }
+
+    public IPAddress getSenderIP() {
+        return senderIP;
     }
 }

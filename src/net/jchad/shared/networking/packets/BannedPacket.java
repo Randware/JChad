@@ -1,4 +1,4 @@
-package net.jchad.shared.packets;
+package net.jchad.shared.networking.packets;
 
 public class BannedPacket extends DefaultPacket{
     public BannedPacket() {

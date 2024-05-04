@@ -1,4 +1,4 @@
-package net.jchad.shared.packets;
+package net.jchad.shared.networking.packets;
 
 public class NotWhitelistedPacket extends DefaultPacket{
     public NotWhitelistedPacket() {

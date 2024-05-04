@@ -1,20 +1,41 @@
 package net.jchad.server.model.chats;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import net.jchad.shared.networking.ip.IPAddress;
+import net.jchad.shared.networking.ip.IPv4Address;
+import net.jchad.shared.networking.ip.InvalidIPAddressException;
+
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
+/**
+ * TODO: Fix serialization error for IPAddress with GSON
+ * TODO: Implement config loading and saving
+ * TODO: Make the storage location for the ChatConfig retrievable from the outside, necessary for config validation
+ */
 public class Chat {
+    private Gson gson;
+
     private String name;
     private ArrayList<ChatMessage> messages;
     private ChatConfig config;
 
     private Path savePath;
+    private Path messagesSavePath;
 
     public Chat(String name) throws IOException {
+        this.gson = new GsonBuilder().create();
+
         this.name = name;
+        this.messages = new ArrayList<>();
+        messages.add(new ChatMessage(1, System.currentTimeMillis(), null, null));
 
         savePath = ChatManager.getChatsSavePath().resolve(name);
+        messagesSavePath = savePath.resolve("messages.json");
 
         loadMessages();
     }
@@ -30,12 +51,21 @@ public class Chat {
     }
 
     private void saveMessages() throws IOException {
-        // Save messages to file here
+        if(!Files.exists(savePath)) {
+            Files.createDirectory(savePath);
+        }
+
+        Files.writeString(Files.createFile(messagesSavePath), gson.toJson(messages));
     }
 
     private void loadMessages() throws IOException {
         // Load saved messages from file here
         // If not messages are saved in this path yet, create all files first.
+        if(!Files.exists(messagesSavePath)) {
+            saveMessages();
+        }
+
+        this.messages = gson.fromJson(Files.readString(messagesSavePath), new TypeToken<ArrayList<ChatMessage>>(){}.getType());
     }
 
     public String getName() {

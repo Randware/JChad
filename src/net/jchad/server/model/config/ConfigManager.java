@@ -8,8 +8,8 @@ import net.jchad.server.model.config.store.ServerSettings;
 import net.jchad.server.model.config.store.ConfigFile;
 import net.jchad.server.model.config.store.InternalSettings;
 import net.jchad.server.model.error.MessageHandler;
-import net.jchad.server.model.networking.ip.IPAddress;
-import net.jchad.server.model.networking.ip.InvalidIPAddressException;
+import net.jchad.shared.networking.ip.IPAddress;
+import net.jchad.shared.networking.ip.InvalidIPAddressException;
 import net.jchad.shared.files.PathWatcher;
 
 import java.io.IOException;
@@ -64,8 +64,6 @@ import java.util.ArrayList;
  */
 
 public class ConfigManager {
-
-
     /**
      * Stores the instance of the {@link PathWatcher} instance,
      * used for watching for file changes in config files.
@@ -182,7 +180,11 @@ public class ConfigManager {
      * Initializes the PathWatcher for the config file directory.
      */
     private void initializePathWatcher() {
-        pathWatcher = new PathWatcher(ConfigFile.getStorageDirectory(), this::configUpdated, this::handlePathWatcherError);
+        try {
+            pathWatcher = new PathWatcher(ConfigFile.getStorageDirectory(), this::configUpdated, this::handlePathWatcherError);
+        } catch (IOException e) {
+            handlePathWatcherError(new IOException("Failed initializing config watching", e));
+        }
 
         pathWatcher.start();
     }
