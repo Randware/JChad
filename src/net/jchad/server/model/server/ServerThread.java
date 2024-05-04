@@ -4,9 +4,9 @@ import com.google.gson.stream.JsonReader;
 import net.jchad.server.model.config.store.Config;
 import net.jchad.server.model.config.store.InternalSettings;
 import net.jchad.server.model.error.MessageHandler;
-import net.jchad.server.model.networking.ip.IPAddress;
-import net.jchad.server.model.networking.ip.InvalidIPAddressException;
-import net.jchad.shared.packets.*;
+import net.jchad.shared.networking.ip.IPAddress;
+import net.jchad.shared.networking.ip.InvalidIPAddressException;
+import net.jchad.shared.networking.packets.*;
 
 
 import java.io.*;

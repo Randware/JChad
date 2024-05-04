@@ -1,4 +1,4 @@
-package net.jchad.server.model.networking.ip;
+package net.jchad.shared.networking.ip;
 
 public class InvalidIPAddressException extends Exception {
 }

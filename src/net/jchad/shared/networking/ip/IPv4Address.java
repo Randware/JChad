@@ -1,6 +1,5 @@
-package net.jchad.server.model.networking.ip;
+package net.jchad.shared.networking.ip;
 
-import java.io.Serializable;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
 import java.util.Arrays;

@@ -1,6 +1,6 @@
 package net.jchad.server.model.config.store;
 
-import net.jchad.server.model.networking.ip.IPAddress;
+import net.jchad.shared.networking.ip.IPAddress;
 
 import java.util.ArrayList;
 

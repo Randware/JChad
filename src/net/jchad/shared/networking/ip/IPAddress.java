@@ -1,6 +1,4 @@
-package net.jchad.server.model.networking.ip;
-
-import java.net.InetAddress;
+package net.jchad.shared.networking.ip;
 
 public interface IPAddress {
     static IPAddress fromString(String ipAddress) throws InvalidIPAddressException {

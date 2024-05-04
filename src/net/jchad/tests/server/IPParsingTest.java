@@ -1,9 +1,9 @@
 package net.jchad.tests.server;
 
-import net.jchad.server.model.networking.ip.IPAddress;
-import net.jchad.server.model.networking.ip.IPv4Address;
-import net.jchad.server.model.networking.ip.IPv6Address;
-import net.jchad.server.model.networking.ip.InvalidIPAddressException;
+import net.jchad.shared.networking.ip.IPAddress;
+import net.jchad.shared.networking.ip.IPv4Address;
+import net.jchad.shared.networking.ip.IPv6Address;
+import net.jchad.shared.networking.ip.InvalidIPAddressException;
 
 public class IPParsingTest {
     public static void main(String[] args) throws InvalidIPAddressException {

@@ -1,9 +1,9 @@
 package net.jchad.shared.files;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.nio.file.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -12,9 +12,11 @@ import java.util.function.Consumer;
  */
 public class PathWatcher extends Thread {
     /**
-     * Path which will be watched.
+     * The {@link Path}s that will be watched.
      */
-    private final Path path;
+    private ArrayList<Path> paths;
+
+    private WatchService watcher;
 
     /**
      * Code that gets called when an event was registered.
@@ -53,16 +55,33 @@ public class PathWatcher extends Thread {
     private final Map<Path, Long> recentlyCreatedFiles = new HashMap<>();
 
     /**
-     * @param path     {@link Path} which will be watched
-     * @param callback Code that gets called when an event was registered.
-     *                 Also returns the {@link WatchEvent} that got registered.
+     * @param path          {@link Path} which will be watched
+     * @param callback      Code that gets called when an event was registered.
+     *                      Also returns the {@link WatchEvent} that got registered.
      * @param errorCallback The method which will be called when the PathWatcher
      *                      runs into an error.
      */
-    public PathWatcher(Path path, Consumer<WatchEvent<?>> callback, Consumer<Exception> errorCallback) {
-        this.path = path;
+    public PathWatcher(Path path, Consumer<WatchEvent<?>> callback, Consumer<Exception> errorCallback) throws IOException {
+        this(Collections.singleton(path), callback, errorCallback);
+    }
+
+    /**
+     * @param paths         Any {@link Collection} of {@link Path} objects, which will all be watched.
+     * @param callback      Code that gets called when an event was registered.
+     *                      Also returns the {@link WatchEvent} that got registered.
+     * @param errorCallback The method which will be called when the PathWatcher
+     *                      runs into an error.
+     */
+    public PathWatcher(Collection<Path> paths, Consumer<WatchEvent<?>> callback, Consumer<Exception> errorCallback) throws IOException {
+        this.paths = new ArrayList<>(paths);
         this.callback = callback;
         this.errorCallback = errorCallback;
+
+        watcher = FileSystems.getDefault().newWatchService();
+
+        for (Path path : this.paths) {
+            registerPath(path);
+        }
     }
 
     /**
@@ -97,6 +116,24 @@ public class PathWatcher extends Thread {
     }
 
     /**
+     * Add a path for the PathWatcher to watch.
+     * Does nothing if the path is already added.
+     *
+     * @param path the {@link Path} that should be added
+     * @throws IOException if the given path couldn't be registered to the watcher
+     */
+    public void addPath(Path path) throws IOException {
+        if (!paths.contains(path)) {
+            registerPath(path);
+            paths.add(path);
+        }
+    }
+
+    private void registerPath(Path path) throws IOException {
+        path.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_CREATE);
+    }
+
+    /**
      * Run the actual loop checking for file system modifications and creations in the specified path.
      */
     @Override
@@ -104,9 +141,7 @@ public class PathWatcher extends Thread {
         startTimestamp = System.currentTimeMillis();
 
         while (!exit) {
-            try (WatchService watcher = FileSystems.getDefault().newWatchService()) {
-                path.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_CREATE);
-
+            try {
                 while (true) {
                     if (!isRunning()) continue;
 
@@ -119,20 +154,21 @@ public class PathWatcher extends Thread {
                      */
                     try {
                         Thread.sleep(100);
-                    } catch (InterruptedException ignore) {
-                    }
+                    } catch (InterruptedException ignore) {}
 
                     for (final WatchEvent<?> event : key.pollEvents()) {
-                        Path modifiedConfig = path.resolve((Path) event.context());
+                        Path eventPath = (Path) event.context();
 
                         if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE) {
                             // Add newly created file to map with timestamp
-                            recentlyCreatedFiles.put(modifiedConfig, System.currentTimeMillis());
-                            callback.accept(event);
+                            if(!Files.isDirectory(eventPath)) {
+                                recentlyCreatedFiles.put(eventPath, System.currentTimeMillis());
+                                callback.accept(event);
+                            }
                         } else if (event.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
-                            if (!recentlyCreatedFiles.containsKey(modifiedConfig) ||
-                                    System.currentTimeMillis() - recentlyCreatedFiles.get(modifiedConfig) > TimeUnit.MILLISECONDS.toMillis(100)) {
-                                recentlyCreatedFiles.remove(modifiedConfig);
+                            if (!recentlyCreatedFiles.containsKey(eventPath) ||
+                                    System.currentTimeMillis() - recentlyCreatedFiles.get(eventPath) > TimeUnit.MILLISECONDS.toMillis(100)) {
+                                recentlyCreatedFiles.remove(eventPath);
                                 callback.accept(event);
                             }
                         } else {
@@ -142,7 +178,7 @@ public class PathWatcher extends Thread {
 
                     key.reset();
                 }
-            } catch (IOException | InterruptedException e) {
+            } catch (InterruptedException e) {
                 errorCallback.accept(e);
             }
         }
