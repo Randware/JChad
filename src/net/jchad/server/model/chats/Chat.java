@@ -33,8 +33,6 @@ public class Chat {
 
         this.name = name;
         this.messages = new ArrayList<>();
-        messages.add(new ChatMessage(1, "Test1", false, System.currentTimeMillis(), "User1", "192.0.0.1"));
-        messages.add(new ChatMessage(2, "Test2", false, System.currentTimeMillis(), "User2", "192.0.0.2"));
 
         savePath = ChatManager.getChatsSavePath().resolve(name);
         messagesSavePath = savePath.resolve("messages.json");
@@ -57,7 +55,11 @@ public class Chat {
             Files.createDirectory(savePath);
         }
 
-        Files.writeString(Files.createFile(messagesSavePath), gson.toJson(messages));
+        if(!Files.exists(messagesSavePath)) {
+            Files.createFile(messagesSavePath);
+        }
+
+        Files.writeString(messagesSavePath, gson.toJson(messages));
     }
 
     private void loadMessages() throws IOException {
@@ -84,5 +86,16 @@ public class Chat {
 
     public Path getSavePath() {
         return savePath;
+    }
+
+    @Override
+    public String toString() {
+        return "Chat{" +
+                ", name='" + name + '\'' +
+                ", messages=" + messages +
+                ", config=" + config +
+                ", savePath=" + savePath +
+                ", messagesSavePath=" + messagesSavePath +
+                '}';
     }
 }
