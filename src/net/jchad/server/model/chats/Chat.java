@@ -27,6 +27,7 @@ public class Chat {
 
     private Path savePath;
     private Path messagesSavePath;
+    private Path configSavePath;
 
     public Chat(String name) throws IOException {
         this.gson = new GsonBuilder().setPrettyPrinting().create();
@@ -36,8 +37,10 @@ public class Chat {
 
         savePath = ChatManager.getChatsSavePath().resolve(name);
         messagesSavePath = savePath.resolve("messages.json");
+        configSavePath = savePath.resolve("config.yml");
 
         loadMessages();
+        loadConfig();
     }
     
     /*
@@ -70,6 +73,20 @@ public class Chat {
         }
 
         this.messages = gson.fromJson(Files.readString(messagesSavePath), new TypeToken<ArrayList<ChatMessage>>(){}.getType());
+    }
+
+    private void saveConfig() throws IOException {
+        // Save config here
+    }
+
+    private void loadConfig() throws IOException {
+        // Load config here
+        if(!Files.exists(configSavePath)) {
+            saveConfig();
+        }
+
+        // Load from YAML here
+        this.config = null;
     }
 
     public String getName() {
