@@ -6,9 +6,9 @@ public class ChatMessage {
     private long id;
     private long timestamp;
     private String senderName;
-    private IPAddress senderIP;
+    private String senderIP;
 
-    public ChatMessage(long id, long timestamp, String senderName, IPAddress senderIP) {
+    public ChatMessage(long id, long timestamp, String senderName, String senderIP) {
         this.id = id;
         this.timestamp = timestamp;
         this.senderName = senderName;
@@ -34,7 +34,7 @@ public class ChatMessage {
         return senderName;
     }
 
-    public IPAddress getSenderIP() {
+    public String getSenderIP() {
         return senderIP;
     }
 }
