@@ -1,24 +1,25 @@
-package net.jchad.server.model.networking;
+package net.jchad.shared.networking.packets;
 
 /**
- * The {@code InvalidPacketException} gets thrown when some network packets can not be read
+ * This exception gets thrown when the connection times out
  */
-public class InvalidPacketException extends Exception{
-     /**
-         * Constructs an {@code InvalidPacketException} with no
+public class TimedOutException extends Exception {
+
+        /**
+         * Constructs an {@code TimedOutException} with no
          * detail message.
          */
-        public InvalidPacketException() {
+        public TimedOutException() {
             super();
         }
 
         /**
-         * Constructs an {@code InvalidPacketException} with the
+         * Constructs an {@code TimedOutException} with the
          * specified detail message.
          *
          * @param   s   the detail message.
          */
-        public InvalidPacketException(String s) {
+        public TimedOutException(String s) {
             super(s);
         }
 
@@ -38,7 +39,7 @@ public class InvalidPacketException extends Exception{
          *         unknown.)
          * @since 1.5
          */
-        public InvalidPacketException(String message, Throwable cause) {
+        public TimedOutException(String message, Throwable cause) {
             super(message, cause);
         }
 
@@ -56,9 +57,10 @@ public class InvalidPacketException extends Exception{
          *         unknown.)
          * @since  1.5
          */
-        public InvalidPacketException(Throwable cause) {
+        public TimedOutException(Throwable cause) {
             super(cause);
         }
+
 
 
 }
