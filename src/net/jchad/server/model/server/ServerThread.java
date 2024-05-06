@@ -69,6 +69,10 @@ public class ServerThread implements Runnable{
             return;
         }
 
+        while (true) {
+
+        }
+
         }  catch (Exception e) {
             messageHandler.handleError(new Exception("An error occurred while connected to [%s]: %s".formatted(remoteAddress,e.getMessage()), e));
         } finally {
