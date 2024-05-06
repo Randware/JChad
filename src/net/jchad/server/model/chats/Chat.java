@@ -33,8 +33,8 @@ public class Chat {
 
         this.name = name;
         this.messages = new ArrayList<>();
-        messages.add(new ChatMessage(1, System.currentTimeMillis(), "Darius", "192.0.0.1"));
-        messages.add(new ChatMessage(2, System.currentTimeMillis(), "Lukas", "192.0.0.2"));
+        messages.add(new ChatMessage(1, "Test1", false, System.currentTimeMillis(), "User1", "192.0.0.1"));
+        messages.add(new ChatMessage(2, "Test2", false, System.currentTimeMillis(), "User2", "192.0.0.2"));
 
         savePath = ChatManager.getChatsSavePath().resolve(name);
         messagesSavePath = savePath.resolve("messages.json");
