@@ -27,7 +27,7 @@ import java.security.*;
  * </pre></blockquote>
  * It is important to do {@code crypterManager.setRemotePublicKey(crypterManager.getPublicKey());} if
  * you are encrypting your own messages (and decrypting them later).
- * <p>This has to be done because the {@link net.jchad.shared.cryptography.CrypterManager CrypterManager} uses the remote Public key for encryption.</p>
+ * <p>This has to be done because the {@link CrypterManager CrypterManager} uses the remote Public key for encryption.</p>
  *
  * <p>Here is an example on how to decrypt and encrypt using the Advanced Encryption Standard (The used AES mode is GCM/NoPadding)</p>
  * <blockquote><pre>
@@ -141,7 +141,7 @@ public class CrypterManager {
     }
 
     /**
-     * Encrypts the given text using the provided {@link java.security.PublicKey PublicKey} (RSA/NoPadding algorithm)
+     * Encrypts the given text using the provided {@link PublicKey PublicKey} (RSA/NoPadding algorithm)
      * After the encryption process <b>the text will be encoded to Base64</b>
      * @param plainText The text that gets encrypted and then encoded to base64
      * @param publicKey the public key used for encrypting
@@ -194,7 +194,7 @@ public class CrypterManager {
 
     }
     /**
-     * Decrypts the given text using the provided {@link java.security.PrivateKey privateKey} (RSA/NoPadding algorithm)
+     * Decrypts the given text using the provided {@link PrivateKey privateKey} (RSA/NoPadding algorithm)
      * Before the encryption process <b>the String gets decoded from Base64 into a byte array</b>
      *
      * @param encryptedBase64Text the RSA/NoPadding encrypted and Base64 encoded String
@@ -280,10 +280,10 @@ public class CrypterManager {
     /**
      * Sets the AES-/SecretKey to the given base64 encoded String that has to represent a SecretKey
      * The secret key is used for encryption and decryption from the client/server. Because AES is a symmetric key algorithm the client and server needs the same key.
-     * To get the base64 encoded String from the {@link net.jchad.shared.cryptography.CrypterManager CrypterManager} class
+     * To get the base64 encoded String from the {@link CrypterManager CrypterManager} class
      * @param base64EncodedAESKey The base64 encoded Secret/AES key
      * @return returns true, if the key got successfully set to the remote public key.
-     *         If an error occurs (like a {@link java.lang.NullPointerException NullPointerException}, {@link net.jchad.shared.cryptography.ImpossibleConversionException ImpossibleConversionException}
+     *         If an error occurs (like a {@link NullPointerException NullPointerException}, {@link ImpossibleConversionException ImpossibleConversionException}
      *         or a {@link java.security.spec.InvalidKeySpecException InvalidKeySpecException})
      *         this returns "false"
      */
@@ -505,10 +505,10 @@ public class CrypterManager {
     /**
      * Sets the remote public key to the given base64 encoded String that has to represent a PublicKey
      * The remote public key gets used for encryption. It has to be the public key of the client you are communicating with.
-     * To get the base64 encoded String from the {@link net.jchad.shared.cryptography.CrypterManager CrypterManager} class
+     * To get the base64 encoded String from the {@link CrypterManager CrypterManager} class
      * @param base64EncodedRemotePublicKey The base64 encoded Public Key
      * @return returns true, if the key got successfully set to the remote public key.
-     *         If an error occurs (like a {@link java.lang.NullPointerException NullPointerException}, {@link net.jchad.shared.cryptography.ImpossibleConversionException ImpossibleConversionException}
+     *         If an error occurs (like a {@link NullPointerException NullPointerException}, {@link ImpossibleConversionException ImpossibleConversionException}
      *         or a {@link java.security.spec.InvalidKeySpecException InvalidKeySpecException})
      *         this returns "false"
      */

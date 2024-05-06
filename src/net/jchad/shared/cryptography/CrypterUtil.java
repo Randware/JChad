@@ -143,7 +143,7 @@ public class CrypterUtil {
     }
 
     /**
-     * Checks is the given string can be {@link java.util.Base64 Base64} encoded
+     * Checks is the given string can be {@link Base64 Base64} encoded
      * @param stringToTest The String that gets tested
      * @return returns <b>true</b> if the provided string is decodable in base64
      */
