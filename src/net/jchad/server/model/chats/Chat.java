@@ -13,7 +13,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 
 /**
- * TODO: Fix serialization error for IPAddress with GSON
+ * DONE: Fix serialization error for IPAddress with GSON
+ *       - Simply turn IPAddress into a String
  * TODO: Implement config loading and saving
  * TODO: Make the storage location for the ChatConfig retrievable from the outside, necessary for config validation
  */
@@ -28,11 +29,12 @@ public class Chat {
     private Path messagesSavePath;
 
     public Chat(String name) throws IOException {
-        this.gson = new GsonBuilder().create();
+        this.gson = new GsonBuilder().setPrettyPrinting().create();
 
         this.name = name;
         this.messages = new ArrayList<>();
-        messages.add(new ChatMessage(1, System.currentTimeMillis(), null, null));
+        messages.add(new ChatMessage(1, System.currentTimeMillis(), "Darius", "192.0.0.1"));
+        messages.add(new ChatMessage(2, System.currentTimeMillis(), "Lukas", "192.0.0.2"));
 
         savePath = ChatManager.getChatsSavePath().resolve(name);
         messagesSavePath = savePath.resolve("messages.json");
