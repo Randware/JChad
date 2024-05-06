@@ -1,5 +1,9 @@
 package net.jchad.server.model.chats;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.TimeZone;
+
 public class ChatMessage {
     private long id;
     private String content;
@@ -25,6 +29,14 @@ public class ChatMessage {
         return id;
     }
 
+    public String getContent() {
+        return content;
+    }
+
+    public boolean isEncrypted() {
+        return encrypted;
+    }
+
     public long getTimestamp() {
         return timestamp;
     }
@@ -35,5 +47,9 @@ public class ChatMessage {
 
     public String getSenderIP() {
         return senderIP;
+    }
+
+    public LocalDateTime getTimestampAsLocalDateTime() {
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), TimeZone.getDefault().toZoneId());
     }
 }
