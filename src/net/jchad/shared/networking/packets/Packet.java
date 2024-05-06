@@ -12,8 +12,8 @@ public interface Packet{
     Gson gson = new Gson();
 
     /**
-     * This methode serializes the current {@link net.jchad.shared.networking.packets.Packet Packet} into json.
-     * @return The json representation of the {@link net.jchad.shared.networking.packets.Packet Packet} class (or its subclasses)
+     * This methode serializes the current {@link Packet Packet} into json.
+     * @return The json representation of the {@link Packet Packet} class (or its subclasses)
      */
     default String toJSON() {
         return gson.toJson(this);
@@ -21,9 +21,9 @@ public interface Packet{
 
     /**
      * This deserializes JSON strings into the given objects.
-     * @param jsonObjectString The JSON string that represents the Object that implements {@link net.jchad.shared.networking.packets.Packet Packet}
+     * @param jsonObjectString The JSON string that represents the Object that implements {@link Packet Packet}
      * @param classOfPacket The class of the Object that it should be deserialized to.
-     * @return The deserialized subclass of {@link net.jchad.shared.networking.packets.Packet Packet}
+     * @return The deserialized subclass of {@link Packet Packet}
      * @throws JsonSyntaxException When the JSON string is not valid JSON this exception gets thrown.
      */
     static <T extends Packet> T fromJSON(String jsonObjectString, Class<T> classOfPacket) throws JsonSyntaxException {

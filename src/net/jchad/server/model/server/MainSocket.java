@@ -3,12 +3,8 @@ package net.jchad.server.model.server;
 import net.jchad.server.model.error.MessageHandler;
 import net.jchad.shared.cryptography.CrypterManager;
 
-import javax.crypto.SecretKey;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Predicate;
