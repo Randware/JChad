@@ -38,7 +38,6 @@ public class CLI implements MessageHandler {
 
     private void handleInput(String command) {
         server.sendCommand(command);
-        System.out.println("Sent command: " + command);
     }
 
     private void handleExit() {

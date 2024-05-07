@@ -105,6 +105,14 @@ public class Chat {
         return savePath;
     }
 
+    public Path getConfigSavePath() {
+        return configSavePath;
+    }
+
+    public Path getMessagesSavePath() {
+        return messagesSavePath;
+    }
+
     @Override
     public String toString() {
         return "Chat{" +
