@@ -4,6 +4,11 @@ import net.jchad.server.model.server.Server;
 
 import java.util.ArrayList;
 
+/**
+ * Blacklist one or multiple IP address
+ *
+ * TODO: Implement proper functionality
+ */
 public class BlacklistCommand extends BaseCommand {
     @Override
     public void execute(Server server, ArrayList<String> args) {

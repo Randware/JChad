@@ -4,6 +4,11 @@ import net.jchad.server.model.server.Server;
 
 import java.util.ArrayList;
 
+/**
+ * Stop the server
+ *
+ * TODO: Implement proper server stopping functionality
+ */
 public class StopCommand extends BaseCommand {
 
     @Override
