@@ -69,8 +69,9 @@ public class GUI extends Application implements BarDisplay {
         chooseDirectoryButton.setTranslateY(30);
         chooseDirectoryButton.setStyle("-fx-font-size: 13px;");
         chooseDirectoryButton.setOnAction(e -> {
-            selectedDirectory = directoryChooser.showDialog(primaryStage);
-            if (selectedDirectory != null) {
+            File selected = directoryChooser.showDialog(primaryStage);
+            if (selected != null) {
+                selectedDirectory = selected;
                 Path directory = selectedDirectory.toPath();
                 configManager.setDownloadPath(directory.toString());
                 chooseDirectoryButton.setText(directory.toString());
@@ -117,111 +118,61 @@ public class GUI extends Application implements BarDisplay {
                 ButtonType overwriteButton = new ButtonType("Overwrite");
                 alert.getButtonTypes().setAll(cancelButton, overwriteButton);
 
-                if (softwareComboBox.getSelectionModel().getSelectedIndex() == 0) {
-                    boolean bothFilesExist = false;
-                    if(selectedDirectory.listFiles() != null) {
-                        for (File file : selectedDirectory.listFiles()) {
-                            if (file.getName().equals(server)) {
-                                for (File file2 : selectedDirectory.listFiles()) {
-                                    if (file2.getName().equals(client)) {
-                                        System.out.println("Both existing");
-                                        bothFilesExist = true;
-                                        break;
+                if (selectedDirectory != null && selectedDirectory.listFiles() != null) {
+                    System.out.println(selectedDirectory);
+                    boolean filesExist = false;
+                    System.out.println("in " + softwareComboBox.getSelectionModel().getSelectedIndex() + " drinnen");
+                    for (File file : selectedDirectory.listFiles()) {
+                        switch (softwareComboBox.getSelectionModel().getSelectedIndex()) {
+                            case 0: // Client and Server
+                                if (file.getName().equals(server)) {
+                                    for (File file2 : selectedDirectory.listFiles()) {
+                                        if (file2.getName().equals(client)) {
+                                            System.out.println("Both existing");
+                                            filesExist = true;
+                                            break;
+                                        }
                                     }
                                 }
-                                if (bothFilesExist) {
-                                    break;
+                                break;
+                            case 1: // Server
+                                if (file.getName().equals(server)) {
+                                    System.out.println("server existing");
+                                    filesExist = true;
                                 }
-                            }
+                                break;
+                            case 2: // Client
+                                if (file.getName().equals(client)) {
+                                    System.out.println("client existing");
+                                    filesExist = true;
+                                }
+                                break;
+                        }
+                        if (filesExist) {
+                            break;
                         }
                     }
-
-                    if (bothFilesExist) {
+                    if (filesExist) {
                         Optional<ButtonType> result = alert.showAndWait();
                         if (result.isPresent() && result.get() == cancelButton) {
                             // User chose to cancel, do not proceed
-                            return;
-                        }
-
-                        // Perform action for Continue button
-                    } else {
-                        // Files not found, proceed with directory selection
-                        Path directory = selectedDirectory.toPath();
-                        configManager.setDownloadPath(directory.toString());
-                        chooseDirectoryButton.setText(directory.toString());
-                    }
-                }
-
-                if(softwareComboBox.getSelectionModel().getSelectedIndex() == 2){
-                    boolean clientExist = false;
-                    if(selectedDirectory.listFiles() != null) {
-                        for (File file : selectedDirectory.listFiles()) {
-                            if (file.getName().equals(client)) {
-                                System.out.println("client existing");
-                                clientExist = true;
-                                break;
-                            }
-
-                            if (clientExist) {
-                                break;
-                            }
-                        }
-                    }
-
-
-
-                    if (clientExist) {
-                        Optional<ButtonType> result = alert.showAndWait();
-                        if (result.isPresent() && result.get() == cancelButton) {
-                            // User chose to cancel, do not proceed
-                            return;
-                        }
-
-                        // Perform action for Continue button
-                    } else {
-                        // Files not found, proceed with directory selection
-                        Path directory = selectedDirectory.toPath();
-                        configManager.setDownloadPath(directory.toString());
-                        chooseDirectoryButton.setText(directory.toString());
-                    }
-                        }
-
-                if(softwareComboBox.getSelectionModel().getSelectedIndex() == 1) {
-                    boolean serverExist = false;
-                    if (selectedDirectory.listFiles() != null) {
-                        for (File file : selectedDirectory.listFiles()) {
-                            if (file.getName().equals(client)) {
-                                System.out.println("client existing");
-                                serverExist = true;
-                                break;
-                            }
-
-                            if (serverExist) {
-                                break;
-                            }
-
-                            if (serverExist) {
-                                break;
-                            }
-
-
-                            if (serverExist) {
-                                Optional<ButtonType> result = alert.showAndWait();
-                                if (result.isPresent() && result.get() == cancelButton) {
-                                    // User chose to cancel, do not proceed
-                                    return;
-                                }
-
-                                // Perform action for Continue button
-                            } else {
-                                // Files not found, proceed with directory selection
+                            File selected = directoryChooser.showDialog(primaryStage);
+                            if (selected != null) {
+                                selectedDirectory = selected;
                                 Path directory = selectedDirectory.toPath();
                                 configManager.setDownloadPath(directory.toString());
                                 chooseDirectoryButton.setText(directory.toString());
                             }
+                            return;
                         }
+                    } else {
+                        // Files not found, proceed with directory selection
+                        Path directory = selectedDirectory.toPath();
+                        configManager.setDownloadPath(directory.toString());
+                        chooseDirectoryButton.setText(directory.toString());
                     }
                 }
+
 
 
 
@@ -294,15 +245,6 @@ public class GUI extends Application implements BarDisplay {
         double scale = Math.min(scaleX, scaleY);
         // Limit the scale within the specified range
         return Math.max(Math.min(scale, MAX_SCALE), MIN_SCALE);
-    }
-
-    private void showDirectoryChooser(Stage primaryStage) {
-        selectedDirectory = directoryChooser.showDialog(primaryStage);
-        if (selectedDirectory != null) {
-            Path directory = selectedDirectory.toPath();
-            configManager.setDownloadPath(directory.toString());
-            chooseDirectoryButton.setText(directory.toString());
-        }
     }
 
     @Override
