@@ -17,7 +17,7 @@ ServerController {
     }
 
     public void sendCommand(String command) {
-        // Send command to server here
+       server.executeCommand(command);
     }
 
     public void stopServer() {

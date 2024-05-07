@@ -2,11 +2,15 @@ package net.jchad.server.model.server;
 
 import net.jchad.server.model.chats.Chat;
 import net.jchad.server.model.chats.ChatManager;
+import net.jchad.server.model.command.Command;
 import net.jchad.server.model.config.*;
 import net.jchad.server.model.config.store.Config;
 import net.jchad.server.model.error.MessageHandler;
+import org.junit.jupiter.params.provider.Arguments;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 // Contains all necessary server data
 public class Server implements ConfigObserver {
@@ -40,8 +44,8 @@ public class Server implements ConfigObserver {
         messageHandler.handleInfo("Server started on port " + config.getServerSettings().getPort());
     }
 
-    private void executeCommand(String command) {
-
+    public void executeCommand(String command) {
+        Command.executeCommand(command, this);
     }
 
     @Override
