@@ -49,24 +49,29 @@ public class GUI extends Application implements MessageHandler {
         menuBar.setPadding(Insets.EMPTY);
 
         Menu settingsMenu = new Menu("Settings");
+        Menu stopServerMenu = new Menu("Stop Server");
 
         Menu fontsSubMenu = new Menu("Fonts");
 
         MenuItem increaseFontSize = new MenuItem("increase Font size (ctrl & +)");
         MenuItem standardFontSize = new MenuItem("standard Font size (crtl & R)");
         MenuItem decreaseFontSize = new MenuItem("decrease Font size (crtl & -)");
+        MenuItem stopServerItem = new MenuItem("Stop Server");
 
         fontsSubMenu.getItems().addAll(increaseFontSize, standardFontSize, decreaseFontSize);
 
         settingsMenu.getItems().add(fontsSubMenu);
+        stopServerMenu.getItems().add(stopServerItem);
 
-        menuBar.getMenus().add(settingsMenu);
+        menuBar.getMenus().addAll(settingsMenu,stopServerMenu);
 
         scrollPane.setContent(logArea);
         scrollPane.setFitToHeight(true);
         scrollPane.setFitToWidth(true);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
+
+
 
         VBox vbox = new VBox(menuBar, scrollPane, cmdField);
 
@@ -79,6 +84,7 @@ public class GUI extends Application implements MessageHandler {
         increaseFontSize.setOnAction(e -> changeFontSize(2));
         standardFontSize.setOnAction(e -> standardFontSizeMethod());
         decreaseFontSize.setOnAction(e -> changeFontSize(-2));
+        stopServerItem.setOnAction(e -> server.stopServer());
 
         vbox.setSpacing(10);
         vbox.setPadding(new Insets(0, 10, 10, 10));
@@ -99,9 +105,19 @@ public class GUI extends Application implements MessageHandler {
             }
         });
 
-        logArea.setOnMouseClicked(event -> {
+        /*logArea.setOnMouseClicked(event -> {
             if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
                 // Logik zum Extrahieren und Kopieren des Textes von t2
+            }
+        });*/
+
+        cmdField.setOnKeyPressed(keyEvent -> {
+            if (keyEvent.getCode() == KeyCode.ENTER) {
+                if (cmdField.getText().length() > 0) {
+                    server.sendCommand(cmdField.getText());
+                    handleInfo("Command entered: " + cmdField.getText());
+                    cmdField.setText("");
+                }
             }
         });
 
