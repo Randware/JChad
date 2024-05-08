@@ -5,6 +5,7 @@ import java.lang.reflect.Array;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -22,7 +23,7 @@ public class PathWatcher extends Thread {
      * Code that gets called when an event was registered.
      * Also returns the {@link WatchEvent} that got registered.
      */
-    private final Consumer<WatchEvent<?>> callback;
+    private final BiConsumer<Path, WatchEvent.Kind<?>> callback;
 
     /**
      * Code that gets called when an error occured.
@@ -61,7 +62,7 @@ public class PathWatcher extends Thread {
      * @param errorCallback The method which will be called when the PathWatcher
      *                      runs into an error.
      */
-    public PathWatcher(Path path, Consumer<WatchEvent<?>> callback, Consumer<Exception> errorCallback) throws IOException {
+    public PathWatcher(Path path, BiConsumer<Path, WatchEvent.Kind<?>> callback, Consumer<Exception> errorCallback) throws IOException {
         this(Collections.singleton(path), callback, errorCallback);
     }
 
@@ -72,7 +73,7 @@ public class PathWatcher extends Thread {
      * @param errorCallback The method which will be called when the PathWatcher
      *                      runs into an error.
      */
-    public PathWatcher(Collection<Path> paths, Consumer<WatchEvent<?>> callback, Consumer<Exception> errorCallback) throws IOException {
+    public PathWatcher(Collection<Path> paths, BiConsumer<Path, WatchEvent.Kind<?>> callback, Consumer<Exception> errorCallback) throws IOException {
         this.paths = new ArrayList<>(paths);
         this.callback = callback;
         this.errorCallback = errorCallback;
@@ -157,22 +158,23 @@ public class PathWatcher extends Thread {
                     } catch (InterruptedException ignore) {}
 
                     for (final WatchEvent<?> event : key.pollEvents()) {
-                        Path eventPath = (Path) event.context();
+                        Path fullPath = ((Path) key.watchable()).resolve((Path) event.context()).toAbsolutePath().normalize();
 
                         if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE) {
                             // Add newly created file to map with timestamp
-                            if(!Files.isDirectory(eventPath)) {
-                                recentlyCreatedFiles.put(eventPath, System.currentTimeMillis());
-                                callback.accept(event);
+                            if(!Files.isDirectory(fullPath)) {
+                                recentlyCreatedFiles.put(fullPath, System.currentTimeMillis());
                             }
+
+                            callback.accept(fullPath, event.kind());
                         } else if (event.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
-                            if (!recentlyCreatedFiles.containsKey(eventPath) ||
-                                    System.currentTimeMillis() - recentlyCreatedFiles.get(eventPath) > TimeUnit.MILLISECONDS.toMillis(100)) {
-                                recentlyCreatedFiles.remove(eventPath);
-                                callback.accept(event);
+                            if (!recentlyCreatedFiles.containsKey(fullPath) ||
+                                    System.currentTimeMillis() - recentlyCreatedFiles.get(fullPath) > TimeUnit.MILLISECONDS.toMillis(100)) {
+                                recentlyCreatedFiles.remove(fullPath);
+                                callback.accept(fullPath, event.kind());
                             }
                         } else {
-                            callback.accept(event);
+                            callback.accept(fullPath, event.kind());
                         }
                     }
 

@@ -419,15 +419,15 @@ public class ConfigManager {
     /**
      * This method gets called when a config was updated
      *
-     * @param event event that was detected by the {@link PathWatcher}
+     * @param path the {@link Path} which was modified
+     * @param kind the {@link WatchEvent.Kind} of this event
      */
-    private void configUpdated(WatchEvent<?> event) {
-        if(event.kind() != StandardWatchEventKinds.ENTRY_MODIFY) {
+    private void configUpdated(Path path, WatchEvent.Kind<?> kind) {
+        if(kind != StandardWatchEventKinds.ENTRY_MODIFY) {
             return;
         }
 
-        Path modifiedConfig = ConfigFile.getStorageDirectory().resolve((Path) event.context());
-        String configName = modifiedConfig.getFileName().toString();
+        String configName = path.getFileName().toString();
 
         if (!ConfigFile.isConfig(configName)) {
             return;

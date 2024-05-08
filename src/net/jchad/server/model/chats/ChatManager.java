@@ -108,14 +108,10 @@ public class ChatManager {
         this.chats = chats;
     }
 
-    private void configUpdated(WatchEvent<?> event) {
-        if(event.kind() == StandardWatchEventKinds.ENTRY_CREATE) {
-            Path createdEntry = chatsSavePath.resolve((Path) event.context());
-
-
-
-            if(Files.isDirectory(createdEntry)) {
-                messageHandler.handleInfo("\"" + createdEntry.getFileName().toString() + "\" chat was created");
+    private void configUpdated(Path path, WatchEvent.Kind<?> kind) {
+        if(kind == StandardWatchEventKinds.ENTRY_CREATE) {
+            if(Files.isDirectory(path)) {
+                messageHandler.handleInfo("\"" + path.getFileName().toString() + "\" chat was created");
 
                 try {
                     loadChats();
@@ -124,15 +120,13 @@ public class ChatManager {
                         configObserver.configUpdated();
                     }
                 } catch (IOException e) {
-                    messageHandler.handleError(new IOException("Failed loading \"" + createdEntry.getFileName().toString() + "\" chat"));
+                    messageHandler.handleError(new IOException("Failed loading \"" + path.getFileName().toString() + "\" chat"));
                     messageHandler.handleWarning("Continuing with old chat configuration");
                 }
             }
-        } else if(event.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
-            Path modifiedEntry = chatsSavePath.resolve((Path) event.context());
-
+        } else if(kind == StandardWatchEventKinds.ENTRY_MODIFY) {
             // TODO: Not call this method when there is a file modified in this entry
-            if(Files.isDirectory(modifiedEntry)) {
+            if(Files.isDirectory(path)) {
                 messageHandler.handleInfo("Chat configuration was updated");
 
                 try {
@@ -146,15 +140,18 @@ public class ChatManager {
                     messageHandler.handleWarning("Continuing with old chat configuration");
                 }
             } else {
-                // TODO: Check if the modified file is the config.yml file of a chat
-                String modifiedChatName = modifiedEntry.getFileName().toString();
+                String modifiedChatName = path.getParent().getFileName().toString();
 
-                messageHandler.handleInfo("\"" + modifiedChatName + "\" file was updated");
+                Chat modifiedChat = getChat(modifiedChatName);
 
-                // TODO: Check here
-                if(chatExists(modifiedChatName)) {
+                if(modifiedChat == null) return;
+
+                Path chatConfigPath = modifiedChat.getConfigSavePath().toAbsolutePath().normalize();
+
+                if(chatConfigPath.equals(path)) {
                     messageHandler.handleInfo("\"" + modifiedChatName + "\" chat configuration was updated");
 
+                    // TODO: Load chat configuration here instead of reloading all chats
                     try {
                         loadChats();
 
