@@ -49,21 +49,21 @@ public class GUI extends Application implements MessageHandler {
         menuBar.setPadding(Insets.EMPTY);
 
         Menu settingsMenu = new Menu("Settings");
-        Menu stopServerMenu = new Menu("Stop Server");
+        Menu serverMenu = new Menu("Server");
 
         Menu fontsSubMenu = new Menu("Fonts");
 
         MenuItem increaseFontSize = new MenuItem("increase Font size (ctrl & +)");
         MenuItem standardFontSize = new MenuItem("standard Font size (crtl & R)");
         MenuItem decreaseFontSize = new MenuItem("decrease Font size (crtl & -)");
-        MenuItem stopServerItem = new MenuItem("Stop Server");
+        MenuItem stopServerItem = new MenuItem("Stop server");
 
         fontsSubMenu.getItems().addAll(increaseFontSize, standardFontSize, decreaseFontSize);
 
         settingsMenu.getItems().add(fontsSubMenu);
-        stopServerMenu.getItems().add(stopServerItem);
+        serverMenu.getItems().add(stopServerItem);
 
-        menuBar.getMenus().addAll(settingsMenu,stopServerMenu);
+        menuBar.getMenus().addAll(settingsMenu,serverMenu);
 
         scrollPane.setContent(logArea);
         scrollPane.setFitToHeight(true);

@@ -41,6 +41,13 @@ public class Server implements ConfigObserver {
         messageHandler.handleInfo("Server started on port " + config.getServerSettings().getPort());
     }
 
+    public void stopServer() {
+        messageHandler.handleInfo("Stopping server");
+
+        // TODO: Implement proper server shutdown logic here instead
+        System.exit(0);
+    }
+
     public void executeCommand(String command) {
         Command.executeCommandString(command, this);
     }

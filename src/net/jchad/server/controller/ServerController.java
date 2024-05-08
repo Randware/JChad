@@ -21,8 +21,6 @@ ServerController {
     }
 
     public void stopServer() {
-        server.getMessageHandler().handleInfo("STOPPING SERVER");
-
-        // Implement proper server stopping logic
+        server.stopServer();
     }
 }

@@ -13,9 +13,9 @@ import java.util.List;
  */
 public enum Command {
     STOP("stop", new StopCommand(), "stop", "Stop the server"),
-    WHITELIST("whitelist", new WhitelistCommand(), "whitelist <IPv4/IPv6> <IPv4/IPv6> ...", "Whitelist one or multiple IP addresses"),
-    BLACKLIST("blacklist", new BlacklistCommand(), "blacklist <IPv4/IPv6]> <IPv4/IPv6> ...", "Blacklist one or multiple IP addresses"),
-    KICK("kick", new KickCommand(), "kick <IPv4/IPv6>, <all>", "Kick specific IP addresses or all connected clients"),
+    WHITELIST("whitelist", new WhitelistCommand(), "whitelist <IPv4/v6> ...", "Whitelist one or multiple IP addresses"),
+    BLACKLIST("blacklist", new BlacklistCommand(), "blacklist <IPv4/v6> ...", "Blacklist one or multiple IP addresses"),
+    KICK("kick", new KickCommand(), "kick <IPv4/v6> | <all>", "Kick specific IP addresses or all connected clients"),
     HELP("help", new HelpCommand(), "help", "Show the help dialog");
 
     /**
@@ -71,8 +71,8 @@ public enum Command {
      */
     private String buildHelpString() {
         String str = """
-                 "%s"
-                  └ %s
+                "%s"
+                  ↳ %s
                 """.formatted(usage, description);
 
         return str;
