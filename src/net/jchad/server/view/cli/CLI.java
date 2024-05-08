@@ -42,7 +42,6 @@ public class CLI implements MessageHandler {
 
     private void handleExit() {
         server.stopServer();
-        System.exit(0);
     }
 
     @Override

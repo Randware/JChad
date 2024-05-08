@@ -13,6 +13,6 @@ public class StopCommand extends BaseCommand {
 
     @Override
     public void execute(Server server, ArrayList<String> args) {
-        server.getMessageHandler().handleInfo("Stop command was executed with args: " + args);
+        server.stopServer();
     }
 }
