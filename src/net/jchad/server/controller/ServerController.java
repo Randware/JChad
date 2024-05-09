@@ -1,5 +1,6 @@
 package net.jchad.server.controller;
 
+import net.jchad.server.model.config.store.Config;
 import net.jchad.server.model.error.MessageHandler;
 import net.jchad.server.model.server.Server;
 
@@ -22,5 +23,9 @@ ServerController {
 
     public void stopServer() {
         server.stopServer();
+    }
+
+    public Config getServerConfig() {
+        return server.getConfig();
     }
 }

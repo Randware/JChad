@@ -156,7 +156,7 @@ public class GUI extends Application implements MessageHandler {
     @Override
     public void handleFatalError(Exception e) {
         Platform.runLater(() -> {
-            String log = "  Ⓧ [Fatal Error]: ";
+            String log = "  ☠ [Fatal Error]: ";
             Text t1 = new Text(log);
             t1.setStyle("-fx-fill: #fd0000;-fx-font-weight:bold;");
             Text t2 = new Text(Util.stackTraceToString(e)+ "\n");
@@ -300,6 +300,43 @@ public class GUI extends Application implements MessageHandler {
                 changeFontSize(0);
             });
         });
+    }
 
+    @Override
+    public void handleDebug(String debug) {
+        if(!server.getServerConfig().getServerSettings().isDebugMode()) return;
+
+        Platform.runLater(() -> {
+            String log = "  ⚙ [Debug]: ";
+            Text t1 = new Text(log);
+            t1.setStyle("-fx-fill: #626262;-fx-font-weight:bold;");
+            Text t2 = new Text(debug + "\n");
+            t2.setStyle("-fx-font-weight:normal;");
+
+            t2.setOnMouseClicked(event -> {
+                if (event.getButton() == MouseButton.SECONDARY) {
+                    ContextMenu contextMenu = new ContextMenu();
+                    MenuItem copyMenuItem = new MenuItem("Kopieren");
+                    contextMenu.getItems().add(copyMenuItem);
+
+                    copyMenuItem.setOnAction(copyEvent -> {
+                        Clipboard clipboard = Clipboard.getSystemClipboard();
+                        ClipboardContent content = new ClipboardContent();
+                        content.putString(t2.getText());
+                        clipboard.setContent(content);
+                    });
+
+                    contextMenu.show(t2, event.getScreenX(), event.getScreenY());
+                }
+            });
+
+            logArea.getChildren().addAll(t1, t2);
+            logArea.getChildren().addListener((ListChangeListener<Node>) change -> {
+                logArea.layout(); // Aktualisieren Sie das Layout des TextFlow
+                scrollPane.layout(); // Aktualisieren Sie das Layout des ScrollPane
+                scrollPane.setVvalue(Double.MAX_VALUE); // Scrollen Sie nach unten
+                changeFontSize(0);
+            });
+        });
     }
 }

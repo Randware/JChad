@@ -75,11 +75,11 @@ public class Chat {
         this.messages = gson.fromJson(Files.readString(messagesSavePath), new TypeToken<ArrayList<ChatMessage>>(){}.getType());
     }
 
-    private void saveConfig() throws IOException {
+    public void saveConfig() throws IOException {
         // Save config here
     }
 
-    private void loadConfig() throws IOException {
+    public void loadConfig() throws IOException {
         // Load config here
         if(!Files.exists(configSavePath)) {
             saveConfig();

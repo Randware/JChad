@@ -55,6 +55,11 @@ public class ServerSettings {
     private boolean encryptCommunications = false;
 
     /**
+     * Display debug messages.
+     */
+    private boolean debugMode = false;
+
+    /**
      * Port the server runs on.
      */
     private int port = 13814;
@@ -88,6 +93,7 @@ public class ServerSettings {
                           boolean strictlyAnonymous,
                           boolean encryptMessages,
                           boolean encryptCommunications,
+                          boolean debugMode,
                           int port) {
 
         this.requiresPassword = requiresPassword;
@@ -99,6 +105,7 @@ public class ServerSettings {
         this.strictlyAnonymous = strictlyAnonymous;
         this.encryptMessages = encryptMessages;
         this.encryptCommunications = encryptCommunications;
+        this.debugMode = debugMode;
         this.port = port;
     }
 
@@ -114,6 +121,7 @@ public class ServerSettings {
                 ", strictlyAnonymous=" + strictlyAnonymous +
                 ", encryptMessages=" + encryptMessages +
                 ", encryptCommunication=" + encryptCommunications +
+                ", debugMode=" + debugMode +
                 ", port=" + port +
                 '}';
     }
@@ -187,9 +195,17 @@ public class ServerSettings {
         this.encryptMessages = encryptMessages;
     }
 
-    public boolean isEncryptedMessages() {return encryptCommunications;}
+    public boolean isEncryptCommunications() {return encryptCommunications;}
 
     public void setEncryptCommunications(boolean encryptCommunications) {this.encryptCommunications = encryptCommunications;}
+
+    public boolean isDebugMode() {
+        return debugMode;
+    }
+
+    public void setDebugMode(boolean debugMode) {
+        this.debugMode = debugMode;
+    }
 
     public int getPort() {
         return port;

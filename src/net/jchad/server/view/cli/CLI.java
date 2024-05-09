@@ -66,4 +66,12 @@ public class CLI implements MessageHandler {
     public void handleInfo(String info) {
         terminal.outputMessage("[INFO] " + info);
     }
+
+    @Override
+    public void handleDebug(String debug) {
+        // Only log debug messages if debug mode is enabled in server settings
+        if(!server.getServerConfig().getServerSettings().isDebugMode()) return;
+
+        terminal.outputMessage("[DEBUG] " + debug);
+    }
 }
