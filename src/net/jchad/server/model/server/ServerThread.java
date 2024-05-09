@@ -125,8 +125,8 @@ public class ServerThread implements Runnable{
     }
 
     /**
-     * Returns a List of all current connected ServerThreads IMMUTABLE BY DEFAULT
-     * @return An immutable List
+     * Returns a Set of all current connected ServerThreads IMMUTABLE BY DEFAULT
+     * @return A copied set of the serverThreadSet
      */
     public static Set<ServerThread> getServerThreadSet() {
         return getServerThreadSet(false);
@@ -138,7 +138,7 @@ public class ServerThread implements Runnable{
      * @return The ServerThreadList
      */
     public static Set<ServerThread> getServerThreadSet(boolean mutable) {
-        return mutable ? serverThreadSet : ConcurrentSkipListSet<>();
+        return mutable ? serverThreadSet : new ConcurrentSkipListSet<ServerThread>(serverThreadSet);
     }
 
 
@@ -150,7 +150,8 @@ public class ServerThread implements Runnable{
      * @return The return value of the operation
      *
      */
-    public  static synchronized <R> R listOperation(Function<List<ServerThread>, R> statement) {
+    @Deprecated
+    public  static synchronized <R> R listOperation(Function<Set<ServerThread>, R> statement) {
         return statement.apply(serverThreadSet);
     }
 
