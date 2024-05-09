@@ -5,9 +5,7 @@ import com.google.gson.JsonSyntaxException;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * This interface provides some useful methods for Packets. Like serialization and deserialization by using the {@link com.google.gson GSON} library.
@@ -41,8 +39,8 @@ import java.util.Set;
  *     }
  *     </pre></blockquote>
  *
- *     <p>If you dislike the {@link Packet#isValid()} methode or you want to extend you can just {@code @Override} it and provide your custom implementation.</p>
- *     <p>It is generally not recommended to override the {@link Packet#isValid()} methode completely, but there are certain use cases where it is helpful to override the methode</p>
+ *     <p><u><b>If you dislike the {@link Packet#isValid()} methode or you want to extend its functionality you can just {@code @Override} it and provide your own implementation.</b></u></p>
+ *     <p>It is generally not recommended to override the {@link Packet#isValid()} methode completely, but there are certain use cases where it is really useful to override the methode</p>
  *      <p>Here are examples of an overwritten {@link Packet#isValid()} methode: </p>
  *      <blockquote><pre>
  *       public class ValidPacket implements Packet{
@@ -116,6 +114,11 @@ public interface Packet{
         return notNull && includesPacketType;
     }
 
+    /**
+     * This retrieves all private/public/protected/... fields of the given class and of all its super classes with the help of recursion
+     * @param clazz The class which fields get returned
+     * @return All fields of the class
+     */
     private List<Field> getAllFields(Class<?> clazz) {
         List<Field> currentClassFields = new ArrayList<>(List.of(clazz.getDeclaredFields()));
         Class<?> parentClass = clazz.getSuperclass();
