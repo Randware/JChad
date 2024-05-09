@@ -10,6 +10,8 @@ module net.jchad {
     requires org.junit.jupiter.api;
     requires org.junit.jupiter.engine;
     requires org.junit.jupiter.params;
+    requires org.junit.platform.engine;
+    requires org.junit.platform.commons;
     requires org.jline;
     requires org.fxmisc.richtext;
     requires jdk.unsupported;
@@ -26,4 +28,5 @@ module net.jchad {
     exports net.jchad.server.view to javafx.graphics;
     opens net.jchad.server.model.config.store to com.fasterxml.jackson.databind;
     opens net.jchad.server.model.chats to com.google.gson;
+    exports net.jchad.tests.shared;
 }

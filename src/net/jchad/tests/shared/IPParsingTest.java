@@ -1,4 +1,4 @@
-package net.jchad.tests.server;
+package net.jchad.tests.shared;
 
 import net.jchad.shared.networking.ip.IPAddress;
 import net.jchad.shared.networking.ip.IPv4Address;
