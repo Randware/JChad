@@ -10,9 +10,58 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Every packet <b><u>has to</u></b> implement this interface.
- * This interface provides some useful methods for serialization and deserialization by using the {@link com.google.gson GSON} library.
+ * This interface provides some useful methods for Packets. Like serialization and deserialization by using the {@link com.google.gson GSON} library.
  *
+ * <p>Every packet <b><u>has to</u></b> implement this interface.</p>
+ * <p><font color="red">If any packet breaks these conventions the {@link Packet#isValid()} will return false!</font></p>
+ * <ul>
+ *      <li><p>Every subclass <b>has to declare a {@link PacketType packet_type}</b> field with the type of {@link PacketType} </p></li>
+ *      <li><p>No variables are allowed to be null, expect those who are annotated with the {@link IgnoreValidation} annotation.</p></li>
+ * </ul>
+ *  <p>Here are examples of two packets that are not valid</p>
+ *  Invalid example one:
+ *     <blockquote><pre>
+ *     public class InvalidPacket implements Packet{
+ *
+ *     private final PacketType packet_type = PacketType.TEST;
+ *     private final String testString = null; //THE VARIABLE IS NOT ALLOWED TO BE NULL
+ *
+ *     {@code @IgnoreValidation}
+ *     private final String testString2 = null;
+ *     //This variable is valid because of the annotation
+ *     }
+ *   </pre></blockquote>
+ *   Invalid example two:
+ *   <blockquote><pre>
+ *     public class InvalidPacket2 implements Packet{
+ *
+ *     private final PacketType packetType = PacketType.TEST;
+ *     //This is invalid, the variable has to have the exact name "packet_type"
+ *     private final String testString = "Hello Network!";
+ *     }
+ *     </pre></blockquote>
+ *
+ *     <p>If you dislike the {@link Packet#isValid()} methode or you want to extend you can just {@code @Override} it and provide your custom implementation.</p>
+ *     <p>It is generally not recommended to override the {@link Packet#isValid()} methode completely, but there are certain use cases where it is helpful to override the methode</p>
+ *      <p>Here are examples of an overwritten {@link Packet#isValid()} methode: </p>
+ *      <blockquote><pre>
+ *       public class ValidPacket implements Packet{
+ *
+ *       private final PacketType packet_type = PacketType.TEST;
+ *       private final String base64Message = "SGFkaSB0aGUgR29hdA==";
+ *
+ *       {@code @Override}
+ *       public boolean isValid() {
+ *         boolean isValidBase64 = true;
+ *         try {
+ *             Base64.getDecoder().decode(base64Message);
+ *         } catch (IllegalArgumentException e) {
+ *             isValidBase64 = false;
+ *         }
+ *         return Packet.super.isValid() && isValidBase64;
+ *       }}
+ *      </pre></blockquote>
+ *      <p>The example uses the default methode to check if all fields are not null. Additionally it checks if the {@code String base64Message} is valid Base64</p>
  */
 public interface Packet{
 
