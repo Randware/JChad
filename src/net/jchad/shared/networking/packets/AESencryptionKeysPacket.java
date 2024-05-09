@@ -5,6 +5,7 @@ public class AESencryptionKeysPacket implements Packet {
 
     private final String messages_key;
 
+    @IgnoreValidation
     private final String communications_key;
 
     public AESencryptionKeysPacket(String messages_key, String communications_key) {

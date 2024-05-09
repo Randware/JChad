@@ -10,15 +10,12 @@ import java.io.IOException;
 
 public class CrypterHelperThread {
     private final ServerThread serverThread;
-    private final String base64AESmessageKey;
     private final int retries;
     private final CrypterManager crypterManager = new CrypterManager();
 
-    protected CrypterHelperThread(ServerThread serverThread, String base64AESmessageKey, int retries) {
+    protected CrypterHelperThread(ServerThread serverThread) {
         this.serverThread = serverThread;
-        this.base64AESmessageKey = base64AESmessageKey;
-        this.retries = retries;
-
+        retries = serverThread.getRetriesOnInvalidPackets();
     }
 
     public void exchangeRSAkeys() {

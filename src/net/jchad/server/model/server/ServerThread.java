@@ -12,10 +12,8 @@ import net.jchad.shared.networking.packets.*;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Function;
 
 public class ServerThread implements Runnable{
@@ -125,24 +123,10 @@ public class ServerThread implements Runnable{
     }
 
     /**
-     * Returns a Set of all current connected ServerThreads IMMUTABLE BY DEFAULT
-     * @return A copied set of the serverThreadSet
-     */
-    public static Set<ServerThread> getServerThreadSet() {
-        return getServerThreadSet(false);
-    }
-
-    /**
-     * Returns a List of all current connected ServerThreads
-     * @param mutable If the list that gets returned is mutable or not
-     * @return The ServerThreadList
-     */
-    public static Set<ServerThread> getServerThreadSet(boolean mutable) {
-        return mutable ? serverThreadSet : new ConcurrentSkipListSet<ServerThread>(serverThreadSet);
-    }
-
-
-    /**
+     * @deprecated <strong><p>This methode should get avoided because it was intended for a thread unsafe list.
+     *             The original collection that stored the {@link ServerThread#serverThreadSet} was an {@link java.util.ArrayList}.
+     *             It got replaced by an {@link ConcurrentHashMap#newKeySet()}</p></strong>
+     *<br>
      * This ensures that all operations done to the list get executed correctly.
      * Without this methode problems could arise when multiple threads add or remove themselves from the array list
      * due to the nature of the ArrayList (Because it isn't concurrency safe.)
@@ -150,56 +134,10 @@ public class ServerThread implements Runnable{
      * @return The return value of the operation
      *
      */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     public  static synchronized <R> R listOperation(Function<Set<ServerThread>, R> statement) {
+
         return statement.apply(serverThreadSet);
-    }
-
-    public MessageHandler getMessageHandler() {
-        return messageHandler;
-    }
-
-    public PrintWriter getPrintWriter() {
-        return printWriter;
-    }
-
-    public BufferedReader getBufferedReader() {
-        return bufferedReader;
-    }
-
-    public JsonReader getJsonReader() {
-        return jsonReader;
-    }
-
-
-
-    public String getRemoteAddress() {
-        return remoteAddress;
-    }
-
-    public InetSocketAddress getInetAddress() {
-        return inetAddress;
-    }
-
-    public Socket getSocket() {
-        return socket;
-    }
-    public Config getConfig() {
-        return server.getConfig();
-    }
-
-    /** //TODO I am unsure if this is a permanent solution. Checking if the config values are correct should not be done in the ServerThread.
-     * Returns a value from the config or the default one if the user set value is invalid
-     * @return
-     */
-    public long getConnectionRefreshIntervalMillis() {
-        if (server.getConfig().getInternalSettings().getConnectionRefreshIntervalMillis() < 0) return new InternalSettings().getConnectionRefreshIntervalMillis();
-        else return server.getConfig().getInternalSettings().getConnectionRefreshIntervalMillis();
-    }
-
-    public int getRetriesOnMalformedJSON() {
-        if (server.getConfig().getInternalSettings().getRetriesOnInvalidPackets() <= 0) return new InternalSettings().getRetriesOnInvalidPackets();
-        else return server.getConfig().getInternalSettings().getRetriesOnInvalidPackets();
     }
 
     public boolean isBanned() {
@@ -226,5 +164,88 @@ public class ServerThread implements Runnable{
         } catch (InvalidIPAddressException ignored) {}
         return false;
     }
+
+
+    /**
+     * Returns a Set of all current connected ServerThreads.
+     * <b>This returns a copy of the Set! The {@link net.jchad.server.model.server.ServerThread ServerThreads} are still mutable</b>
+     * <p>If the original set gets modified the returned set stays the same!</p>
+     * Use {@link ServerThread#getServerThreadSet(boolean)}
+     * @return A copied set of the {@link ServerThread#serverThreadSet}
+     */
+    public static Set<ServerThread> getServerThreadSet() {
+        return getServerThreadSet(false);
+    }
+
+    /**
+     * Returns a Set of all current connected ServerThreads
+     * @param createCopyOfSet <p>Set this to true if the returning {@link ServerThread#serverThreadSet} should be a copy of the original one.</p>
+     *                        <p>Otherwise set this to false to get the mutable {@link ServerThread#serverThreadSet}</p>
+     * @return The {@link ServerThread#serverThreadSet}
+     */
+    public static Set<ServerThread> getServerThreadSet(boolean createCopyOfSet) {
+        if (createCopyOfSet) {
+            Set<ServerThread> returnedSet = ConcurrentHashMap.newKeySet();
+            returnedSet.addAll(serverThreadSet);
+            return returnedSet;
+        } else {
+            return serverThreadSet;
+        }
+    }
+
+
+    /** //TODO I am unsure if this is a permanent solution. Checking if the config values are correct should not be done in the ServerThread.
+     * Returns a value from the config or the default one if the user set value is invalid
+     * @return
+     */
+    public long getConnectionRefreshIntervalMillis() {
+        if (server.getConfig().getInternalSettings().getConnectionRefreshIntervalMillis() < 0) return new InternalSettings().getConnectionRefreshIntervalMillis();
+        else return server.getConfig().getInternalSettings().getConnectionRefreshIntervalMillis();
+    }
+
+    public int getRetriesOnInvalidPackets() {
+        if (server.getConfig().getInternalSettings().getRetriesOnInvalidPackets() <= 0) return new InternalSettings().getRetriesOnInvalidPackets();
+        else return server.getConfig().getInternalSettings().getRetriesOnInvalidPackets();
+    }
+
+
+
+    public MessageHandler getMessageHandler() {
+        return messageHandler;
+    }
+
+    public PrintWriter getPrintWriter() {
+        return printWriter;
+    }
+
+    public BufferedReader getBufferedReader() {
+        return bufferedReader;
+    }
+
+    public JsonReader getJsonReader() {
+        return jsonReader;
+    }
+
+    public Server getServer() {
+        return server;
+    }
+
+    public String getRemoteAddress() {
+        return remoteAddress;
+    }
+
+    public InetSocketAddress getInetAddress() {
+        return inetAddress;
+    }
+
+    public Socket getSocket() {
+        return socket;
+    }
+    public Config getConfig() {
+        return server.getConfig();
+    }
+
+
+
 
 }
