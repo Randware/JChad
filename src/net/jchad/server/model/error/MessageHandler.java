@@ -19,4 +19,6 @@ public interface MessageHandler {
     // An info used for displaying status, info, etc.
     void handleInfo(String info);
 
+    void handleDebug(String debug);
+
 }

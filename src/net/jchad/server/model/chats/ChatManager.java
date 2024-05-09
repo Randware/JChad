@@ -1,12 +1,10 @@
 package net.jchad.server.model.chats;
 
 import net.jchad.server.model.config.ConfigObserver;
-import net.jchad.server.model.config.store.ConfigFile;
 import net.jchad.server.model.error.MessageHandler;
 import net.jchad.shared.files.PathWatcher;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardWatchEventKinds;
@@ -125,7 +123,6 @@ public class ChatManager {
                 }
             }
         } else if(kind == StandardWatchEventKinds.ENTRY_MODIFY) {
-            // TODO: Not call this method when there is a file modified in this entry
             if(Files.isDirectory(path)) {
                 messageHandler.handleInfo("Chat configuration was updated");
 
