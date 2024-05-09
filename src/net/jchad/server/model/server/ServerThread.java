@@ -12,14 +12,16 @@ import net.jchad.shared.networking.packets.*;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Function;
 
 public class ServerThread implements Runnable{
     private final Server server;
     private final MessageHandler messageHandler;
-    private final static List<ServerThread> serverThreadList = new ArrayList<>();
+    private final static Set<ServerThread> serverThreadSet = ConcurrentHashMap.newKeySet();
     private final PrintWriter printWriter;
     private final BufferedReader bufferedReader;
     private final JsonReader jsonReader;
@@ -53,7 +55,7 @@ public class ServerThread implements Runnable{
 
     public void run() {
         messageHandler.handleInfo(remoteAddress + " tries to establish a connection to the Server");
-        listOperation(list -> list.add(this));
+        serverThreadSet.add(this);
         try {
         if (isBanned()) {
             printWriter.println(new BannedPacket().toJSON());
@@ -102,7 +104,7 @@ public class ServerThread implements Runnable{
         printWriter.println(new ConnectionClosedPacket(reason).toJSON());//Sends the client a notification that the connection gets closed
         printWriter.flush();
         try {
-            listOperation(list -> list.remove(this));
+            serverThreadSet.remove(this);
             if (printWriter != null) {
                 printWriter.flush();
                 printWriter.close();
@@ -126,8 +128,8 @@ public class ServerThread implements Runnable{
      * Returns a List of all current connected ServerThreads IMMUTABLE BY DEFAULT
      * @return An immutable List
      */
-    public static List<ServerThread> getServerThreadList() {
-        return getServerThreadList(false);
+    public static Set<ServerThread> getServerThreadSet() {
+        return getServerThreadSet(false);
     }
 
     /**
@@ -135,8 +137,8 @@ public class ServerThread implements Runnable{
      * @param mutable If the list that gets returned is mutable or not
      * @return The ServerThreadList
      */
-    public static List<ServerThread> getServerThreadList(boolean mutable) {
-        return mutable ? serverThreadList : List.copyOf(serverThreadList);
+    public static Set<ServerThread> getServerThreadSet(boolean mutable) {
+        return mutable ? serverThreadSet : ConcurrentSkipListSet<>();
     }
 
 
@@ -149,7 +151,7 @@ public class ServerThread implements Runnable{
      *
      */
     public  static synchronized <R> R listOperation(Function<List<ServerThread>, R> statement) {
-        return statement.apply(serverThreadList);
+        return statement.apply(serverThreadSet);
     }
 
     public MessageHandler getMessageHandler() {
@@ -195,8 +197,8 @@ public class ServerThread implements Runnable{
     }
 
     public int getRetriesOnMalformedJSON() {
-        if (server.getConfig().getInternalSettings().getRetriesOnMalformedJSON() <= 0) return new InternalSettings().getRetriesOnMalformedJSON();
-        else return server.getConfig().getInternalSettings().getRetriesOnMalformedJSON();
+        if (server.getConfig().getInternalSettings().getRetriesOnInvalidPackets() <= 0) return new InternalSettings().getRetriesOnInvalidPackets();
+        else return server.getConfig().getInternalSettings().getRetriesOnInvalidPackets();
     }
 
     public boolean isBanned() {

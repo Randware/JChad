@@ -12,7 +12,7 @@ public class ClientSampleCodeRunnable implements Runnable {
     public void run() {
         try {
             // Create client socket
-            Socket s = new Socket("localhost", 13814);
+            Socket s = new Socket("81.217.113.13", 12312);
 
             // to send data to the server
             DataOutputStream dos

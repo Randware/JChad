@@ -3,7 +3,9 @@ package net.jchad.shared.networking.packets;
 public enum PacketType {
     BANNED ,
     NOT_WHITELISTED,
-    CONNECTION_CLOSED;
+    CONNECTION_CLOSED,
+    AES_ENCRYPTION_KEY,
+    RSA_PUBLIC_KEY;
 
 
 

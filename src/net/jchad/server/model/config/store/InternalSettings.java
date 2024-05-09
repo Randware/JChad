@@ -33,9 +33,9 @@ public class InternalSettings {
     /**
      * This determines how many times the client is allowed to send falsy data to the server .
      * If this limit gets exceeded the connection will close.
-     * If this gets set to a negative number the default value (3) get used instead.
+     * If this gets set to a negative number the default value (1) get used instead.
      */
-    private int retriesOnMalformedJSON = 3;
+    private int retriesOnInvalidPackets = 1;
 
     /**
      * Default {@link InternalSettings} constructor
@@ -50,11 +50,11 @@ public class InternalSettings {
      * @param PathWatcherRestartCountResetMilliseconds The amount of milliseconds after which the restart counter for the {@link PathWatcher} gets reset.
      *                                                   Set to negative number to never reset the restart counter.
      */
-    public InternalSettings(int maxPathWatcherRestarts, int PathWatcherRestartCountResetMilliseconds, long connectionRefreshIntervalMillis, int retriesOnMalformedJSON) {
+    public InternalSettings(int maxPathWatcherRestarts, int PathWatcherRestartCountResetMilliseconds, long connectionRefreshIntervalMillis, int retriesOnInvalidPackets) {
         this.maxPathWatcherRestarts = maxPathWatcherRestarts;
         this.pathWatcherRestartCountResetMilliseconds = PathWatcherRestartCountResetMilliseconds;
         this.connectionRefreshIntervalMillis = connectionRefreshIntervalMillis;
-        this.retriesOnMalformedJSON = retriesOnMalformedJSON;
+        this.retriesOnInvalidPackets = retriesOnInvalidPackets;
     }
 
     /**
@@ -104,15 +104,15 @@ public class InternalSettings {
      *
      * @return how many times the client is allowed to send falsy data to the server.
      */
-    public int getRetriesOnMalformedJSON() {
-        return retriesOnMalformedJSON;
+    public int getRetriesOnInvalidPackets() {
+        return retriesOnInvalidPackets;
     }
 
     /**
      *
-     * @param retriesOnMalformedJSON how many times the client is allowed to send falsy data to the server process.
+     * @param retriesOnInvalidPackets how many times the client is allowed to send falsy data to the server process.
      */
-    public void setRetriesOnMalformedJSON(int retriesOnMalformedJSON) {
-        this.retriesOnMalformedJSON = retriesOnMalformedJSON;
+    public void setRetriesOnInvalidPackets(int retriesOnInvalidPackets) {
+        this.retriesOnInvalidPackets = retriesOnInvalidPackets;
     }
 }

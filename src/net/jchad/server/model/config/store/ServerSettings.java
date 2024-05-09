@@ -47,7 +47,12 @@ public class ServerSettings {
     /**
      * Encrypt messages.
      */
-    private boolean encrypted = true;
+    private boolean encryptMessages = true;
+
+    /**
+     * Encrypt communications
+     */
+    private boolean encryptCommunications = false;
 
     /**
      * Port the server runs on.
@@ -71,7 +76,7 @@ public class ServerSettings {
      * @param blacklist Blacklisted IPs are not allowed to connect.
      * @param blacklistedIPs Blacklisted IPs
      * @param strictlyAnonymous Hide usernames in all channels
-     * @param encrypted Encrypt messages
+     * @param encryptMessages Encrypt messages
      * @param port Port the server runs on.
      */
     public ServerSettings(boolean requiresPassword,
@@ -81,7 +86,8 @@ public class ServerSettings {
                           boolean blacklist,
                           ArrayList<IPAddress> blacklistedIPs,
                           boolean strictlyAnonymous,
-                          boolean encrypted,
+                          boolean encryptMessages,
+                          boolean encryptCommunications,
                           int port) {
 
         this.requiresPassword = requiresPassword;
@@ -91,7 +97,8 @@ public class ServerSettings {
         this.blacklist = blacklist;
         this.blacklistedIPs = blacklistedIPs;
         this.strictlyAnonymous = strictlyAnonymous;
-        this.encrypted = encrypted;
+        this.encryptMessages = encryptMessages;
+        this.encryptCommunications = encryptCommunications;
         this.port = port;
     }
 
@@ -105,7 +112,8 @@ public class ServerSettings {
                 ", blacklist=" + blacklist +
                 ", blacklistedIPs=" + blacklistedIPs +
                 ", strictlyAnonymous=" + strictlyAnonymous +
-                ", encrypted=" + encrypted +
+                ", encryptMessages=" + encryptMessages +
+                ", encryptCommunication=" + encryptCommunications +
                 ", port=" + port +
                 '}';
     }
@@ -171,13 +179,17 @@ public class ServerSettings {
         this.strictlyAnonymous = strictlyAnonymous;
     }
 
-    public boolean isEncrypted() {
-        return encrypted;
+    public boolean isEncryptMessages() {
+        return encryptMessages;
     }
 
-    public void setEncrypted(boolean encrypted) {
-        this.encrypted = encrypted;
+    public void setEncryptMessages(boolean encryptMessages) {
+        this.encryptMessages = encryptMessages;
     }
+
+    public boolean isEncryptedMessages() {return encryptCommunications;}
+
+    public void setEncryptCommunications(boolean encryptCommunications) {this.encryptCommunications = encryptCommunications;}
 
     public int getPort() {
         return port;
