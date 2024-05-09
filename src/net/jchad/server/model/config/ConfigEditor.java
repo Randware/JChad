@@ -40,8 +40,8 @@ public class ConfigEditor {
         saveConfig();
     }
 
-    public void setEncrypted(boolean encrypted) {
-        serverSettings.setEncrypted(encrypted);
+    public void setEncryptMessages(boolean encryptMessages) {
+        serverSettings.setEncryptMessages(encryptMessages);
         saveConfig();
     }
 

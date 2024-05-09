@@ -351,7 +351,7 @@ public class CrypterManager {
      * Sets the keypair to a valid keypair instead of null
      * @return if some changes where made to the keypair 'true' gets returned
      */
-    private boolean initKeyPair() {
+    public boolean initKeyPair() {
         return initKeyPair(1024);
     }
 
@@ -419,6 +419,7 @@ public class CrypterManager {
      * @return Base64 encoded string representation of the SecretKey/AESKey
      */
     public String getAESKey() {
+        initAESKey();
         return keyToBase64(secretKey);
     }
 
@@ -477,7 +478,7 @@ public class CrypterManager {
      * Sets the secret key to a valid one instead of null
      * @return If the aes key gets initialized this returns 'true', otherwise this will return 'false'
      */
-    private boolean initAESKey() {
+    public boolean initAESKey() {
         return initAESKey(KeyUnit.DEFAULT);
     }
 

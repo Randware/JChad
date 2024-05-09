@@ -17,7 +17,7 @@ public final class MainSocket implements Runnable{
     private final int port;
     private ExecutorService executor;
     private final Server server;
-    private final String base64AESkey;
+    private final String base64AESmessageKey;
 
 
     protected MainSocket(int port, Server server) {
@@ -29,7 +29,7 @@ public final class MainSocket implements Runnable{
         if (1024 > port || port > 49151) messageHandler.handleWarning("Server-Port is outside of the User ports! Refer to https://en.wikipedia.org/wiki/Registered_port");
         this.port = port;
         executor = Executors.newVirtualThreadPerTaskExecutor();
-        base64AESkey = new CrypterManager().getAESKey();
+        base64AESmessageKey = new CrypterManager().getAESKey();
 
     }
 
@@ -53,10 +53,7 @@ public final class MainSocket implements Runnable{
         }
     }
 
-
-    public static <T> T getValueOrDefault(T value, Predicate<T> predicate, T defaultValue) {
-        return predicate.test(value) ? value : defaultValue;
+    public String getBase64AESmessageKey() {
+        return base64AESmessageKey;
     }
-
-
 }
