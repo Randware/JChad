@@ -1,10 +1,12 @@
 package net.jchad.server.model.server;
 
+import com.google.gson.Gson;
 import net.jchad.server.model.error.MessageHandler;
 import net.jchad.shared.cryptography.CrypterManager;
 import net.jchad.shared.networking.ip.IPAddress;
 import net.jchad.shared.networking.ip.InvalidIPAddressException;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -20,6 +22,8 @@ import java.util.function.Predicate;
 public final class MainSocket implements Runnable{
     private final MessageHandler messageHandler;
     private final int port;
+    private ServerSocket serverSocket = null;
+    private final Gson gson = new Gson();
     private ExecutorService executor;
     private final Server server;
     private final String base64AESmessageKey;
@@ -42,7 +46,8 @@ public final class MainSocket implements Runnable{
 
     @Override
     public void run() {
-        try (ServerSocket serverSocket = new ServerSocket(port)) {
+        try {
+            serverSocket = new ServerSocket(port);
             while (true) {
 
                 Socket socket = serverSocket.accept();
@@ -55,7 +60,7 @@ public final class MainSocket implements Runnable{
             messageHandler.handleFatalError(new Exception("An unknown error occurred", e));
         } finally {
             executor.shutdownNow();
-
+            closeServerSocket();
         }
     }
 
@@ -64,8 +69,24 @@ public final class MainSocket implements Runnable{
     }
 
     public void shutdown(String message) {
+        messageHandler.handleDebug("Closing all connections before shutting the MainSocket down");
         serverThreadSet.forEach(thread -> thread.close(message));
         executor.shutdownNow();
+        closeServerSocket();
+        Thread.currentThread().interrupt();
+    }
+
+    /**
+     * This closes the ServerSocket if it is not null.
+     */
+    public void closeServerSocket() {
+        if (serverSocket != null) {
+            try {
+                serverSocket.close();
+            } catch (IOException e) {
+                messageHandler.handleFatalError(new IOException("Error while closing the MainSocket.", e));
+            }
+        }
     }
 
     public String getBase64AESmessageKey() {
@@ -129,5 +150,9 @@ public final class MainSocket implements Runnable{
 
     public Server getServer() {
         return server;
+    }
+
+    public Gson getGson() {
+        return gson;
     }
 }

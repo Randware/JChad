@@ -397,6 +397,7 @@ public class CrypterManager {
      * @return Base64 encoded string representation of the public key
      */
     public String getPublicKey() {
+        initKeyPair();
         return keyToBase64(keyPair.getPublic());
     }
     /**

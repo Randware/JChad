@@ -32,7 +32,7 @@ public class CrypterHelperThread {
                     }
                     JsonToken jsToken = serverThread.getJsonReader().peek();
                     if (jsToken.equals(JsonToken.BEGIN_OBJECT)) {
-
+                        PublicRSAkeyPacket publicRSAkeyPacket = serverThread.getMainSocket().getGson().fromJson(serverThread.getJsonReader(), PublicRSAkeyPacket.class);
                     } else {
                         skip = true;
                         throw new MalformedJsonException("Invalid JSON while trying to exchange RSA public keys");
