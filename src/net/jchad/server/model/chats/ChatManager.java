@@ -82,7 +82,8 @@ public class ChatManager {
     private void loadChats() throws IOException {
         ensureChatsSavePathCreated();
 
-        ArrayList<Path> dirs = new ArrayList<>(Files.list(chatsSavePath).filter(Files::isDirectory).toList());
+        ArrayList<Path> dirs = new ArrayList<>(Files.list(chatsSavePath)
+                .filter(Files::isDirectory).toList());
 
         ArrayList<Chat> chats = new ArrayList<>();
 
@@ -90,7 +91,7 @@ public class ChatManager {
             String chatName = dir.getFileName().toString();
 
             try {
-                chats.add(new Chat(chatName));
+                chats.add(new Chat(chatName, messageHandler));
             } catch (IOException e) {
                 messageHandler.handleError(new IOException("Failed loading chat \"" + chatName + "\"", e));
             }
@@ -148,9 +149,8 @@ public class ChatManager {
                 if(chatConfigPath.equals(path)) {
                     messageHandler.handleInfo("\"" + modifiedChatName + "\" chat configuration was updated");
 
-                    // TODO: Load chat configuration here instead of reloading all chats
                     try {
-                        loadChats();
+                        modifiedChat.loadConfig();
 
                         if(configObserver != null) {
                             configObserver.configUpdated();

@@ -21,6 +21,7 @@ module net.jchad {
     opens net.jchad.shared.networking.packets to com.google.gson;
     opens net.jchad.shared.networking.ip to com.google.gson;
     opens net.jchad.server.model.config to com.fasterxml.jackson.databind;
+    exports net.jchad.server.model.chats to com.fasterxml.jackson.databind;
     exports net.jchad.installer.gui;
     exports net.jchad.installer.serializable to com.google.gson;
     opens net.jchad.client.model.client to javafx.fxml;

@@ -15,6 +15,7 @@ public class Server implements ConfigObserver {
     private ConfigManager configManager;
     private ChatManager chatManager;
     private final double version = 1.00;
+    private long startTimestamp;
 
     private MainSocket mainSocket;
     private Config config;
@@ -25,6 +26,8 @@ public class Server implements ConfigObserver {
     }
 
     public void runServer() {
+        startTimestamp = System.currentTimeMillis();
+
         messageHandler.handleInfo("Starting server ...");
 
         this.configManager = new ConfigManager(messageHandler, this);
@@ -68,5 +71,13 @@ public class Server implements ConfigObserver {
 
     public MessageHandler getMessageHandler() {
         return messageHandler;
+    }
+
+    public double getVersion() {
+        return version;
+    }
+
+    public long getStartTimestamp() {
+        return startTimestamp;
     }
 }

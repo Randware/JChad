@@ -195,7 +195,7 @@ public class ServerSettings {
         this.encryptMessages = encryptMessages;
     }
 
-    public boolean isEncryptedMessages() {return encryptCommunications;}
+    public boolean isEncryptCommunications() {return encryptCommunications;}
 
     public void setEncryptCommunications(boolean encryptCommunications) {this.encryptCommunications = encryptCommunications;}
 
