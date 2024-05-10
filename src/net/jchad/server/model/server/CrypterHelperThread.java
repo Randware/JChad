@@ -4,6 +4,7 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.MalformedJsonException;
 import net.jchad.shared.cryptography.CrypterManager;
+import net.jchad.shared.networking.packets.InvalidPacketException;
 import net.jchad.shared.networking.packets.PublicRSAkeyPacket;
 
 import java.io.IOException;
@@ -33,18 +34,25 @@ public class CrypterHelperThread {
                     JsonToken jsToken = serverThread.getJsonReader().peek();
                     if (jsToken.equals(JsonToken.BEGIN_OBJECT)) {
                         PublicRSAkeyPacket publicRSAkeyPacket = serverThread.getMainSocket().getGson().fromJson(serverThread.getJsonReader(), PublicRSAkeyPacket.class);
+                        if (!publicRSAkeyPacket.isValid()) {
+                            throw new InvalidPacketException("The received PublicRSAkeyPacket is not valid.");
+                        }
+
                     } else {
                         skip = true;
                         throw new MalformedJsonException("Invalid JSON while trying to exchange RSA public keys");
                     }
 
                 }
-            } catch (MalformedJsonException | JsonSyntaxException e) {
-                
+            } catch (MalformedJsonException | JsonSyntaxException | InvalidPacketException e) {
+                if (fails >= retries) {
+                    //serverThread.getMessageHandler().handleDebug();
+                }
             }
             catch (IOException ioe) {
-                serverThread.getMessageHandler().handleError(new IOException("An IO exception occurred! ", ioe));
+                serverThread.getMessageHandler().handleDebug(new IOException("An IO exception occurred! ", ioe));
                 serverThread.close("An IO exception occurred while trying to exchange the RSA keys");
+                break;
             }
         }
     }
