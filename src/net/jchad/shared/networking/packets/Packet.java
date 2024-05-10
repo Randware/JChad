@@ -11,10 +11,10 @@ import java.util.List;
  * This interface provides some useful methods for Packets. Like serialization and deserialization by using the {@link com.google.gson GSON} library.
  *
  * <p>Every packet <b><u>has to</u></b> implement this interface.</p>
- * <p><font color="red">If any packet breaks these conventions the {@link Packet#isValid()} will return false!</font></p>
+ * <p><u><b><font color="red">If any packet breaks these conventions the {@link Packet#isValid()} will return false!</font></b></u></p>
  * <ul>
  *      <li><p>Every subclass <b>has to declare a {@link PacketType packet_type}</b> field with the type of {@link PacketType} </p></li>
- *      <li><p>No variables are allowed to be null, expect those who are annotated with the {@link IgnoreValidation} annotation.</p></li>
+ *      <li><p>No variables are allowed to be null, expect those who are annotated with the {@link IgnoreValidation @IgnoreValidation} annotation.</p></li>
  * </ul>
  *  <p>Here are examples of two packets that are not valid</p>
  *  Invalid example one:
@@ -104,8 +104,12 @@ public interface Packet{
                         break;
                     }
 
-                    if (field.getName().equals("packet_type") && field.get(this) != null) {
-                        includesPacketType = true;
+                    if (field.getName().equals("packet_type")) {
+                        if (field.get(this) != null && field.get(this) instanceof PacketType) {
+                            includesPacketType = true;
+                        } else {
+                            break;
+                        }
                     }
             } catch (Exception howWouldYouGetThatException) {
                 break;
