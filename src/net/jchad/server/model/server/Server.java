@@ -60,6 +60,8 @@ public class Server implements ConfigObserver {
         messageHandler.handleInfo("Stopping server");
         mainSocket.shutdown();
         running = false;
+        startTimestamp = 0;
+        messageHandler.handleInfo("Server is stopped");
     }
 
     public void executeCommand(String command) {
