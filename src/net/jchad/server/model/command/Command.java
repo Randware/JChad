@@ -13,6 +13,7 @@ import java.util.List;
  */
 public enum Command {
     STOP("stop", new StopCommand(), "stop", "Stop the server"),
+    START("start", new StartCommand(), "start", "Start the server"),
     WHITELIST("whitelist", new WhitelistCommand(), "whitelist <IPv4/v6> ...", "Whitelist one or multiple IP addresses"),
     BLACKLIST("blacklist", new BlacklistCommand(), "blacklist <IPv4/v6> ...", "Blacklist one or multiple IP addresses"),
     KICK("kick", new KickCommand(), "kick <IPv4/v6> | <all>", "Kick specific IP addresses or all connected clients"),
