@@ -52,4 +52,16 @@ public class ChatMessage {
     public LocalDateTime getTimestampAsLocalDateTime() {
         return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), TimeZone.getDefault().toZoneId());
     }
+
+    @Override
+    public String toString() {
+        return "ChatMessage{" +
+                "id=" + id +
+                ", content='" + content + '\'' +
+                ", encrypted=" + encrypted +
+                ", timestamp=" + timestamp +
+                ", senderName='" + senderName + '\'' +
+                ", senderIP='" + senderIP + '\'' +
+                '}';
+    }
 }
