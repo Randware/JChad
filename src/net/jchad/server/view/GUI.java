@@ -343,5 +343,6 @@ public class GUI extends Application implements MessageHandler {
     @Override
     public void stop() throws Exception {
         server.stopServer();
+        System.exit(0);
     }
 }
