@@ -5,6 +5,8 @@ import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.MalformedJsonException;
 import net.jchad.shared.cryptography.CrypterManager;
 import net.jchad.shared.networking.packets.InvalidPacketException;
+import net.jchad.shared.networking.packets.InvalidPacket;
+import net.jchad.shared.networking.packets.PacketType;
 import net.jchad.shared.networking.packets.PublicRSAkeyPacket;
 
 import java.io.IOException;
@@ -46,11 +48,12 @@ public class CrypterHelperThread {
                 }
             } catch (MalformedJsonException | JsonSyntaxException | InvalidPacketException e) {
                 if (fails >= retries) {
-                    serverThread.getMessageHandler().handleDebug("%s sent %d/%d invalid packets/json. The connection get terminated now".formatted(serverThread.getRemoteAddress(), fails, retries));
+                    serverThread.getMessageHandler().handleDebug("%s sent an invalid packet. The connection get terminated now after %d failed attempts from %d maximum tries".formatted(serverThread.getRemoteAddress(), fails, retries));
                     serverThread.close("%s sent to many invalid packets".formatted(serverThread.getRemoteAddress()));
                     break;
                 } else {
-
+                    serverThread.getMessageHandler().handleDebug("%s sent an invalid packet! The connection gets terminated if the server receives %d more invalid packets".formatted(serverThread.getRemoteAddress(), retries - fails));
+                    serverThread.getPrintWriter().println(new InvalidPacket(PacketType.RSA_PUBLIC_KEY, "The provided RSA packet was not valid"));
                 }
             }
             catch (IOException ioe) {
