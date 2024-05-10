@@ -12,7 +12,7 @@ public class ClientSampleCodeRunnable implements Runnable {
     public void run() {
         try {
             // Create client socket
-            Socket s = new Socket("81.217.113.13", 12312);
+            Socket s = new Socket("localhost", 13814);
 
             // to send data to the server
             DataOutputStream dos
@@ -38,6 +38,7 @@ public class ClientSampleCodeRunnable implements Runnable {
                 Thread.currentThread().sleep(500);
                 // send to the server
                 dos.writeBytes(Thread.currentThread().getName() + "\n");
+                dos.flush();
 
                 // receive from the server
                 str1 = br.readLine();
