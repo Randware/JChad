@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -28,6 +29,7 @@ public final class MainSocket implements Runnable{
     private final Server server;
     private final String base64AESmessageKey;
     private final Set<ServerThread> serverThreadSet = ConcurrentHashMap.newKeySet();
+    private boolean running = true;
 
 
     protected MainSocket(int port, Server server) {
@@ -49,11 +51,22 @@ public final class MainSocket implements Runnable{
         try {
             serverSocket = new ServerSocket(port);
             while (!serverSocket.isClosed()) {
+                    Socket socket = serverSocket.accept();
 
-                Socket socket = serverSocket.accept();
+
+
 
                 executor.submit(new ServerThread(socket,  this));
 
+            }
+        } catch(SocketException se) {
+            if (!running) {
+                //Ignores the exception if it gets throw, when the server shutdowns.
+                //When I close the serverSocket while the serverSocket.accept()
+                // methode is running a guaranteed Exception gets thrown,
+                // therefore, we ignore ethe exception
+            } else {
+                messageHandler.handleFatalError(new Exception("An unknown error occurred", se));
             }
         } catch (Exception e) {
             messageHandler.handleFatalError(new Exception("An unknown error occurred", e));
@@ -71,11 +84,12 @@ public final class MainSocket implements Runnable{
         if (Thread.currentThread().isInterrupted()) {
             Thread.currentThread().interrupt();
         }
+        running = false;
         messageHandler.handleDebug("Closing all connections before shutting the MainSocket down");
         serverThreadSet.forEach(thread -> thread.close(message));
         executor.shutdownNow();
-        Thread.currentThread().interrupt();
         closeServerSocket();
+        Thread.currentThread().interrupt();
     }
 
     /**
