@@ -16,6 +16,7 @@ public class Server implements ConfigObserver {
     private ChatManager chatManager;
     private final double version = 1.00;
     private long startTimestamp;
+    private boolean running;
 
     private MainSocket mainSocket;
     private Config config;
@@ -26,7 +27,13 @@ public class Server implements ConfigObserver {
     }
 
     public void runServer() {
+        if(running) {
+            messageHandler.handleWarning("Server is already running");
+            return;
+        }
+
         startTimestamp = System.currentTimeMillis();
+        running = true;
 
         messageHandler.handleInfo("Starting server ...");
 
@@ -45,8 +52,14 @@ public class Server implements ConfigObserver {
     }
 
     public void stopServer() {
+        if(!isRunning()) {
+            messageHandler.handleWarning("Server is already stopped");
+            return;
+        }
+
         messageHandler.handleInfo("Stopping server");
         mainSocket.shutdown();
+        running = false;
     }
 
     public void executeCommand(String command) {
@@ -79,5 +92,9 @@ public class Server implements ConfigObserver {
 
     public long getStartTimestamp() {
         return startTimestamp;
+    }
+
+    public boolean isRunning() {
+        return running;
     }
 }

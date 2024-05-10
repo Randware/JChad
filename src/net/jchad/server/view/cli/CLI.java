@@ -42,6 +42,7 @@ public class CLI implements MessageHandler {
 
     private void handleExit() {
         server.stopServer();
+        System.exit(0);
     }
 
     @Override
@@ -49,7 +50,6 @@ public class CLI implements MessageHandler {
         terminal.outputMessage("[FATAL ERROR] " + Util.stackTraceToString(e));
         terminal.close();
         server.stopServer();
-        System.exit(0);
     }
 
     @Override
