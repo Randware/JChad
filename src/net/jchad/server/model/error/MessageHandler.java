@@ -1,5 +1,7 @@
 package net.jchad.server.model.error;
 
+import net.jchad.shared.common.Util;
+
 import java.awt.*;
 import java.awt.image.ImageObserver;
 import java.awt.image.ImageProducer;
@@ -21,4 +23,11 @@ public interface MessageHandler {
 
     void handleDebug(String debug);
 
+    default void handleDebug(Exception e) {
+        handleDebug(Util.stackTraceToString(e));
+    }
+
+    default void handleDebug(String debugString, Exception debugException) {
+        handleDebug(debugString + "\n" + Util.stackTraceToString(debugException));
+    }
 }
