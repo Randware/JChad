@@ -115,6 +115,7 @@ public class GUI extends Application implements MessageHandler {
             if (keyEvent.getCode() == KeyCode.ENTER) {
                 if (cmdField.getText().length() > 0) {
                     server.sendCommand(cmdField.getText());
+                    logArea.getChildren().addAll(new Text(" > " + cmdField.getText() + "\n"));
                     cmdField.setText("");
                 }
             }
