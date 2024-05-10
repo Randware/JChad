@@ -46,7 +46,11 @@ public class CrypterHelperThread {
                 }
             } catch (MalformedJsonException | JsonSyntaxException | InvalidPacketException e) {
                 if (fails >= retries) {
-                    //serverThread.getMessageHandler().handleDebug();
+                    serverThread.getMessageHandler().handleDebug("%s sent %d/%d invalid packets/json. The connection get terminated now".formatted(serverThread.getRemoteAddress(), fails, retries));
+                    serverThread.close("%s sent to many invalid packets".formatted(serverThread.getRemoteAddress()));
+                    break;
+                } else {
+
                 }
             }
             catch (IOException ioe) {
