@@ -53,6 +53,10 @@ public final class MainSocket implements Runnable{
         }
     }
 
+    public void shutdown(String message) {
+        ServerThread.getServerThreadSet().forEach(thread -> thread.close("The server is shutting down"));
+    }
+
     public String getBase64AESmessageKey() {
         return base64AESmessageKey;
     }
