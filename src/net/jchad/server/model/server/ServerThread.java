@@ -18,8 +18,8 @@ import java.util.function.Function;
 
 public class ServerThread implements Runnable{
     private final Server server;
+    private final MainSocket mainSocket;
     private final MessageHandler messageHandler;
-    private final static Set<ServerThread> serverThreadSet = ConcurrentHashMap.newKeySet();
     private final PrintWriter printWriter;
     private final BufferedReader bufferedReader;
     private final JsonReader jsonReader;
@@ -27,9 +27,10 @@ public class ServerThread implements Runnable{
     private final InetSocketAddress inetAddress;
     private String remoteAddress = "Unknown"; //The ip address of the client
 
-    public ServerThread(Socket socket, Server server) throws IOException {
-        if (server == null) throw new IllegalArgumentException("Could not connect to [%s]: The MessageHandler is null".formatted(remoteAddress));
-        this.server = server;
+    public ServerThread(Socket socket, MainSocket mainSocket) throws IOException {
+        if (mainSocket == null) throw new IllegalArgumentException("Could not connect to [%s]: The MainServer is null".formatted(remoteAddress));
+        this.mainSocket = mainSocket;
+        this.server = mainSocket.getServer();
         if (server.getMessageHandler() == null) {throw new IllegalArgumentException("Could not connect to [%s]: The MessageHandler is null".formatted(remoteAddress));}
         this.messageHandler = server.getMessageHandler();
         if (socket == null) {
@@ -53,16 +54,16 @@ public class ServerThread implements Runnable{
 
     public void run() {
         messageHandler.handleInfo(remoteAddress + " tries to establish a connection to the Server");
-        serverThreadSet.add(this);
+
         try {
-        if (isBanned()) {
+        if (mainSocket.isBanned(inetAddress)) {
             printWriter.println(new BannedPacket().toJSON());
             printWriter.flush();
             close(remoteAddress + " is banned on this server");
             return;
         }
 
-        if (!isWhitelisted()) {
+        if (!mainSocket.isWhitelisted(inetAddress)) {
             printWriter.println(new NotWhitelistedPacket().toJSON());
             printWriter.flush();
             close(remoteAddress + " is not whitelisted on this server");
@@ -102,7 +103,7 @@ public class ServerThread implements Runnable{
         printWriter.println(new ConnectionClosedPacket(reason).toJSON());//Sends the client a notification that the connection gets closed
         printWriter.flush();
         try {
-            serverThreadSet.remove(this);
+            mainSocket.getServerThreadSet(false).remove(this);
             if (printWriter != null) {
                 printWriter.flush();
                 printWriter.close();
@@ -122,76 +123,7 @@ public class ServerThread implements Runnable{
         }
     }
 
-    /**
-     * @deprecated <strong><p>This methode should get avoided because it was intended for a thread unsafe list.
-     *             The original collection that stored the {@link ServerThread#serverThreadSet} was an {@link java.util.ArrayList}.
-     *             It got replaced by an {@link ConcurrentHashMap#newKeySet()}</p></strong>
-     *<br>
-     * This ensures that all operations done to the list get executed correctly.
-     * Without this methode problems could arise when multiple threads add or remove themselves from the array list
-     * due to the nature of the ArrayList (Because it isn't concurrency safe.)
-     * @param statement The statement that gets executed on the arraylist
-     * @return The return value of the operation
-     *
-     */
-    @Deprecated(forRemoval = true)
-    public  static synchronized <R> R listOperation(Function<Set<ServerThread>, R> statement) {
 
-        return statement.apply(serverThreadSet);
-    }
-
-    public boolean isBanned() {
-        try {
-
-            if (server.getConfig().getServerSettings().isBlacklist() && server.getConfig().getServerSettings().getBlacklistedIPs().contains(IPAddress.fromString(remoteAddress.substring(0, remoteAddress.lastIndexOf(":"))))) {
-                return true;
-            }
-        } catch (InvalidIPAddressException e) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Returns if the ip address is allowed to join
-     * @return When the whitelist is true and the ip of the client is in the allowed ips this returns true
-     */
-    public boolean isWhitelisted() {
-        try {
-            if (server.getConfig().getServerSettings().isWhitelist() && server.getConfig().getServerSettings().getWhitelistedIPs().contains(IPAddress.fromString(remoteAddress.substring(0, remoteAddress.lastIndexOf(":"))))) {
-                return true;
-            } else return !server.getConfig().getServerSettings().isWhitelist();
-        } catch (InvalidIPAddressException ignored) {}
-        return false;
-    }
-
-
-    /**
-     * Returns a Set of all current connected ServerThreads.
-     * <b>This returns a copy of the Set! The {@link net.jchad.server.model.server.ServerThread ServerThreads} are still mutable</b>
-     * <p>If the original set gets modified the returned set stays the same!</p>
-     * Use {@link ServerThread#getServerThreadSet(boolean)}
-     * @return A copied set of the {@link ServerThread#serverThreadSet}
-     */
-    public static Set<ServerThread> getServerThreadSet() {
-        return getServerThreadSet(false);
-    }
-
-    /**
-     * Returns a Set of all current connected ServerThreads
-     * @param createCopyOfSet <p>Set this to true if the returning {@link ServerThread#serverThreadSet} should be a copy of the original one.</p>
-     *                        <p>Otherwise set this to false to get the mutable {@link ServerThread#serverThreadSet}</p>
-     * @return The {@link ServerThread#serverThreadSet}
-     */
-    public static Set<ServerThread> getServerThreadSet(boolean createCopyOfSet) {
-        if (createCopyOfSet) {
-            Set<ServerThread> returnedSet = ConcurrentHashMap.newKeySet();
-            returnedSet.addAll(serverThreadSet);
-            return returnedSet;
-        } else {
-            return serverThreadSet;
-        }
-    }
 
 
     /** //TODO I am unsure if this is a permanent solution. Checking if the config values are correct should not be done in the ServerThread.

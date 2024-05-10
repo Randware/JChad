@@ -43,9 +43,7 @@ public class Server implements ConfigObserver {
 
     public void stopServer() {
         messageHandler.handleInfo("Stopping server");
-
-        // TODO: Implement proper server shutdown logic here instead
-        System.exit(0);
+        mainSocket.shutdown();
     }
 
     public void executeCommand(String command) {
