@@ -54,7 +54,7 @@ public class ServerThread implements Runnable{
 
     public void run() {
         messageHandler.handleInfo(remoteAddress + " tries to establish a connection to the Server");
-
+        mainSocket.getServerThreadSet(false).add(this);
         try {
         if (mainSocket.isBanned(inetAddress)) {
             printWriter.println(new BannedPacket().toJSON());
@@ -70,9 +70,7 @@ public class ServerThread implements Runnable{
             return;
         }
 
-        while (true) {
 
-        }
 
         }  catch (Exception e) {
             messageHandler.handleError(new Exception("An error occurred while connected to [%s]: %s".formatted(remoteAddress,e.getMessage()), e));
