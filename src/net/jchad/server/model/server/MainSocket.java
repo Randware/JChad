@@ -48,14 +48,13 @@ public final class MainSocket implements Runnable{
     public void run() {
         try {
             serverSocket = new ServerSocket(port);
-            while (true) {
+            while (!serverSocket.isClosed()) {
 
                 Socket socket = serverSocket.accept();
 
                 executor.submit(new ServerThread(socket,  this));
 
             }
-
         } catch (Exception e) {
             messageHandler.handleFatalError(new Exception("An unknown error occurred", e));
         } finally {
@@ -69,11 +68,14 @@ public final class MainSocket implements Runnable{
     }
 
     public void shutdown(String message) {
+        if (Thread.currentThread().isInterrupted()) {
+            Thread.currentThread().interrupt();
+        }
         messageHandler.handleDebug("Closing all connections before shutting the MainSocket down");
         serverThreadSet.forEach(thread -> thread.close(message));
         executor.shutdownNow();
-        closeServerSocket();
         Thread.currentThread().interrupt();
+        closeServerSocket();
     }
 
     /**
