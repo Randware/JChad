@@ -177,7 +177,7 @@ public class ServerThread implements Runnable{
         return server.getConfig();
     }
 
-
-
-
+    public MainSocket getMainSocket() {
+        return mainSocket;
+    }
 }
