@@ -17,7 +17,8 @@ public enum Command {
     BLACKLIST("blacklist", new BlacklistCommand(), "blacklist <IPv4/v6> ...", "Blacklist one or multiple IP addresses"),
     KICK("kick", new KickCommand(), "kick <IPv4/v6> | <all>", "Kick specific IP addresses or all connected clients"),
     HELP("help", new HelpCommand(), "help", "Show the help dialog"),
-    GITHUB("GitHub", new GitHubCommand(), "GitHub", "Get the link to the official GitHub repository for JChad");
+    INFO("info", new InfoCommand(), "info", "Show information about the running server instance"),
+    GITHUB("github", new GitHubCommand(), "github", "Get the link for the official JChad github repository");
 
     /**
      * This value represents the command string, which should be associated with the command.
