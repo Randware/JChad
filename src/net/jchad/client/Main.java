@@ -3,7 +3,8 @@ package net.jchad.client;
 import net.jchad.server.view.cli.CLI;
 import net.jchad.server.view.GUI;
 
-public class Main {
+public class
+Main {
     private final static boolean cliMode = true;
 
     public static void main(String[] args) {
