@@ -51,7 +51,7 @@ public final class MainSocket implements Runnable{
     @Override
     public void run() {
         try {
-            System.out.println(ServerInformationPacket.getCurrentServerInfo(server));
+
             serverSocket = new ServerSocket(port);
             while (!serverSocket.isClosed()) {
                     Socket socket = serverSocket.accept();
