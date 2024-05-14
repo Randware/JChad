@@ -6,6 +6,7 @@ import net.jchad.server.model.error.MessageHandler;
 import net.jchad.shared.cryptography.CrypterManager;
 import net.jchad.shared.networking.ip.IPAddress;
 import net.jchad.shared.networking.ip.InvalidIPAddressException;
+import net.jchad.shared.networking.packets.ServerInformationPacket;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -50,6 +51,7 @@ public final class MainSocket implements Runnable{
     @Override
     public void run() {
         try {
+            System.out.println(ServerInformationPacket.getCurrentServerInfo(server));
             serverSocket = new ServerSocket(port);
             while (!serverSocket.isClosed()) {
                     Socket socket = serverSocket.accept();

@@ -6,7 +6,7 @@ public enum PacketType {
     CONNECTION_CLOSED,
     AES_ENCRYPTION_KEY,
     RSA_PUBLIC_KEY,
-    DISCOVERY, //The discovery packet provides information to the client
+    SERVER_INFORMATION, //The SERVER_INFORMATION packet provides information to the client
     INVALID,
     MESSAGE;
 
