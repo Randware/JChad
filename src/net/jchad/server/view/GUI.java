@@ -104,8 +104,8 @@ public class GUI extends Application implements MessageHandler {
         cmdField.setOnKeyPressed(keyEvent -> {
             if (keyEvent.getCode() == KeyCode.ENTER) {
                 if (!cmdField.getText().isEmpty()) {
-                    server.sendCommand(cmdField.getText());
                     appendText(" > " + cmdField.getText() + "\n", "-fx-fill: black;");
+                    server.sendCommand(cmdField.getText());
                     cmdField.setText("");
                 }
             }
