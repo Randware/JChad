@@ -1,5 +1,10 @@
 package net.jchad.client.view;
 
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.stage.Stage;
 import net.jchad.client.controller.ClientController;
 import net.jchad.client.model.error.MessageHandler;
 
@@ -16,6 +21,8 @@ public class GUI implements MessageHandler {
 
         // Display GUI
     }
+
+
 
     @Override
     public void handleFatalError(Exception e) {
