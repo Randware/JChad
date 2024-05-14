@@ -7,7 +7,7 @@ import net.jchad.server.model.config.*;
 import net.jchad.server.model.config.store.Config;
 import net.jchad.server.model.error.MessageHandler;
 
-import java.util.ArrayList;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 // Contains all necessary server data
 public class Server implements ConfigObserver {
@@ -20,7 +20,7 @@ public class Server implements ConfigObserver {
 
     private MainSocket mainSocket;
     private Config config;
-    private ArrayList<Chat> chats;
+    private ConcurrentLinkedDeque<Chat> chats;
 
     public Server(MessageHandler messageHandler) {
         this.messageHandler = messageHandler;
@@ -78,6 +78,10 @@ public class Server implements ConfigObserver {
 
     public Config getConfig() {
         return config;
+    }
+
+    public ConcurrentLinkedDeque<Chat> getChats() {
+        return chats;
     }
 
     public MainSocket getMainSocket() {

@@ -72,8 +72,8 @@ public class ChatManager {
         return null;
     }
 
-    public ArrayList<Chat> getAllChats() {
-        return new ArrayList<>(chats);
+    public ConcurrentLinkedDeque<Chat> getAllChats() {
+        return new ConcurrentLinkedDeque<>(chats);
     }
 
     private void ensureChatsSavePathCreated() {

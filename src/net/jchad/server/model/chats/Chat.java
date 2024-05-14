@@ -163,7 +163,7 @@ public class Chat {
      * @return all messages from this chat
      */
     public ArrayList<ChatMessage> getAllMessages() {
-        return messages;
+        return new ArrayList<>(messages);
     }
 
     /**
@@ -175,7 +175,7 @@ public class Chat {
     public ArrayList<ChatMessage> getMessages() {
         if(!config.isLoadChatHistory()) return new ArrayList<>();
 
-        return messages;
+        return new ArrayList<>(messages);
     }
 
     public ChatConfig getConfig() {
