@@ -6,7 +6,7 @@ import net.jchad.shared.networking.packets.Packet;
 import net.jchad.shared.networking.packets.PacketType;
 
 public class TestInvalidPacket implements Packet {
-    private final PacketType packet_type = PacketType.DISCOVERY;
+    private final PacketType packet_type = PacketType.SERVER_INFORMATION;
     @IgnoreValidation
     private final Command command = null;
     private final int idk = 14;

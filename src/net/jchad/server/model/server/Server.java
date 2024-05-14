@@ -103,4 +103,5 @@ public class Server implements ConfigObserver {
     public boolean isRunning() {
         return running;
     }
+
 }
