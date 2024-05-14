@@ -156,7 +156,25 @@ public class Chat {
         return name;
     }
 
+    /**
+     * <font color="red">This method should ideally not be called, since it does not
+     * respect the configured settings for the message loading of this chat.</font>
+     *
+     * @return all messages from this chat
+     */
+    public ArrayList<ChatMessage> getAllMessages() {
+        return messages;
+    }
+
+    /**
+     * <font color="red">This method should be called when accessing messages in this chat,
+     * as it respects the configured message loading values.</font>
+     *
+     * @return all messages from this chat according to the configuration of this chat
+     */
     public ArrayList<ChatMessage> getMessages() {
+        if(!config.isLoadChatHistory()) return new ArrayList<>();
+
         return messages;
     }
 

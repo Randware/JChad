@@ -41,7 +41,7 @@ public class Server implements ConfigObserver {
         this.config = configManager.getConfig();
         messageHandler.handleInfo("Loaded server configuration");
 
-        this.chatManager = new ChatManager(messageHandler, this);
+        this.chatManager = new ChatManager(this, this);
         this.chats = chatManager.getAllChats();
         messageHandler.handleInfo("Loaded chat configuration");
 

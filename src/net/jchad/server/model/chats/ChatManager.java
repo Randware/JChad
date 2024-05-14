@@ -1,7 +1,9 @@
 package net.jchad.server.model.chats;
 
 import net.jchad.server.model.config.ConfigObserver;
+import net.jchad.server.model.config.store.Config;
 import net.jchad.server.model.error.MessageHandler;
+import net.jchad.server.model.server.Server;
 import net.jchad.shared.files.PathWatcher;
 
 import java.io.IOException;
@@ -16,14 +18,18 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 public class ChatManager {
     private static final Path chatsSavePath = Path.of("./chats/");
 
+    private Server server;
     private MessageHandler messageHandler;
     private ConfigObserver configObserver;
+
     private PathWatcher pathWatcher;
+    private int restartAttempts;
 
     private ConcurrentLinkedDeque<Chat> chats;
 
-    public ChatManager(MessageHandler messageHandler, ConfigObserver configObserver) {
-        this.messageHandler = messageHandler;
+    public ChatManager(Server server, ConfigObserver configObserver) {
+        this.server = server;
+        this.messageHandler = server.getMessageHandler();
         this.configObserver = configObserver;
 
         ensureChatsSavePathCreated();
@@ -39,8 +45,8 @@ public class ChatManager {
         }
     }
 
-    public ChatManager(MessageHandler messageHandler) {
-        this(messageHandler, null);
+    public ChatManager(Server server) {
+        this(server, null);
     }
 
     private void initializePathWatcher() {
@@ -101,7 +107,9 @@ public class ChatManager {
             try {
                 pathWatcher.addPath(dir);
             } catch (IOException e) {
-                messageHandler.handleError(new IOException("Failed initializing chat config watching for \"" + chatName + "\" chat", e));
+                messageHandler.handleError(
+                        new IOException("Failed initializing chat config watching for \"" + chatName + "\" chat", e)
+                );
                 messageHandler.handleWarning("Live updating the \"" + chatName + "\" chat configuration is not possible");
             }
         }
@@ -167,7 +175,33 @@ public class ChatManager {
     }
 
     private void handlePathWatcherError(Exception e) {
-        // Handle error, restart, etc.
+        Config config = server.getConfig();
+        int restartMillis = config.getInternalSettings().getPathWatcherRestartCountResetMilliseconds();
+
+
+        if (System.currentTimeMillis() - pathWatcher.getStartTimestamp() >= restartMillis) {
+            restartAttempts = 0;
+        }
+
+        restartAttempts++;
+
+        int maxRestarts = config.getInternalSettings().getMaxPathWatcherRestarts();
+
+        if (restartAttempts <= maxRestarts) {
+            messageHandler.handleError(new IOException("The PathWatcher thread has run into an unexpected error: " + e));
+            messageHandler.handleWarning("Attempting restart " + restartAttempts + " ...");
+
+            if (pathWatcher != null) {
+                pathWatcher.stopWatcher();
+            }
+
+            initializePathWatcher();
+        } else {
+            messageHandler.handleError(new IOException("Failed PathWatcher restart after " + maxRestarts + " attempts: " + e));
+            messageHandler.handleWarning("Registering live updates in the chat configuration is no longer possible.");
+
+            pathWatcher.stopWatcher();
+        }
     }
 
     public static Path getChatsSavePath() {
