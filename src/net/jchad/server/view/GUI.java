@@ -40,7 +40,7 @@ public class GUI extends Application implements MessageHandler {
     }
 
     @Override
-    public void start(Stage stage) throws Exception {
+    public void start(Stage stage) {
         server = new ServerController(this);
         server.startServer();
 
@@ -342,8 +342,11 @@ public class GUI extends Application implements MessageHandler {
     }
 
     @Override
-    public void stop() throws Exception {
-        server.stopServer();
+    public void stop() {
+        if(server.isRunning()) {
+            server.stopServer();
+        }
+
         System.exit(0);
     }
 }

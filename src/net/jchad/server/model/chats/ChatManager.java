@@ -10,6 +10,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class ChatManager {
     private static final Path chatsSavePath = Path.of("./chats/");
@@ -18,7 +20,7 @@ public class ChatManager {
     private ConfigObserver configObserver;
     private PathWatcher pathWatcher;
 
-    private ArrayList<Chat> chats;
+    private ConcurrentLinkedDeque<Chat> chats;
 
     public ChatManager(MessageHandler messageHandler, ConfigObserver configObserver) {
         this.messageHandler = messageHandler;
@@ -33,7 +35,7 @@ public class ChatManager {
             messageHandler.handleError(new IOException("Failed loading saved chat configuration", e));
             messageHandler.handleWarning("Empty chat configuration was loaded");
 
-            chats = new ArrayList<>();
+            chats = new ConcurrentLinkedDeque<>();
         }
     }
 
@@ -65,7 +67,7 @@ public class ChatManager {
     }
 
     public ArrayList<Chat> getAllChats() {
-        return chats;
+        return new ArrayList<>(chats);
     }
 
     private void ensureChatsSavePathCreated() {
@@ -85,7 +87,7 @@ public class ChatManager {
         ArrayList<Path> dirs = new ArrayList<>(Files.list(chatsSavePath)
                 .filter(Files::isDirectory).toList());
 
-        ArrayList<Chat> chats = new ArrayList<>();
+        ConcurrentLinkedDeque<Chat> chats = new ConcurrentLinkedDeque<>();
 
         for(Path dir : dirs) {
             String chatName = dir.getFileName().toString();
