@@ -5,15 +5,14 @@ import java.time.LocalDateTime;
 import java.util.TimeZone;
 
 public class ChatMessage {
-    private long id;
-    private String content;
-    private boolean encrypted;
-    private long timestamp;
-    private String senderName;
-    private String senderIP;
+    private int id;
+    private final String content;
+    private final boolean encrypted;
+    private final long timestamp;
+    private final String senderName;
+    private final String senderIP;
 
-    public ChatMessage(long id, String content, boolean encrypted, long timestamp, String senderName, String senderIP) {
-        this.id = id;
+    public ChatMessage(String content, boolean encrypted, long timestamp, String senderName, String senderIP) {
         this.content = content;
         this.encrypted = encrypted;
         this.timestamp = timestamp;
@@ -21,11 +20,13 @@ public class ChatMessage {
         this.senderIP = senderIP;
     }
 
-    public ChatMessage(long id, String content, boolean encrypted, long timestamp) {
-        this(id, content, encrypted, timestamp, null, null);
+    protected ChatMessage appendID(int id) {
+        this.id = id;
+
+        return this;
     }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 

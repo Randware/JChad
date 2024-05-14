@@ -25,6 +25,10 @@ ServerController {
         server.stopServer();
     }
 
+    public boolean isRunning() {
+        return server.isRunning();
+    }
+
     public Config getServerConfig() {
         return server.getConfig();
     }

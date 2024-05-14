@@ -60,9 +60,11 @@ public class Chat {
     /*
     Add message, then try to save modified messages. If it fails throw Exception.
     If an exception is thrown, it means, the message was added, but couldn't be written to file.
+
+    Use synchronized here to ensure the messages are added in the right order.
      */
-    public void addMessage(ChatMessage message) throws IOException {
-        messages.add(message);
+    public synchronized void addMessage(ChatMessage message) throws IOException {
+        messages.add(message.appendID(messages.size()));
 
         saveMessages();
     }
