@@ -2,7 +2,6 @@ package net.jchad.server.view;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
@@ -19,14 +18,14 @@ import org.fxmisc.richtext.InlineCssTextArea;
 
 public class GUI extends Application implements MessageHandler {
     private ServerController server;
-    private InlineCssTextArea logArea = new InlineCssTextArea();
-    private TextField cmdField = new TextField();
+    private final InlineCssTextArea logArea = new InlineCssTextArea();
+    private final TextField cmdField = new TextField();
     private double sizeValue;
-    private ScrollPane scrollPane = new ScrollPane();
+    private final ScrollPane scrollPane = new ScrollPane();
     private final KeyCombination crtlMinus = new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN);
     private final KeyCombination crtlPlus = new KeyCodeCombination(KeyCode.PLUS, KeyCombination.CONTROL_DOWN);
     private final KeyCombination crtlR = new KeyCodeCombination(KeyCode.R, KeyCombination.CONTROL_DOWN);
-    private MenuBar menuBar = new MenuBar();
+    private final MenuBar menuBar = new MenuBar();
     Rectangle2D screenBounds = Screen.getPrimary().getBounds();
     double screenWidth = screenBounds.getWidth();
     double screenHeight = screenBounds.getHeight();
@@ -44,6 +43,7 @@ public class GUI extends Application implements MessageHandler {
         cmdField.setPromptText("Enter command here...");
 
         menuBar.setPadding(Insets.EMPTY);
+        logArea.setEditable(false);
 
         Menu settingsMenu = new Menu("Settings");
         Menu serverMenu = new Menu("Server");
@@ -54,11 +54,12 @@ public class GUI extends Application implements MessageHandler {
         MenuItem standardFontSize = new MenuItem("standard Font size (crtl & R)");
         MenuItem decreaseFontSize = new MenuItem("decrease Font size (crtl & -)");
         MenuItem stopServerItem = new MenuItem("Stop server");
+        MenuItem startServerItem = new MenuItem("Start server");
 
         fontsSubMenu.getItems().addAll(increaseFontSize, standardFontSize, decreaseFontSize);
 
         settingsMenu.getItems().add(fontsSubMenu);
-        serverMenu.getItems().add(stopServerItem);
+        serverMenu.getItems().addAll(stopServerItem, startServerItem);
 
         menuBar.getMenus().addAll(settingsMenu, serverMenu);
 
@@ -80,9 +81,11 @@ public class GUI extends Application implements MessageHandler {
         standardFontSize.setOnAction(e -> standardFontSizeMethod());
         decreaseFontSize.setOnAction(e -> changeFontSize(-2));
         stopServerItem.setOnAction(e -> server.stopServer());
+        startServerItem.setOnAction(e -> server.startServer());
 
         vbox.setSpacing(10);
-        vbox.setPadding(new Insets(0, 10, 10, 10));
+        vbox.setPadding(new Insets(10, 10, 10, 10));
+        VBox.setMargin(menuBar, new Insets(0, -10, 0, -10));
         VBox.setVgrow(logArea, Priority.ALWAYS);
 
         vbox.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
@@ -100,7 +103,7 @@ public class GUI extends Application implements MessageHandler {
 
         cmdField.setOnKeyPressed(keyEvent -> {
             if (keyEvent.getCode() == KeyCode.ENTER) {
-                if (cmdField.getText().length() > 0) {
+                if (!cmdField.getText().isEmpty()) {
                     server.sendCommand(cmdField.getText());
                     appendText(" > " + cmdField.getText() + "\n", "-fx-fill: black;");
                     cmdField.setText("");
@@ -156,7 +159,6 @@ public class GUI extends Application implements MessageHandler {
     public void handleFatalError(Exception e) {
         appendText("  ☠ [Fatal Error]: ", "-fx-fill: #fd0000; -fx-font-weight:bold;");
         appendText(Util.stackTraceToString(e) + "\n", "-fx-fill: #000000; -fx-font-weight:normal;");
-        server.stopServer();
     }
 
     @Override
