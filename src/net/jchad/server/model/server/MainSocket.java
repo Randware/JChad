@@ -1,6 +1,7 @@
 package net.jchad.server.model.server;
 
 import com.google.gson.Gson;
+import net.jchad.server.model.config.store.InternalSettings;
 import net.jchad.server.model.error.MessageHandler;
 import net.jchad.shared.cryptography.CrypterManager;
 import net.jchad.shared.networking.ip.IPAddress;
@@ -133,6 +134,21 @@ public final class MainSocket implements Runnable{
             } else return !server.getConfig().getServerSettings().isWhitelist();
         } catch (InvalidIPAddressException ignored) {}
         return false;
+    }
+
+
+    /** //TODO I am unsure if this is a permanent solution. Checking if the config values are correct should not be done in the ServerThread.
+     * Returns a value from the config or the default one if the user set value is invalid
+     * @return
+     */
+    public long getConnectionRefreshIntervalMillis() {
+        if (server.getConfig().getInternalSettings().getConnectionRefreshIntervalMillis() < 0) return new InternalSettings().getConnectionRefreshIntervalMillis();
+        else return server.getConfig().getInternalSettings().getConnectionRefreshIntervalMillis();
+    }
+
+    public int getRetriesOnInvalidPackets() {
+        if (server.getConfig().getInternalSettings().getRetriesOnInvalidPackets() <= 0) return new InternalSettings().getRetriesOnInvalidPackets();
+        else return server.getConfig().getInternalSettings().getRetriesOnInvalidPackets();
     }
 
 

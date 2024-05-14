@@ -32,8 +32,8 @@ public class InternalSettings {
 
     /**
      * This determines how many times the client is allowed to send falsy data to the server .
-     * If this limit gets exceeded the connection will close.
-     * If this gets set to a negative number the default value (1) get used instead.
+     * If this limit gets exceeded, the connection will close.
+     * If this gets set to a negative number, the default value (1) get used instead.
      */
     private int retriesOnInvalidPackets = 1;
 

@@ -4,6 +4,7 @@ import com.google.gson.stream.JsonReader;
 import net.jchad.server.model.config.store.Config;
 import net.jchad.server.model.config.store.InternalSettings;
 import net.jchad.server.model.error.MessageHandler;
+import net.jchad.server.model.users.User;
 import net.jchad.shared.networking.ip.IPAddress;
 import net.jchad.shared.networking.ip.InvalidIPAddressException;
 import net.jchad.shared.networking.packets.*;
@@ -26,6 +27,7 @@ public class ServerThread implements Runnable{
     private final Socket socket;
     private final InetSocketAddress inetAddress;
     private String remoteAddress = "Unknown"; //The ip address of the client
+    private User user = null;
 
     public ServerThread(Socket socket, MainSocket mainSocket) throws IOException {
         if (mainSocket == null) throw new IllegalArgumentException("Could not connect to [%s]: The MainServer is null".formatted(remoteAddress));
@@ -102,6 +104,9 @@ public class ServerThread implements Runnable{
         printWriter.flush();
         try {
             mainSocket.getServerThreadSet(false).remove(this);
+            if (user != null) {
+                User.removeUser(this);
+            }
             if (printWriter != null) {
                 printWriter.flush();
                 printWriter.close();
@@ -120,24 +125,6 @@ public class ServerThread implements Runnable{
             Thread.currentThread().interrupt();
         }
     }
-
-
-
-
-    /** //TODO I am unsure if this is a permanent solution. Checking if the config values are correct should not be done in the ServerThread.
-     * Returns a value from the config or the default one if the user set value is invalid
-     * @return
-     */
-    public long getConnectionRefreshIntervalMillis() {
-        if (server.getConfig().getInternalSettings().getConnectionRefreshIntervalMillis() < 0) return new InternalSettings().getConnectionRefreshIntervalMillis();
-        else return server.getConfig().getInternalSettings().getConnectionRefreshIntervalMillis();
-    }
-
-    public int getRetriesOnInvalidPackets() {
-        if (server.getConfig().getInternalSettings().getRetriesOnInvalidPackets() <= 0) return new InternalSettings().getRetriesOnInvalidPackets();
-        else return server.getConfig().getInternalSettings().getRetriesOnInvalidPackets();
-    }
-
 
 
     public MessageHandler getMessageHandler() {
