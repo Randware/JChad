@@ -95,12 +95,11 @@ public class Chat {
 
         ArrayList<ChatMessage> loadedMessages = new ArrayList<>();
         try {
-            loadedMessages = gson.fromJson(Files.readString(messagesSavePath), new TypeToken<ArrayList<ChatMessage>>(){}.getType());
+            loadedMessages = gson.fromJson(Files.readString(messagesSavePath), new TypeToken<ArrayList<ChatMessage>>() {
+            }.getType());
         } catch (JsonSyntaxException e) {
             messageHandler.handleError(new Exception("Failed loading messages from \"messages.json\" file, it seems to be malformed"));
         }
-
-        Collections.reverse(loadedMessages);
 
         this.messages = loadedMessages;
     }
@@ -160,6 +159,9 @@ public class Chat {
      * <font color="red">This method should ideally not be called, since it does not
      * respect the configured settings for the message loading of this chat.</font>
      *
+     * It is sorted from oldest to newest. That means the first index is the oldest message
+     * and the last index is the newest message.
+     *
      * @return all messages from this chat
      */
     public ArrayList<ChatMessage> getAllMessages() {
@@ -170,12 +172,23 @@ public class Chat {
      * <font color="red">This method should be called when accessing messages in this chat,
      * as it respects the configured message loading values.</font>
      *
+     * It is sorted from oldest to newest. That means the first index is the oldest message
+     * and the last index is the newest message.
+     *
      * @return all messages from this chat according to the configuration of this chat
      */
     public ArrayList<ChatMessage> getMessages() {
-        if(!config.isLoadChatHistory()) return new ArrayList<>();
+        if (!config.isLoadChatHistory()) return new ArrayList<>();
 
-        return new ArrayList<>(messages);
+        ArrayList<ChatMessage> selectedMessages = new ArrayList<>();
+
+        int messageCount = (int) Math.min(config.getLoadChatHistoryMessageCount(), messages.size());
+
+        for (int x = messages.size() - messageCount; x < messages.size(); x++) {
+            selectedMessages.add(messages.get(x));
+        }
+
+        return selectedMessages;
     }
 
     public ChatConfig getConfig() {
