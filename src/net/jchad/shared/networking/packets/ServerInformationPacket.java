@@ -3,6 +3,8 @@ package net.jchad.shared.networking.packets;
 import net.jchad.server.model.chats.Chat;
 import net.jchad.server.model.server.Server;
 
+import java.util.Arrays;
+
 public class ServerInformationPacket implements Packet{
     private final PacketType packet_type = PacketType.SERVER_INFORMATION;
 
@@ -22,6 +24,20 @@ public class ServerInformationPacket implements Packet{
         this.requires_password = requires_password;
         this.whitelist = whitelist;
         this.strictly_anonymous = strictly_anonymous;
+    }
+
+    @Override
+    public String toString() {
+        return "ServerInformationPacket{" +
+                "packet_type=" + packet_type +
+                ", server_version=" + server_version +
+                ", encrypt_communications=" + encrypt_communications +
+                ", encrypt_messages=" + encrypt_messages +
+                ", available_chats=" + Arrays.toString(available_chats) +
+                ", requires_password=" + requires_password +
+                ", whitelist=" + whitelist +
+                ", strictly_anonymous=" + strictly_anonymous +
+                '}';
     }
 
     public static ServerInformationPacket getCurrentServerInfo(Server server) {
