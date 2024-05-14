@@ -12,7 +12,7 @@ public class ClientSampleCode {
     {
 
         // Create client socket
-        Socket s = new Socket("10.32.6.150", 13814);
+        Socket s = new Socket("localhost", 13814);
 
         // to send data to the server
         DataOutputStream dos
@@ -30,11 +30,9 @@ public class ClientSampleCode {
                 = new BufferedReader(
                 new InputStreamReader(System.in));
         String str, str1;
+        System.out.println(br.readLine());
+        System.out.println(br.readLine());
 
-
-        str1 = br.readLine();
-
-        System.out.println(str1);
 
         // repeat as long as exit
         // is not typed at client

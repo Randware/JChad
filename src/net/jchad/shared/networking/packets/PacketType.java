@@ -8,7 +8,9 @@ public enum PacketType {
     RSA_PUBLIC_KEY,
     SERVER_INFORMATION, //The SERVER_INFORMATION packet provides information to the client
     INVALID,
-    MESSAGE;
+    MESSAGE,
+    USERNAME,
+    USERNAME_ERROR;
 
 
 
@@ -33,4 +35,6 @@ public enum PacketType {
     public static PacketType valueOfReadableString(String readableStringOfEnum) throws IllegalArgumentException {
         return valueOf(readableStringOfEnum.replace(" ", "_").toUpperCase());
     }
+
+
 }

@@ -72,6 +72,10 @@ public class ServerThread implements Runnable{
             return;
         }
 
+        //Send the server information to the client:
+            printWriter.println(ServerInformationPacket.getCurrentServerInfo(server).toJSON());
+
+
 
 
         }  catch (Exception e) {
