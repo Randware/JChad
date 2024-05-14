@@ -30,8 +30,8 @@ public abstract class HelperThread {
      * @return T
      * @param <T>
      */
-    public <T extends Class<? extends Packet>> Packet readJSON(T returningClassType, PacketType reuiredPacketType) {
-        Packet returningObject = null;
+    public <T extends Packet> Packet readJSON(Class<T> returningClassType, PacketType reuiredPacketType) {
+        T returningObject = null;
         boolean skip = false;
         for (int failedAttempts = 1; retries >= failedAttempts; failedAttempts++) {
             try {
@@ -42,7 +42,7 @@ public abstract class HelperThread {
                     }
                     JsonToken jsToken = serverThread.getJsonReader().peek();
                     if (jsToken.equals(JsonToken.BEGIN_OBJECT)) {
-                        returningObject = serverThread.getMainSocket().getGson().fromJson(serverThread.getJsonReader(), returningClassType.getClass());
+                        returningObject = serverThread.getMainSocket().getGson().fromJson(serverThread.getJsonReader(), returningClassType);
                         if (!returningObject.isValid()) {
                             returningObject = null;
                             throw new InvalidPacketException("The received Packet is not valid.");
@@ -75,7 +75,7 @@ public abstract class HelperThread {
             serverThread.close("The JSON reading process failed");
         }
 
-            return null;
+            return returningObject;
     }
 
 
