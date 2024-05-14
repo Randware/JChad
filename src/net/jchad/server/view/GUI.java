@@ -84,7 +84,7 @@ public class GUI extends Application implements MessageHandler {
         startServerItem.setOnAction(e -> server.startServer());
 
         vbox.setSpacing(10);
-        vbox.setPadding(new Insets(10, 10, 10, 10));
+        vbox.setPadding(new Insets(0, 10, 10, 10));
         VBox.setMargin(menuBar, new Insets(0, -10, 0, -10));
         VBox.setVgrow(logArea, Priority.ALWAYS);
 
