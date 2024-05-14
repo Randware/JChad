@@ -7,7 +7,8 @@ public enum PacketType {
     AES_ENCRYPTION_KEY,
     RSA_PUBLIC_KEY,
     DISCOVERY, //The discovery packet provides information to the client
-    INVALID;
+    INVALID,
+    MESSAGE;
 
 
 

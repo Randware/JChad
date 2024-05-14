@@ -6,7 +6,6 @@ import com.google.gson.stream.MalformedJsonException;
 import net.jchad.shared.cryptography.CrypterManager;
 import net.jchad.shared.networking.packets.InvalidPacketException;
 import net.jchad.shared.networking.packets.InvalidPacket;
-import net.jchad.shared.networking.packets.PacketType;
 import net.jchad.shared.networking.packets.PublicRSAkeyPacket;
 
 import java.io.IOException;
