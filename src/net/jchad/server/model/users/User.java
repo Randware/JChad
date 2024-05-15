@@ -86,8 +86,16 @@ public class User {
         if (!username.matches(connection.getServer().getConfig().getInternalSettings().getUsernameRegex())) {
             throw new UsernameInvalidException(connection.getServer().getConfig().getInternalSettings().getUsernameRegexDescription());
         }
+        boolean usernameExists = false;
+        Collection<User> checkWithUsers = users.values();
+        for (User currentUser : checkWithUsers) {
+            if (currentUser.getUsername().equalsIgnoreCase(username)) {
+                usernameExists = true;
+                break;
+            }
+        }
 
-        if (users.contains(username)) {
+        if (usernameExists) {
             throw new UsernameTakenException("The username: " + username + " is already taken.");
         }
 
@@ -250,36 +258,6 @@ public class User {
         return readyToReceiveMessages == user.readyToReceiveMessages && Objects.equals(connection, user.connection) && Objects.equals(username, user.username) && Objects.equals(joinedChats, user.joinedChats);
     }
 
-    /**
-     * This methode sends the given message to all valid users.
-     * A valid user is someone that:
-     * <ul>
-     *     <li> Is ready to receive messages ({@link User#readyToReceiveMessages} has to be {@code true}) </li>
-     *
-     *     <li> Does not equal the current user. Object.equals(this, user) has to be false. </li>
-     *
-     *     <li> Has already joint the specified chat in the {@link net.jchad.shared.networking.packets.MessagePacket messagePacket} </li>
-     * </ul>
-     * @param messagePacket the packet that gets sent to the valid users.
-     * @param sender The sender of the {@link net.jchad.shared.networking.packets.MessagePacket MessagePacket}.
-     *               If the sender is {@code null} the packet gets sent to every user
-     * @return to how many users the {@link net.jchad.shared.networking.packets.MessagePacket messagePacket} was sent
-     */
-    public static int sendMessage(ServerMessagePacket messagePacket, User sender) {
-        int messagesSent = 0;
-        if (messagePacket != null && messagePacket.isValid()) {
-            Collection<User> userValues = users.values();
-            for (User user : userValues) {
-                if (!Objects.equals(sender, user) && user.isReadyToReceiveMessages() && user.getJoinedChats().contains(messagePacket.getChat())) {
-                    user.getConnection().getPrintWriter().println(messagePacket.toJSON());
 
-                    user.getConnection().getPrintWriter().flush();
-                    messagesSent++;
-                }
-
-            }
-        }
-        return messagesSent;
-    }
 
 }

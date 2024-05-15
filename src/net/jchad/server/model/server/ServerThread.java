@@ -74,11 +74,25 @@ public class ServerThread implements Runnable{
 
         //Send the server information to the client:
             printWriter.println(ServerInformationPacket.getCurrentServerInfo(server).toJSON());
+            printWriter.flush();
 
-        //
+        //Come to an agreement for the client's username
+            user = new UsernameHelperThread(this).arrangeUser();
 
-
-        }  catch (Exception e) {
+            messageHandler.handleInfo(remoteAddress + " connected successfully to the Server");
+        //Initialization is finished. Client can chat now
+            user.addJoinedChats("test"); //temporary
+            user.setReadyToReceiveMessages(true);
+            new MainHelperThread(this).start();
+        } catch (ConnectionClosedException e) {
+            //ignore
+            /*
+            You probably wonder why I throw this exception in the close() methode and catch it to just ignore it.
+            Here is why:
+            When you interrupt they sometimes continue runtime, therefore I throw this exception the stop the entire run methode
+             */
+        }
+        catch (Exception e) {
             messageHandler.handleError(new Exception("An error occurred while connected to [%s]: %s".formatted(remoteAddress,e.getMessage()), e));
         } finally {
             close();
@@ -127,8 +141,10 @@ public class ServerThread implements Runnable{
         } finally {
             messageHandler.handleInfo("Closing connection with " + remoteAddress + ((reason == null) ? "" : (" Reason: " + reason)));
             Thread.currentThread().interrupt();
+            throw new ConnectionClosedException("The connection was closed.");
         }
     }
+
 
 
     public MessageHandler getMessageHandler() {
@@ -164,6 +180,10 @@ public class ServerThread implements Runnable{
     }
     public Config getConfig() {
         return server.getConfig();
+    }
+
+    public User getUser() {
+        return user;
     }
 
     public MainSocket getMainSocket() {
