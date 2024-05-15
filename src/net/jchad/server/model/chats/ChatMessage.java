@@ -1,5 +1,7 @@
 package net.jchad.server.model.chats;
 
+import net.jchad.shared.networking.packets.ServerMessagePacket;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.TimeZone;
@@ -64,5 +66,15 @@ public class ChatMessage {
                 ", senderName='" + senderName + '\'' +
                 ", senderIP='" + senderIP + '\'' +
                 '}';
+    }
+
+    /**
+     * Creates a {@link ChatMessage} from a {@link ServerMessagePacket}.
+     *
+     * @param messagePacket The packet that get converted to a {@link ChatMessage}
+     * @return a {@link ChatMessage} with the values from the {@link ServerMessagePacket}
+     */
+    public static ChatMessage fromMessagePacket(ServerMessagePacket messagePacket) {
+        return new ChatMessage(messagePacket.getChat(), messagePacket.getEncrypted(),messagePacket.getTimestamp(), messagePacket.getUsername(), messagePacket.getIp());
     }
 }

@@ -12,7 +12,7 @@ public class ClientSampleCode {
     {
 
         // Create client socket
-        Socket s = new Socket("localhost", 13814);
+        Socket s = new Socket("vnos.bot.nu", 13814);
 
         // to send data to the server
         DataOutputStream dos

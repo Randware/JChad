@@ -29,7 +29,6 @@ public final class MainSocket implements Runnable{
     private final Gson gson = new Gson();
     private ExecutorService executor;
     private final Server server;
-    private final String base64AESmessageKey;
     private final Set<ServerThread> serverThreadSet = ConcurrentHashMap.newKeySet();
     private boolean running = true;
 
@@ -43,7 +42,6 @@ public final class MainSocket implements Runnable{
         if (1024 > port || port > 49151) messageHandler.handleWarning("Server-Port is outside of the User ports! Refer to https://en.wikipedia.org/wiki/Registered_port");
         this.port = port;
         executor = Executors.newVirtualThreadPerTaskExecutor();
-        base64AESmessageKey = new CrypterManager().getAESKey();
 
     }
 
@@ -107,9 +105,6 @@ public final class MainSocket implements Runnable{
         }
     }
 
-    public String getBase64AESmessageKey() {
-        return base64AESmessageKey;
-    }
 
     public boolean isBanned(InetSocketAddress inetSocketAddress) {
         try {
@@ -136,21 +131,6 @@ public final class MainSocket implements Runnable{
             } else return !server.getConfig().getServerSettings().isWhitelist();
         } catch (InvalidIPAddressException ignored) {}
         return false;
-    }
-
-
-    /** //TODO I am unsure if this is a permanent solution. Checking if the config values are correct should not be done in the ServerThread.
-     * Returns a value from the config or the default one if the user set value is invalid
-     * @return
-     */
-    public long getConnectionRefreshIntervalMillis() {
-        if (server.getConfig().getInternalSettings().getConnectionRefreshIntervalMillis() < 0) return new InternalSettings().getConnectionRefreshIntervalMillis();
-        else return server.getConfig().getInternalSettings().getConnectionRefreshIntervalMillis();
-    }
-
-    public int getRetriesOnInvalidPackets() {
-        if (server.getConfig().getInternalSettings().getRetriesOnInvalidPackets() <= 0) return new InternalSettings().getRetriesOnInvalidPackets();
-        else return server.getConfig().getInternalSettings().getRetriesOnInvalidPackets();
     }
 
 

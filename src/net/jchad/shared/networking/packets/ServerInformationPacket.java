@@ -15,8 +15,10 @@ public class ServerInformationPacket implements Packet{
     private final Boolean requires_password;
     private final Boolean whitelist;
     private final Boolean strictly_anonymous;
+    private final String username_validation_regex;
+    private final String username_validation_description;
 
-    protected ServerInformationPacket(Double server_version,Boolean encrypt_communications, Boolean encrypt_messages, String[] available_chats, Boolean requires_password, Boolean whitelist, Boolean strictly_anonymous) {
+    protected ServerInformationPacket(Double server_version,Boolean encrypt_communications, Boolean encrypt_messages, String[] available_chats, Boolean requires_password, Boolean whitelist, Boolean strictly_anonymous, String username_validation_regex, String username_validation_description) {
         this.server_version = server_version;
         this.encrypt_communications = encrypt_communications;
         this.encrypt_messages = encrypt_messages;
@@ -24,6 +26,8 @@ public class ServerInformationPacket implements Packet{
         this.requires_password = requires_password;
         this.whitelist = whitelist;
         this.strictly_anonymous = strictly_anonymous;
+        this.username_validation_regex = username_validation_regex;
+        this.username_validation_description = username_validation_description;
     }
 
     @Override
@@ -37,6 +41,8 @@ public class ServerInformationPacket implements Packet{
                 ", requires_password=" + requires_password +
                 ", whitelist=" + whitelist +
                 ", strictly_anonymous=" + strictly_anonymous +
+                ", username_validation_regex='" + username_validation_regex + '\'' +
+                ", username_validation_description='" + username_validation_description + '\'' +
                 '}';
     }
 
@@ -45,8 +51,10 @@ public class ServerInformationPacket implements Packet{
                 server.getConfig().getServerSettings().isEncryptCommunications(),
                      server.getConfig().getServerSettings().isEncryptMessages(),
                         server.getChats().stream().map(Chat::getName).toArray(String[]::new),
-                                      server.getConfig().getServerSettings().isRequiresPassword(),
+                     server.getConfig().getServerSettings().isRequiresPassword(),
                                       server.getConfig().getServerSettings().isWhitelist(),
-                                      server.getConfig().getServerSettings().isStrictlyAnonymous());
+                     server.getConfig().getServerSettings().isStrictlyAnonymous(),
+               server.getConfig().getInternalSettings().getUsernameRegex(),
+           server.getConfig().getInternalSettings().getUsernameRegexDescription());
     }
 }
