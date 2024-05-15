@@ -100,6 +100,10 @@ public class Server implements ConfigObserver {
         return startTimestamp;
     }
 
+    public ChatManager getChatManager() {
+        return chatManager;
+    }
+
     public boolean isRunning() {
         return running;
     }

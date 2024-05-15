@@ -31,11 +31,29 @@ public class InternalSettings {
     private long connectionRefreshIntervalMillis = 100;
 
     /**
-     * This determines how many times the client is allowed to send falsy data to the server .
+     * This determines how many times the client is allowed to send falsy data to the server.
      * If this limit gets exceeded, the connection will close.
      * If this gets set to a negative number, the default value (1) get used instead.
      */
     private int retriesOnInvalidPackets = 1;
+
+    /**
+     * This regex checks if the wanted username (from the client) is valid.
+     * It gives control on what the usernames should look like.
+     * (Like allow underscores or other special characters...)
+     *
+     */
+    private String usernameRegex = "^[A-Za-z]+(?:_[A-Za-z]+)?$";
+
+    /**
+     * This decries the regex above.
+     * This explains the "criteria" for the username.
+     * This gets sent to the client with the {@link net.jchad.shared.networking.packets.ServerInformationPacket ServerInformationPacket} and
+     * when the client wants and invalid username.
+     *
+     */
+    private String usernameRegexDescription = "The username is only allowed to have letters and one underscore in the middle of the name";
+
 
     /**
      * Default {@link InternalSettings} constructor
@@ -50,11 +68,15 @@ public class InternalSettings {
      * @param PathWatcherRestartCountResetMilliseconds The amount of milliseconds after which the restart counter for the {@link PathWatcher} gets reset.
      *                                                   Set to negative number to never reset the restart counter.
      */
-    public InternalSettings(int maxPathWatcherRestarts, int PathWatcherRestartCountResetMilliseconds, long connectionRefreshIntervalMillis, int retriesOnInvalidPackets) {
+    public InternalSettings(int maxPathWatcherRestarts, int PathWatcherRestartCountResetMilliseconds,
+                            long connectionRefreshIntervalMillis, int retriesOnInvalidPackets,
+                            String usernameRegex, String usernameRegexDescription) {
         this.maxPathWatcherRestarts = maxPathWatcherRestarts;
         this.pathWatcherRestartCountResetMilliseconds = PathWatcherRestartCountResetMilliseconds;
         this.connectionRefreshIntervalMillis = connectionRefreshIntervalMillis;
         this.retriesOnInvalidPackets = retriesOnInvalidPackets;
+        this.usernameRegex = usernameRegex;
+        this.usernameRegexDescription = usernameRegexDescription;
     }
 
     /**
@@ -88,8 +110,10 @@ public class InternalSettings {
 
     /**
      * @return The delay in milliseconds between each loop iteration in each connection.
+     *         Returns the default value (100) if the configured one is below 0
      */
     public long getConnectionRefreshIntervalMillis() {
+        if (connectionRefreshIntervalMillis < 0) return 100; //Default value
         return connectionRefreshIntervalMillis;
     }
 
@@ -103,8 +127,10 @@ public class InternalSettings {
     /**
      *
      * @return how many times the client is allowed to send falsy data to the server.
+     *         Returns the default value (1) if the configured one is below 0
      */
     public int getRetriesOnInvalidPackets() {
+        if (retriesOnInvalidPackets < 0) return 1;
         return retriesOnInvalidPackets;
     }
 
@@ -115,4 +141,38 @@ public class InternalSettings {
     public void setRetriesOnInvalidPackets(int retriesOnInvalidPackets) {
         this.retriesOnInvalidPackets = retriesOnInvalidPackets;
     }
+
+    /**
+     *
+     * @return the regex that validates all usernames
+     */
+    public String getUsernameRegex() {
+        return usernameRegex;
+    }
+
+    /**
+     *
+     * @param usernameRegex the regex that validates all usernames
+     */
+    public void setUsernameRegex(String usernameRegex) {
+        this.usernameRegex = usernameRegex;
+    }
+
+    /**
+     *
+     * @return the "criteria" for usernames described in readable words
+     */
+    public String getUsernameRegexDescription() {
+        return usernameRegexDescription;
+    }
+
+    /**
+     *
+     * @param usernameRegexDescription sets the "criteria" for usernames described in readable words
+     */
+    public void setUsernameRegexDescription(String usernameRegexDescription) {
+        this.usernameRegexDescription = usernameRegexDescription;
+    }
+
+
 }

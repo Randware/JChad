@@ -9,4 +9,12 @@ public class UsernamePacket implements Packet {
     public UsernamePacket(String username) {
         this.username = username;
     }
+
+    public PacketType getPacket_type() {
+        return packet_type;
+    }
+
+    public String getUsername() {
+        return username;
+    }
 }

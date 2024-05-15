@@ -9,33 +9,38 @@ import net.jchad.shared.networking.packets.*;
 import java.io.IOException;
 import java.util.function.Predicate;
 
-public abstract class HelperThread {
+public abstract class HelperThread{
     private final ServerThread serverThread;
     private final int retries;
+    private final long sleepInterval;
 
     public HelperThread(ServerThread serverThread) {
         if (serverThread == null) {
             throw new NullPointerException("The serverThread can not be null");
         }
         this.serverThread = serverThread;
-        this.retries = serverThread.getMainSocket().getRetriesOnInvalidPackets();
+        this.retries = serverThread.getServer().getConfig().getInternalSettings().getRetriesOnInvalidPackets();
+        this.sleepInterval = serverThread.getServer().getConfig().getInternalSettings().getConnectionRefreshIntervalMillis();
     }
+
 
     /**
      * <p>This methode reads the JSON in the {@link net.jchad.server.model.server.ServerThread ServerThread} using the {@link com.google.gson.stream.JsonReader JsonReader}</p>
      * <p>It may occur that this methode returns null BUT this is rare. If the methode returns null just close the {@link net.jchad.server.model.server.ServerThread ServerThread} </p>
      *
      * @param returningClassType The object which should get returned wi
-     * @param reuiredPacketType
+     * @param reuiredPacketType The required packet type that gets sent to the client when he sends an invalid packet.
+     *                          This does not affect the methode in any way. It just tells the client which packet type it (the client) should have sent.
      * @return T
      * @param <T>
      */
-    public <T extends Packet> Packet readJSON(Class<T> returningClassType, PacketType reuiredPacketType) {
+    public <T extends Packet> T readJSON(Class<T> returningClassType, PacketType reuiredPacketType) {
         T returningObject = null;
         boolean skip = false;
         for (int failedAttempts = 1; retries >= failedAttempts; failedAttempts++) {
             try {
                 while (serverThread.getJsonReader().hasNext()) {
+                    Thread.currentThread().sleep(sleepInterval);
                     if (skip) {
                         serverThread.getJsonReader().skipValue();
                         skip = false;
@@ -61,13 +66,16 @@ public abstract class HelperThread {
                     break;
                 } else {
                     serverThread.getMessageHandler().handleDebug("%s sent an invalid packet! The connection gets terminated if the server receives %d more invalid packets".formatted(serverThread.getRemoteAddress(), retries - failedAttempts));
-                    serverThread.getPrintWriter().println(new InvalidPacket(reuiredPacketType, "The provided packet was not valid"));
+                    writeJSON(new InvalidPacket(reuiredPacketType, "The provided packet was not valid").toJSON());
                 }
             }
             catch (IOException ioe) {
                 serverThread.getMessageHandler().handleDebug(new IOException("An IO exception occurred! ", ioe));
                 serverThread.close("An IO exception occurred while trying to read JSON");
                 break;
+            } catch (InterruptedException e) {
+                serverThread.getMessageHandler().handleDebug("Thread for %s got interrupted unexpectedly!".formatted(serverThread.getRemoteAddress()));
+                serverThread.close("The Thread got interrupted unexpectedly");
             }
         }
 
@@ -79,10 +87,20 @@ public abstract class HelperThread {
     }
 
 
-    public <T> void writeJSON(T json) {
+    public <T extends String> void writeJSON(T json) {
             serverThread.getPrintWriter().println(json);
             serverThread.getPrintWriter().flush();
     }
 
+    public ServerThread getServerThread() {
+        return serverThread;
+    }
 
+    int getRetries() {
+        return retries;
+    }
+
+    long getSleepInterval() {
+        return sleepInterval;
+    }
 }

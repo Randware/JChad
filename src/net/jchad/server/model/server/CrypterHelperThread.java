@@ -18,7 +18,7 @@ public class CrypterHelperThread {
 
     protected CrypterHelperThread(ServerThread serverThread) {
         this.serverThread = serverThread;
-        retries = serverThread.getMainSocket().getRetriesOnInvalidPackets();
+        retries = serverThread.getServer().getConfig().getInternalSettings().getRetriesOnInvalidPackets();
     }
 
     public void exchangeRSAkeys() {
