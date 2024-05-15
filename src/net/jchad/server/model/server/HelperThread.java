@@ -51,6 +51,8 @@ public abstract class HelperThread{
                         if (!returningObject.isValid()) {
                             returningObject = null;
                             throw new InvalidPacketException("The received Packet is not valid.");
+                        } else {
+                            return returningObject;
                         }
 
                     } else {

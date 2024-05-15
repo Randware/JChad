@@ -1,6 +1,8 @@
 package net.jchad.tests.shared;
 
 import net.jchad.server.model.users.User;
+import net.jchad.shared.networking.packets.ClientMessagePacket;
+import net.jchad.shared.networking.packets.UsernamePacket;
 
 public class Test {
     public static void main(String[] args) {
@@ -18,5 +20,9 @@ public class Test {
         System.out.println(test3);
         System.out.println(test4);
         System.out.println(test5);
+
+
+        System.out.println(new UsernamePacket("Dari_OS").toJSON());
+        System.out.println(new ClientMessagePacket("Hello world", false, "test").toJSON());
     }
 }

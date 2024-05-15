@@ -1,56 +1,48 @@
 package net.jchad.client.model.client;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.Socket;
+import java.util.Scanner;
 
 // Temporary client used for testing
 public class ClientSampleCode {
-    public static void main(String args[])
-            throws Exception
-    {
+    public static void main(String[] args) {
+        try {
+            // Create a socket to connect to the server
+            Socket socket = new Socket("localhost", 13814);
 
-        // Create client socket
-        Socket s = new Socket("vnos.bot.nu", 13814);
+            // Obtain input and output streams
+            OutputStream outputStream = socket.getOutputStream();
+            InputStream inputStream = socket.getInputStream();
 
-        // to send data to the server
-        DataOutputStream dos
-                = new DataOutputStream(
-                s.getOutputStream());
+            // Wrap the streams with readers and writers for easier communication
+            PrintWriter out = new PrintWriter(outputStream, true);
+            BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
 
-        // to read data coming from the server
-        BufferedReader br
-                = new BufferedReader(
-                new InputStreamReader(
-                        s.getInputStream()));
+            // Start a thread for listening to server responses
+            Thread listenerThread = new Thread(() -> {
+                try {
+                    String response;
+                    while ((response = in.readLine()) != null) {
+                        System.out.println("Server response: " + response);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+            listenerThread.start();
 
-        // to read data from the keyboard
-        BufferedReader kb
-                = new BufferedReader(
-                new InputStreamReader(System.in));
-        String str, str1;
-        System.out.println(br.readLine());
-        System.out.println(br.readLine());
+            // Scanner for user input
+            Scanner scanner = new Scanner(System.in);
 
+            // Start sending user input to the server
+            while (true) {
+                String userInput = scanner.nextLine();
+                out.println(userInput);
+            }
 
-        // repeat as long as exit
-        // is not typed at client
-        while (!(str = kb.readLine()).equals("exit")) {
-            // send to the server
-            dos.writeBytes(str);
-            dos.flush();
-
-            // receive from the server
-            str1 = br.readLine();
-
-            System.out.println("[SERVER] " + str1);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
-        // close connection.
-        dos.close();
-        br.close();
-        kb.close();
-        s.close();
     }
 }
