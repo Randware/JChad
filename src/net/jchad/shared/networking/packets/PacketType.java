@@ -11,7 +11,8 @@ public enum PacketType {
     CLIENT_MESSAGE, //This is the message packet that the client sends to the server
     SERVER_MESSAGE, //This is the message packet that the server uses internally and sends to all clients. It has additional information.
     USERNAME,
-    USERNAME_RESPONSE;
+    USERNAME_RESPONSE,
+    PASSWORD;
 
 
 
