@@ -38,6 +38,13 @@ public class InternalSettings {
     private int retriesOnInvalidPackets = 1;
 
     /**
+     * This determines how many times the client is allowed to send the wrong password.
+     * The connection will close if the client exceeds this number.
+     * If this gets set to a negative number, the default value (3) get used instead.
+     */
+    private int retriesOnInvalidPassword = 3;
+
+    /**
      * This regex checks if the wanted username (from the client) is valid.
      * It gives control on what the usernames should look like.
      * (Like allow underscores or other special characters...)
@@ -69,12 +76,13 @@ public class InternalSettings {
      *                                                   Set to negative number to never reset the restart counter.
      */
     public InternalSettings(int maxPathWatcherRestarts, int PathWatcherRestartCountResetMilliseconds,
-                            long connectionRefreshIntervalMillis, int retriesOnInvalidPackets,
+                            long connectionRefreshIntervalMillis, int retriesOnInvalidPackets, int retriesOnInvalidPassword,
                             String usernameRegex, String usernameRegexDescription) {
         this.maxPathWatcherRestarts = maxPathWatcherRestarts;
         this.pathWatcherRestartCountResetMilliseconds = PathWatcherRestartCountResetMilliseconds;
         this.connectionRefreshIntervalMillis = connectionRefreshIntervalMillis;
         this.retriesOnInvalidPackets = retriesOnInvalidPackets;
+        this.retriesOnInvalidPassword = retriesOnInvalidPassword;
         this.usernameRegex = usernameRegex;
         this.usernameRegexDescription = usernameRegexDescription;
     }
@@ -140,6 +148,23 @@ public class InternalSettings {
      */
     public void setRetriesOnInvalidPackets(int retriesOnInvalidPackets) {
         this.retriesOnInvalidPackets = retriesOnInvalidPackets;
+    }
+
+    /**
+     *
+     * @return the number that determines how many times the client is allowed to send the wrong password.
+     */
+    public int getRetriesOnInvalidPassword() {
+        if(retriesOnInvalidPassword < 0) return 3;
+        return retriesOnInvalidPassword;
+    }
+
+    /**
+     *
+     * @param retriesOnInvalidPassword the number that determines how many times the client is allowed to send the wrong password.
+     */
+    public void setRetriesOnInvalidPassword(int retriesOnInvalidPassword) {
+        this.retriesOnInvalidPassword = retriesOnInvalidPassword;
     }
 
     /**

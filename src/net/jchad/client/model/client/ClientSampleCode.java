@@ -34,11 +34,19 @@ public class ClientSampleCode {
 
             // Scanner for user input
             Scanner scanner = new Scanner(System.in);
-
+            StringBuilder builder = new StringBuilder();
             // Start sending user input to the server
             while (true) {
                 String userInput = scanner.nextLine();
-                out.println(userInput);
+                if (userInput.equals("send")) {
+                    out.println(builder);
+                    out.flush();
+                    builder = new StringBuilder();
+                    System.out.println("sent");
+                } else {
+                    builder.append(userInput);
+                }
+
             }
 
         } catch (IOException e) {
