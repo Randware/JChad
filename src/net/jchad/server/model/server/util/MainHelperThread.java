@@ -1,12 +1,13 @@
-package net.jchad.server.model.server;
+package net.jchad.server.model.server.util;
 
-import net.jchad.shared.networking.packets.ClientMessagePacket;
+import net.jchad.server.model.server.ServerThread;
+import net.jchad.shared.networking.packets.messages.ClientMessagePacket;
 import net.jchad.shared.networking.packets.PacketType;
 
 /**
  * This is the main helper thread that gets used when everything is initialized
  */
-public class MainHelperThread extends HelperThread{
+public class MainHelperThread extends HelperThread {
 
     private final int fails = 1;
     public MainHelperThread(ServerThread serverThread) {

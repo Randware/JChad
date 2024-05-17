@@ -1,11 +1,11 @@
 package net.jchad.server.model.users;
 
 import net.jchad.server.model.chats.Chat;
-import net.jchad.server.model.chats.ChatManager;
 import net.jchad.server.model.chats.ChatMessage;
 import net.jchad.server.model.server.ServerThread;
-import net.jchad.shared.networking.packets.ClientMessagePacket;
-import net.jchad.shared.networking.packets.ServerMessagePacket;
+import net.jchad.shared.networking.packets.messages.ClientMessagePacket;
+import net.jchad.shared.networking.packets.messages.ServerMessagePacket;
+import net.jchad.shared.networking.packets.messages.MessagePacket;
 
 import java.io.IOException;
 import java.util.*;
@@ -148,10 +148,10 @@ public class User {
      *
      *     <li> Does not equal the current user. Object.equals(this, user) has to be false. </li>
      *
-     *     <li> Has already joint the specified chat in the {@link net.jchad.shared.networking.packets.MessagePacket messagePacket} </li>
+     *     <li> Has already joint the specified chat in the {@link MessagePacket messagePacket} </li>
      * </ul>
      * @param messagePacket the packet that gets send to the valid users
-     * @return to how many users the {@link net.jchad.shared.networking.packets.MessagePacket messagePacket} was sent
+     * @return to how many users the {@link MessagePacket messagePacket} was sent
      */
     public int sendMessage(ClientMessagePacket messagePacket) {
         return sendMessage(new ServerMessagePacket(
@@ -172,10 +172,10 @@ public class User {
      *
      *     <li> Does not equal the current user. Object.equals(this, user) has to be false. </li>
      *
-     *     <li> Has already joint the specified chat in the {@link net.jchad.shared.networking.packets.MessagePacket messagePacket} </li>
+     *     <li> Has already joint the specified chat in the {@link MessagePacket messagePacket} </li>
      * </ul>
      * @param messagePacket the packet that gets sent to the valid users. If the username is null, it gets set to the username of this instance.
-     * @return to how many users the {@link net.jchad.shared.networking.packets.MessagePacket messagePacket} was sent
+     * @return to how many users the {@link MessagePacket messagePacket} was sent
      */
     public int sendMessage(ServerMessagePacket messagePacket) {
         int messagesSent = 0;

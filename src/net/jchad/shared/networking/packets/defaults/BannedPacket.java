@@ -1,6 +1,8 @@
-package net.jchad.shared.networking.packets;
+package net.jchad.shared.networking.packets.defaults;
 
-public class BannedPacket extends DefaultPacket{
+import net.jchad.shared.networking.packets.PacketType;
+
+public class BannedPacket extends DefaultPacket {
     public BannedPacket() {
         super(PacketType.BANNED, "YOU HAVE BEEN BANNED FROM THE SERVER!");
     }

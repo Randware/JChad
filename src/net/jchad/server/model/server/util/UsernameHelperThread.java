@@ -1,15 +1,15 @@
-package net.jchad.server.model.server;
+package net.jchad.server.model.server.util;
 
+import net.jchad.server.model.server.ServerThread;
 import net.jchad.server.model.users.ConnectionExistsException;
 import net.jchad.server.model.users.User;
 import net.jchad.server.model.users.UsernameInvalidException;
 import net.jchad.server.model.users.UsernameTakenException;
-import net.jchad.shared.networking.packets.InvalidPacketException;
 import net.jchad.shared.networking.packets.PacketType;
-import net.jchad.shared.networking.packets.UsernameResponsePacket;
-import net.jchad.shared.networking.packets.UsernamePacket;
+import net.jchad.shared.networking.packets.username.UsernameResponsePacket;
+import net.jchad.shared.networking.packets.username.UsernamePacket;
 
-public class UsernameHelperThread extends HelperThread{
+public class UsernameHelperThread extends HelperThread {
     private final String usernameRegexDescription;
 
     public UsernameHelperThread(ServerThread serverThread) {

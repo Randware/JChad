@@ -1,6 +1,8 @@
-package net.jchad.shared.networking.packets;
+package net.jchad.shared.networking.packets.messages;
 
-public final class ServerMessagePacket extends MessagePacket{
+import net.jchad.shared.networking.packets.PacketType;
+
+public final class ServerMessagePacket extends MessagePacket {
 
     private String username;
     private final Long timestamp;

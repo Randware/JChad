@@ -1,4 +1,7 @@
-package net.jchad.shared.networking.packets;
+package net.jchad.shared.networking.packets.messages;
+
+import net.jchad.shared.networking.packets.Packet;
+import net.jchad.shared.networking.packets.PacketType;
 
 public sealed abstract class MessagePacket implements Packet permits ClientMessagePacket, ServerMessagePacket {
 

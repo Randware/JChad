@@ -1,13 +1,8 @@
-package net.jchad.server.model.server;
+package net.jchad.server.model.server.util;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import com.google.gson.stream.JsonToken;
-import com.google.gson.stream.MalformedJsonException;
+import net.jchad.server.model.server.ServerThread;
 import net.jchad.shared.networking.packets.*;
-
-import java.io.IOException;
-import java.util.function.Predicate;
 
 public abstract class HelperThread{
     private final ServerThread serverThread;
@@ -34,7 +29,7 @@ public abstract class HelperThread{
      * @return T
      * @param <T>
      */
-    public <T extends Packet> T readJSON(Class<T> returningClassType, PacketType reuiredPacketType) {
+    <T extends Packet> T readJSON(Class<T> returningClassType, PacketType reuiredPacketType) {
      return readJSON(returningClassType, reuiredPacketType, this.retries);
     }
 
@@ -48,67 +43,43 @@ public abstract class HelperThread{
      * @return T
      * @param <T>
      */
-    public <T extends Packet> T readJSON(Class<T> returningClassType, PacketType reuiredPacketType, int retries) {
+    <T extends Packet> T readJSON(Class<T> returningClassType, PacketType reuiredPacketType, int retries) {
         T returningObject = null;
-        boolean skip = false;
-        for (int failedAttempts = 1; retries >= failedAttempts; failedAttempts++) {
+        for (int failedAttempts = 0; retries >= failedAttempts; failedAttempts++) {
             try {
-                while (serverThread.getJsonReader().hasNext()) {
-                    Thread.currentThread().sleep(sleepInterval);
-                    if (skip) {
-                        serverThread.getJsonReader().skipValue();
-                        skip = false;
-                    }
-                    JsonToken jsToken = serverThread.getJsonReader().peek();
-                    if (jsToken.equals(JsonToken.BEGIN_OBJECT)) {
-                        returningObject = serverThread.getMainSocket().getGson().fromJson(serverThread.getJsonReader(), returningClassType);
-                        if (!returningObject.isValid()) {
-                            returningObject = null;
-                            throw new InvalidPacketException("The received Packet is not valid.");
-                        } else {
-                            return returningObject;
-                        }
-
-                    } else {
-                        skip = true;
-                        throw new InvalidPacketException("Invalid JSON while trying to read object");
-                    }
-
+                Thread.currentThread().sleep(sleepInterval);
+                returningObject = serverThread.getGson().fromJson(serverThread.getScanner().next(), returningClassType);
+                if (!returningObject.isValid()) {
+                    throw new InvalidPacketException("The received packet is not valid");
+                } else {
+                    break;
                 }
-            } catch (MalformedJsonException | JsonSyntaxException | InvalidPacketException e) {
+            } catch ( JsonSyntaxException | InvalidPacketException e) {
                 if (failedAttempts >= retries) {
-                    serverThread.getMessageHandler().handleDebug("%s sent an invalid packet. The connection get terminated after %d failed attempts from %d maximum tries".formatted(serverThread.getRemoteAddress(), failedAttempts, retries));
+                    serverThread.getMessageHandler().handleDebug("%s sent an invalid packet. The connection get terminated now!".formatted(serverThread.getRemoteAddress()));
                     serverThread.close("%s sent to many invalid packets".formatted(serverThread.getRemoteAddress()));
                     break;
                 } else {
-                    serverThread.getMessageHandler().handleDebug("%s sent an invalid packet! The connection gets terminated if the server receives %d more invalid packets".formatted(serverThread.getRemoteAddress(), retries - failedAttempts));
+                    serverThread.getMessageHandler().handleDebug("%s sent an invalid packet. The connection gets terminated if the server receives %d more invalid packet(s)".formatted(serverThread.getRemoteAddress(), retries - failedAttempts));
                     writeJSON(new InvalidPacket(reuiredPacketType, "The provided packet was not valid").toJSON());
                 }
-            }
-            catch (IOException ioe) {
-                serverThread.getMessageHandler().handleDebug(new IOException("An IO exception occurred! ", ioe));
-                serverThread.close("An IO exception occurred while trying to read JSON");
-                break;
             } catch (InterruptedException e) {
-                serverThread.getMessageHandler().handleDebug("Thread for %s got interrupted unexpectedly!".formatted(serverThread.getRemoteAddress()));
-                serverThread.close("The Thread got interrupted unexpectedly");
+                    serverThread.getMessageHandler().handleError(new Exception("The client thread connected with %s got interrupted unsuspectingly".formatted(serverThread.getRemoteAddress()), e));
+                    serverThread.close("Thead got interrupted unsuspectingly");
             }
         }
 
-        if (returningObject == null) {
-            serverThread.close("The JSON reading process failed");
-        }
 
         return returningObject;
     }
 
 
-    public <T extends String> void writeJSON(T json) {
+    <T extends String> void writeJSON(T json) {
             serverThread.getPrintWriter().println(json);
             serverThread.getPrintWriter().flush();
     }
 
-    public ServerThread getServerThread() {
+    ServerThread getServerThread() {
         return serverThread;
     }
 

@@ -1,4 +1,8 @@
-package net.jchad.shared.networking.packets;
+package net.jchad.shared.networking.packets.encryption;
+
+import net.jchad.shared.networking.packets.IgnoreValidation;
+import net.jchad.shared.networking.packets.Packet;
+import net.jchad.shared.networking.packets.PacketType;
 
 public class AESencryptionKeysPacket implements Packet {
     private final PacketType packet_type = PacketType.AES_ENCRYPTION_KEY;

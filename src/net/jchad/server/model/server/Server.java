@@ -6,6 +6,7 @@ import net.jchad.server.model.command.Command;
 import net.jchad.server.model.config.*;
 import net.jchad.server.model.config.store.Config;
 import net.jchad.server.model.error.MessageHandler;
+import net.jchad.shared.cryptography.CrypterManager;
 
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -15,6 +16,7 @@ public class Server implements ConfigObserver {
     private ConfigManager configManager;
     private ChatManager chatManager;
     private final double version = 1.00;
+    private String serverPassword; //A SHA256 string that represents the server password
     private long startTimestamp;
     private boolean running;
 
@@ -24,6 +26,7 @@ public class Server implements ConfigObserver {
 
     public Server(MessageHandler messageHandler) {
         this.messageHandler = messageHandler;
+
     }
 
     public void runServer() {
@@ -45,6 +48,7 @@ public class Server implements ConfigObserver {
         this.chats = chatManager.getAllChats();
         messageHandler.handleInfo("Loaded chat configuration");
 
+        this.serverPassword = CrypterManager.hash(config.getServerSettings().getPassword());
 
         mainSocket = new MainSocket(config.getServerSettings().getPort(), this);
         new Thread(mainSocket).start();
@@ -108,4 +112,7 @@ public class Server implements ConfigObserver {
         return running;
     }
 
+    public String getServerPassword() {
+        return serverPassword;
+    }
 }

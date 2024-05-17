@@ -1,6 +1,9 @@
-package net.jchad.shared.networking.packets;
+package net.jchad.shared.networking.packets.defaults;
 
-public class DefaultPacket implements Packet{
+import net.jchad.shared.networking.packets.Packet;
+import net.jchad.shared.networking.packets.PacketType;
+
+public class DefaultPacket implements Packet {
     private final PacketType packet_type;
     private final String message;
 
