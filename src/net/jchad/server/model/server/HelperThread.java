@@ -35,6 +35,20 @@ public abstract class HelperThread{
      * @param <T>
      */
     public <T extends Packet> T readJSON(Class<T> returningClassType, PacketType reuiredPacketType) {
+     return readJSON(returningClassType, reuiredPacketType, this.retries);
+    }
+
+    /**
+     * <p>This methode reads the JSON in the {@link net.jchad.server.model.server.ServerThread ServerThread} using the {@link com.google.gson.stream.JsonReader JsonReader}</p>
+     * <p>It may occur that this methode returns null BUT this is rare. If the methode returns null just close the {@link net.jchad.server.model.server.ServerThread ServerThread} </p>
+     *
+     * @param returningClassType The object which should get returned wi
+     * @param reuiredPacketType The required packet type that gets sent to the client when he sends an invalid packet.
+     *                          This does not affect the methode in any way. It just tells the client which packet type it (the client) should have sent.
+     * @return T
+     * @param <T>
+     */
+    public <T extends Packet> T readJSON(Class<T> returningClassType, PacketType reuiredPacketType, int retries) {
         T returningObject = null;
         boolean skip = false;
         for (int failedAttempts = 1; retries >= failedAttempts; failedAttempts++) {
@@ -85,7 +99,7 @@ public abstract class HelperThread{
             serverThread.close("The JSON reading process failed");
         }
 
-            return returningObject;
+        return returningObject;
     }
 
 
