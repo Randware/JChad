@@ -5,10 +5,12 @@ import net.jchad.shared.networking.packets.PacketType;
 
 public abstract class JoinChatPacket implements Packet {
     private final PacketType packet_type = PacketType.JOIN_CHAT;
-    private final JoinChatPacket join_chat_type;
+    private final JoinChatPacketType join_chat_type;
+    private final String chat_name;
 
-    public JoinChatPacket(JoinChatPacket join_chat_type) {
+    public JoinChatPacket(JoinChatPacketType join_chat_type, String chat_name) {
         this.join_chat_type = join_chat_type;
+        this.chat_name = chat_name;
     }
 
     enum JoinChatPacketType {
@@ -18,5 +20,9 @@ public abstract class JoinChatPacket implements Packet {
 
     public PacketType getPacket_type() {
         return packet_type;
+    }
+
+    public String getChat_name() {
+        return chat_name;
     }
 }

@@ -37,15 +37,10 @@ public class ClientSampleCode {
             StringBuilder builder = new StringBuilder();
             // Start sending user input to the server
             while (true) {
-                String userInput = scanner.nextLine();
-                if (userInput.equals("send")) {
-                    out.println(builder);
+
+                    out.println(scanner.nextLine());
                     out.flush();
-                    builder = new StringBuilder();
-                    System.out.println("sent");
-                } else {
-                    builder.append(userInput);
-                }
+
 
             }
 
