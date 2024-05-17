@@ -10,7 +10,7 @@ import net.jchad.server.model.users.User;
 import net.jchad.shared.networking.packets.defaults.BannedPacket;
 import net.jchad.shared.networking.packets.defaults.ConnectionClosedPacket;
 import net.jchad.shared.networking.packets.defaults.NotWhitelistedPacket;
-import net.jchad.shared.networking.packets.defaults.ServerInformationPacket;
+import net.jchad.shared.networking.packets.defaults.ServerInformationResponsePacket;
 
 
 import java.io.*;
@@ -74,7 +74,7 @@ public class ServerThread implements Runnable{
         }
 
         //Send the server information to the client:
-            printWriter.println(ServerInformationPacket.getCurrentServerInfo(server).toJSON());
+            printWriter.println(ServerInformationResponsePacket.getCurrentServerInfo(server).toJSON());
             printWriter.flush();
 
         //Forces the client to provide the correct password
@@ -89,7 +89,6 @@ public class ServerThread implements Runnable{
 
 
         //Initialization is finished. Client can chat now
-            user.addJoinedChats("test"); //temporary
             user.setReadyToReceiveMessages(true);
             new MainHelperThread(this).start();
         } catch (ConnectionClosedException e) {

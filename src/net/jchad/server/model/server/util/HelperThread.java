@@ -65,7 +65,7 @@ public abstract class HelperThread{
                 }
             } catch (InterruptedException e) {
                     serverThread.getMessageHandler().handleError(new Exception("The client thread connected with %s got interrupted unsuspectingly".formatted(serverThread.getRemoteAddress()), e));
-                    serverThread.close("Thead got interrupted unsuspectingly");
+                    serverThread.close("Thread got interrupted unsuspectingly");
             }
         }
 

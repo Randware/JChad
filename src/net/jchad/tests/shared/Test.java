@@ -2,7 +2,7 @@ package net.jchad.tests.shared;
 
 import net.jchad.shared.cryptography.CrypterManager;
 import net.jchad.shared.networking.packets.messages.ClientMessagePacket;
-import net.jchad.shared.networking.packets.username.UsernamePacket;
+import net.jchad.shared.networking.packets.username.UsernameClientPacket;
 
 public class Test {
     public static void main(String[] args) {
@@ -23,7 +23,7 @@ public class Test {
         System.out.println(test5);
 
 
-        System.out.println(new UsernamePacket("Dari_OS").toJSON());
+        System.out.println(new UsernameClientPacket("Dari_OS").toJSON());
         System.out.println(new ClientMessagePacket("Hello world", false, "test").toJSON());
     }
 }

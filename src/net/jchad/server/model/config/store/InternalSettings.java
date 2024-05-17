@@ -1,7 +1,7 @@
 package net.jchad.server.model.config.store;
 
 import net.jchad.shared.files.PathWatcher;
-import net.jchad.shared.networking.packets.defaults.ServerInformationPacket;
+import net.jchad.shared.networking.packets.defaults.ServerInformationResponsePacket;
 
 /**
  * Stores internal settings the server uses to function.
@@ -56,7 +56,7 @@ public class InternalSettings {
     /**
      * This decries the regex above.
      * This explains the "criteria" for the username.
-     * This gets sent to the client with the {@link ServerInformationPacket ServerInformationPacket} and
+     * This gets sent to the client with the {@link ServerInformationResponsePacket ServerInformationPacket} and
      * when the client wants and invalid username.
      *
      */

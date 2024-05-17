@@ -6,8 +6,8 @@ import net.jchad.server.model.users.User;
 import net.jchad.server.model.users.UsernameInvalidException;
 import net.jchad.server.model.users.UsernameTakenException;
 import net.jchad.shared.networking.packets.PacketType;
-import net.jchad.shared.networking.packets.username.UsernameResponsePacket;
-import net.jchad.shared.networking.packets.username.UsernamePacket;
+import net.jchad.shared.networking.packets.username.UsernameServerPacket;
+import net.jchad.shared.networking.packets.username.UsernameClientPacket;
 
 public class UsernameHelperThread extends HelperThread {
     private final String usernameRegexDescription;
@@ -19,12 +19,13 @@ public class UsernameHelperThread extends HelperThread {
 
     public User arrangeUser() {
         User user = null;
-        for (int fails = 1; fails <= getRetries(); fails++) {
-            UsernamePacket usernamePacket = readJSON(UsernamePacket.class, PacketType.USERNAME);
+        writeJSON(new UsernameServerPacket(UsernameServerPacket.UsernameResponseType.PROVIDE_USERNAME, "Please enter a username.").toJSON());
+        for (int fails = 0; fails <= getRetries(); fails++) {
+            UsernameClientPacket usernameClientPacket = readJSON(UsernameClientPacket.class, PacketType.USERNAME);
             try {
 
-                user = new User(usernamePacket.getUsername(), getServerThread());
-                getServerThread().getPrintWriter().println(new UsernameResponsePacket(UsernameResponsePacket.UsernameResponseType.SUCCESS_USERNAME_SET, "The username was successfully set").toJSON());
+                user = new User(usernameClientPacket.getUsername(), getServerThread());
+                getServerThread().getPrintWriter().println(new UsernameServerPacket(UsernameServerPacket.UsernameResponseType.SUCCESS_USERNAME_SET, "The username was successfully set").toJSON());
                 getServerThread().getPrintWriter().flush();
                     return user;
 
@@ -44,7 +45,7 @@ public class UsernameHelperThread extends HelperThread {
                 int retriesLeft = getRetries() - fails;
                 getServerThread().getMessageHandler().handleDebug("A NullPointerException occurred during the user arrangement. The connection get terminated "
                         + ((retriesLeft <= 0) ? "now": ("after " + retriesLeft + " more failed attempt(s)")), e);
-                writeJSON(new UsernameResponsePacket(UsernameResponsePacket.UsernameResponseType.ERROR_USERNAME_INVALID, usernameRegexDescription).toJSON());
+                writeJSON(new UsernameServerPacket(UsernameServerPacket.UsernameResponseType.ERROR_USERNAME_INVALID, usernameRegexDescription).toJSON());
                 if (retriesLeft <= 0) {
                     getServerThread().close("Failed to choose a valid username");
                 }
@@ -52,7 +53,7 @@ public class UsernameHelperThread extends HelperThread {
                 int retriesLeft = getRetries() - fails;
                 getServerThread().getMessageHandler().handleDebug("A NullPointerException occurred during the user arrangement. The connection get terminated "
                         + ((retriesLeft <= 0) ? "now": ("after " + retriesLeft + " more failed attempt(s)")), e);
-                writeJSON(new UsernameResponsePacket(UsernameResponsePacket.UsernameResponseType.ERROR_USERNAME_TAKEN, "The username is already taken").toJSON());
+                writeJSON(new UsernameServerPacket(UsernameServerPacket.UsernameResponseType.ERROR_USERNAME_TAKEN, "The username is already taken").toJSON());
                 if (retriesLeft <= 0) {
                     getServerThread().close("Failed to choose a non existing username");
                 }
