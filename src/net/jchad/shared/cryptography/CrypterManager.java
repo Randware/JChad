@@ -10,7 +10,7 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
-
+import java.util.Base64;
 
 
 /**
@@ -248,6 +248,18 @@ public class CrypterManager {
         return isCorrectlySigned;
     }
 
+
+    /**
+     * This methode hashes the input string using the SHA-256 Algorithm.
+     * The returned string is base64 encoded because {@link Crypter#sha256Hash(byte[])} returns a byte array.
+     * Before the string gets hashed, it gets converted to UTF-8 bytes
+     * @param stringTOHash The string that gets Hashed
+     * @return The returning hash in base64
+     */
+    public static String hash(String stringTOHash) {
+        byte[] hashedBytes = Crypter.sha256Hash(stringTOHash.getBytes(StandardCharsets.UTF_8));
+        return Base64.getEncoder().encodeToString(hashedBytes);
+    }
 
     /**
      * Sets the AES secret key

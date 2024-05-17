@@ -1,6 +1,9 @@
-package net.jchad.shared.networking.packets;
+package net.jchad.shared.networking.packets.encryption;
 
-public class PublicRSAkeyPacket implements Packet{
+import net.jchad.shared.networking.packets.Packet;
+import net.jchad.shared.networking.packets.PacketType;
+
+public class PublicRSAkeyPacket implements Packet {
     private final PacketType packet_type = PacketType.RSA_PUBLIC_KEY;
     private final String publicKey;
 

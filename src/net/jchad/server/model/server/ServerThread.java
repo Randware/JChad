@@ -1,21 +1,22 @@
 package net.jchad.server.model.server;
 
-import com.google.gson.stream.JsonReader;
+import com.google.gson.Gson;
 import net.jchad.server.model.config.store.Config;
-import net.jchad.server.model.config.store.InternalSettings;
 import net.jchad.server.model.error.MessageHandler;
+import net.jchad.server.model.server.util.MainHelperThread;
+import net.jchad.server.model.server.util.PasswordHelperThread;
+import net.jchad.server.model.server.util.UsernameHelperThread;
 import net.jchad.server.model.users.User;
-import net.jchad.shared.networking.ip.IPAddress;
-import net.jchad.shared.networking.ip.InvalidIPAddressException;
-import net.jchad.shared.networking.packets.*;
+import net.jchad.shared.networking.packets.defaults.BannedPacket;
+import net.jchad.shared.networking.packets.defaults.ConnectionClosedPacket;
+import net.jchad.shared.networking.packets.defaults.NotWhitelistedPacket;
+import net.jchad.shared.networking.packets.defaults.ServerInformationPacket;
 
 
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
+import java.util.Scanner;
 
 public class ServerThread implements Runnable{
     private final Server server;
@@ -23,11 +24,12 @@ public class ServerThread implements Runnable{
     private final MessageHandler messageHandler;
     private final PrintWriter printWriter;
     private final BufferedReader bufferedReader;
-    private final JsonReader jsonReader;
+    private final Scanner scanner;
     private final Socket socket;
     private final InetSocketAddress inetAddress;
     private String remoteAddress = "Unknown"; //The ip address of the client
     private User user = null;
+    private final Gson gson = new Gson();
 
     public ServerThread(Socket socket, MainSocket mainSocket) throws IOException {
         if (mainSocket == null) throw new IllegalArgumentException("Could not connect to [%s]: The MainServer is null".formatted(remoteAddress));
@@ -50,8 +52,7 @@ public class ServerThread implements Runnable{
             }
         printWriter = new PrintWriter(new BufferedOutputStream(socket.getOutputStream()));
         bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        jsonReader = new JsonReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
-        jsonReader.setLenient(true);
+        scanner = new Scanner(socket.getInputStream());
     }
 
     public void run() {
@@ -76,10 +77,17 @@ public class ServerThread implements Runnable{
             printWriter.println(ServerInformationPacket.getCurrentServerInfo(server).toJSON());
             printWriter.flush();
 
+        //Forces the client to provide the correct password
+            if (server.getConfig().getServerSettings().isRequiresPassword()) {
+                new PasswordHelperThread(this).getPassword();
+            }
+
         //Come to an agreement for the client's username
             user = new UsernameHelperThread(this).arrangeUser();
 
             messageHandler.handleInfo(remoteAddress + " connected successfully to the Server");
+
+
         //Initialization is finished. Client can chat now
             user.addJoinedChats("test"); //temporary
             user.setReadyToReceiveMessages(true);
@@ -132,8 +140,9 @@ public class ServerThread implements Runnable{
             if (bufferedReader != null) {
                 bufferedReader.close();
             }
-            if (jsonReader != null) {
-                jsonReader.close();
+
+            if (scanner != null) {
+                scanner.close();
             }
             if (socket != null) socket.close();
         } catch (IOException e) {
@@ -159,9 +168,6 @@ public class ServerThread implements Runnable{
         return bufferedReader;
     }
 
-    public JsonReader getJsonReader() {
-        return jsonReader;
-    }
 
     public Server getServer() {
         return server;
@@ -182,11 +188,19 @@ public class ServerThread implements Runnable{
         return server.getConfig();
     }
 
+    public Scanner getScanner() {
+        return scanner;
+    }
+
     public User getUser() {
         return user;
     }
 
     public MainSocket getMainSocket() {
         return mainSocket;
+    }
+
+    public Gson getGson() {
+        return gson;
     }
 }

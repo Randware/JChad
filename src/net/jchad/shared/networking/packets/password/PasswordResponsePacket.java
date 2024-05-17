@@ -1,4 +1,4 @@
-package net.jchad.shared.networking.packets;
+package net.jchad.shared.networking.packets.password;
 
 public class PasswordResponsePacket extends PasswordPacket{
     private final String password;

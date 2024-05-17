@@ -1,6 +1,6 @@
 package net.jchad.server.model.chats;
 
-import net.jchad.shared.networking.packets.ServerMessagePacket;
+import net.jchad.shared.networking.packets.messages.ServerMessagePacket;
 
 import java.time.Instant;
 import java.time.LocalDateTime;

@@ -1,12 +1,13 @@
 package net.jchad.tests.shared;
 
-import net.jchad.server.model.users.User;
-import net.jchad.shared.networking.packets.ClientMessagePacket;
-import net.jchad.shared.networking.packets.UsernamePacket;
+import net.jchad.shared.cryptography.CrypterManager;
+import net.jchad.shared.networking.packets.messages.ClientMessagePacket;
+import net.jchad.shared.networking.packets.username.UsernamePacket;
 
 public class Test {
     public static void main(String[] args) {
        // User user = new User("Test user", null, );
+        System.out.println(CrypterManager.hash("Test"));
         boolean test0 = "".matches("^[A-Za-z]+(?:_[A-Za-z]+)?$");
         boolean test1 = "dari_os".matches("^[A-Za-z]+(?:_[A-Za-z]+)?$");
         boolean test2 = "GHaxZ".matches("^[A-Za-z]+(?:_[A-Za-z]+)?$");

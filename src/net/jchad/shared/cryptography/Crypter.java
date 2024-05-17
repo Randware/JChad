@@ -98,4 +98,19 @@ public class Crypter {
             publicSignature.update(byteArrayThatWasSigned);
             return publicSignature.verify(signature);
     }
+
+
+    /**
+     * This methode hashes the input bytes using the SHA-256 algorithm.
+     * @param bytesToHash The bytes that should be hashed
+     * @return The hash
+     */
+    public static byte[] sha256Hash(byte[] bytesToHash) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            return digest.digest(bytesToHash);
+        } catch (NoSuchAlgorithmException ignore) {
+            throw new RuntimeException("If you somehow got this exception... I have no idea why???", ignore);
+        }
+    }
 }

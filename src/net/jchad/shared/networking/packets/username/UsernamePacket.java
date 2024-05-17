@@ -1,4 +1,7 @@
-package net.jchad.shared.networking.packets;
+package net.jchad.shared.networking.packets.username;
+
+import net.jchad.shared.networking.packets.Packet;
+import net.jchad.shared.networking.packets.PacketType;
 
 public class UsernamePacket implements Packet {
 

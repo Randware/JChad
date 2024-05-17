@@ -1,11 +1,13 @@
-package net.jchad.shared.networking.packets;
+package net.jchad.shared.networking.packets.defaults;
 
 import net.jchad.server.model.chats.Chat;
 import net.jchad.server.model.server.Server;
+import net.jchad.shared.networking.packets.Packet;
+import net.jchad.shared.networking.packets.PacketType;
 
 import java.util.Arrays;
 
-public class ServerInformationPacket implements Packet{
+public class ServerInformationPacket implements Packet {
     private final PacketType packet_type = PacketType.SERVER_INFORMATION;
 
     private final Double server_version;

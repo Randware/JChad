@@ -1,12 +1,9 @@
 package net.jchad.server.model.server;
 
 import com.google.gson.Gson;
-import net.jchad.server.model.config.store.InternalSettings;
 import net.jchad.server.model.error.MessageHandler;
-import net.jchad.shared.cryptography.CrypterManager;
 import net.jchad.shared.networking.ip.IPAddress;
 import net.jchad.shared.networking.ip.InvalidIPAddressException;
-import net.jchad.shared.networking.packets.ServerInformationPacket;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -17,7 +14,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Predicate;
 
 /**
  * Runs the main socket and manages all the other socket threads
