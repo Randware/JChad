@@ -30,37 +30,38 @@ public abstract class HelperThread{
      * @param <T>
      */
     <T extends Packet> T readJSON(Class<T> returningClassType, PacketType reuiredPacketType) {
-     return readJSON(returningClassType, reuiredPacketType, this.retries);
+     return readJSON(returningClassType, reuiredPacketType, this.retries, true);
     }
 
     /**
      * <p>This methode reads the JSON in the {@link net.jchad.server.model.server.ServerThread ServerThread} using the {@link com.google.gson.stream.JsonReader JsonReader}</p>
      * <p>It may occur that this methode returns null BUT this is rare. If the methode returns null just close the {@link net.jchad.server.model.server.ServerThread ServerThread} </p>
      *
+     * @param validatePacket Decides if the received packet should be validated by calling {@link Packet#isValid()}
      * @param returningClassType The object which should get returned wi
      * @param reuiredPacketType The required packet type that gets sent to the client when he sends an invalid packet.
      *                          This does not affect the methode in any way. It just tells the client which packet type it (the client) should have sent.
      * @return T
      * @param <T>
      */
-    <T extends Packet> T readJSON(Class<T> returningClassType, PacketType reuiredPacketType, int retries) {
+    <T extends Packet> T readJSON(Class<T> returningClassType, PacketType reuiredPacketType, int retries, boolean validatePacket) {
         T returningObject = null;
         for (int failedAttempts = 0; retries >= failedAttempts; failedAttempts++) {
             try {
                 Thread.currentThread().sleep(sleepInterval);
-                returningObject = serverThread.getGson().fromJson(serverThread.getScanner().next(), returningClassType);
-                if (!returningObject.isValid()) {
+                returningObject = serverThread.getGson().fromJson(serverThread.getScanner().nextLine(), returningClassType); //TODO Fix weird scanner behaviour
+                if ( returningObject == null || (validatePacket && !returningObject.isValid())) {
                     throw new InvalidPacketException("The received packet is not valid");
                 } else {
                     break;
                 }
             } catch ( JsonSyntaxException | InvalidPacketException e) {
                 if (failedAttempts >= retries) {
-                    serverThread.getMessageHandler().handleDebug("%s sent an invalid packet. The connection get terminated now!".formatted(serverThread.getRemoteAddress()));
-                    serverThread.close("%s sent to many invalid packets".formatted(serverThread.getRemoteAddress()));
+                    serverThread.getMessageHandler().handleDebug("%The client sent an invalid packet. The connection get terminated now!");
+                    serverThread.close("The client sent to many invalid packets");
                     break;
                 } else {
-                    serverThread.getMessageHandler().handleDebug("%s sent an invalid packet. The connection gets terminated if the server receives %d more invalid packet(s)".formatted(serverThread.getRemoteAddress(), retries - failedAttempts));
+                    serverThread.getMessageHandler().handleDebug("The client sent an invalid packet. The connection gets terminated if the server receives %d more invalid packet(s)".formatted( retries - failedAttempts));
                     writeJSON(new InvalidPacket(reuiredPacketType, "The provided packet was not valid").toJSON());
                 }
             } catch (InterruptedException e) {

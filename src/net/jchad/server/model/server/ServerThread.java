@@ -5,6 +5,7 @@ import net.jchad.server.model.config.store.Config;
 import net.jchad.server.model.error.MessageHandler;
 import net.jchad.server.model.server.util.MainHelperThread;
 import net.jchad.server.model.server.util.PasswordHelperThread;
+import net.jchad.server.model.server.util.ServerInformationHelperThread;
 import net.jchad.server.model.server.util.UsernameHelperThread;
 import net.jchad.server.model.users.User;
 import net.jchad.shared.networking.packets.defaults.BannedPacket;
@@ -74,8 +75,7 @@ public class ServerThread implements Runnable{
         }
 
         //Send the server information to the client:
-            printWriter.println(ServerInformationResponsePacket.getCurrentServerInfo(server).toJSON());
-            printWriter.flush();
+            new ServerInformationHelperThread(this).sendInformation();
 
         //Forces the client to provide the correct password
             if (server.getConfig().getServerSettings().isRequiresPassword()) {

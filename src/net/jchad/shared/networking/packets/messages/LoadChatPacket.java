@@ -3,12 +3,12 @@ package net.jchad.shared.networking.packets.messages;
 import net.jchad.shared.networking.packets.Packet;
 import net.jchad.shared.networking.packets.PacketType;
 
-public abstract class JoinChatPacket implements Packet {
-    private final PacketType packet_type = PacketType.JOIN_CHAT;
+public abstract class LoadChatPacket implements Packet {
+    private final PacketType packet_type = PacketType.LOAD_CHAT;
     private final JoinChatPacketType join_chat_type;
     private final String chat_name;
 
-    public JoinChatPacket(JoinChatPacketType join_chat_type, String chat_name) {
+    public LoadChatPacket(JoinChatPacketType join_chat_type, String chat_name) {
         this.join_chat_type = join_chat_type;
         this.chat_name = chat_name;
     }
