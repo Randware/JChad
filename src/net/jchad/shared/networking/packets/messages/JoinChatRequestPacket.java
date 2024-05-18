@@ -1,10 +1,10 @@
 package net.jchad.shared.networking.packets.messages;
 
-public class LoadChatRequestPacket extends LoadChatPacket {
+public class JoinChatRequestPacket extends JoinChatPacket {
 
 
 
-    public LoadChatRequestPacket(String chat_name) {
+    public JoinChatRequestPacket(String chat_name) {
         super(JoinChatPacketType.REQUEST, chat_name);
 
     }

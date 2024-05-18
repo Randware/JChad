@@ -17,6 +17,7 @@ public class User {
     private static final ConcurrentHashMap<ServerThread, User> users = new ConcurrentHashMap<>();
     private final ServerThread connection;
     private final String username;
+    private final Set<String> joinedChats = ConcurrentHashMap.newKeySet();
     private boolean readyToReceiveMessages;
 
     /**
@@ -33,9 +34,27 @@ public class User {
      * @throws ConnectionExistsException If the connection is already associated with a user
      */
     public User(String username, ServerThread connection) {
-        this(username, connection, false);
-    }
+            this(username, connection, new HashSet<>());
+        }
 
+
+    /**
+     * Creates a new user and adds it and the given {@link ServerThread} into a {@link ConcurrentHashMap}.
+     * Users can send messages to other users
+     *
+     * @param username The username of the user.
+     * @param connection The {@link ServerThread} that gets associated with the user
+     * @param joinedChats All chats that the user is in
+     *
+     *
+     * @throws UsernameInvalidException If the username did not match with the configured regex
+     * @throws UsernameTakenException If the username was already taken by another connection
+     * @throws NullPointerException If one of the Parameters is null
+     * @throws ConnectionExistsException If the connection is already associated with a user
+     */
+    public User(String username, ServerThread connection, Set<String> joinedChats) {
+        this(username, connection, joinedChats, false);
+    }
 
     /**
      * Creates a new user and adds it and the given {@link ServerThread} into a {@link ConcurrentHashMap}.
@@ -52,13 +71,17 @@ public class User {
      * @throws NullPointerException If one of the Parameters is null
      * @throws ConnectionExistsException If the connection is already associated with a user
      */
-    public User(String username, ServerThread connection, boolean readyToReceiveMessages) {
+    public User(String username, ServerThread connection,Set<String> joinedChats, boolean readyToReceiveMessages) {
         if (username == null) {
             throw new NullPointerException("username can not be null");
         }
 
         if (connection == null) {
             throw new NullPointerException("the connection is not allowed to be null");
+        }
+
+        if (joinedChats == null) {
+            throw new NullPointerException("the joinedChats is not allowed to be null");
         }
 
         if (!username.matches(connection.getServer().getConfig().getInternalSettings().getUsernameRegex())) {
@@ -83,9 +106,23 @@ public class User {
 
         this.connection = connection;
         this.username = username;
+        this.joinedChats.addAll(joinedChats);
         this.readyToReceiveMessages = readyToReceiveMessages;
         users.put(connection, this);
 
+    }
+
+    public void addJoinedChats(String... chats) {
+        joinedChats.addAll(Arrays.asList(chats));
+    }
+
+    public void removeJoinedChats(String... chats) {
+        joinedChats.removeAll(Arrays.asList(chats));
+    }
+
+
+    public Set<String> getJoinedChats() {
+        return joinedChats;
     }
 
     public ServerThread getConnection() {
@@ -152,12 +189,12 @@ public class User {
         Chat chat = connection.getServer().getChatManager().getChat(messagePacket.getChat());
         ChatMessage chatMessage = ChatMessage.fromMessagePacket(messagePacket);
         if (chat == null) {
-            connection.getMessageHandler().handleDebug("%s tried to send a message to a chat that does not exist");
+            connection.getMessageHandler().handleDebug("%s tried to send a message to a chat that does not exist".formatted(getConnection().getRemoteAddress()));
             return 0;
         }
             Collection<User> userValues = users.values();
             for (User user : userValues) {
-                if (!this.equals(user) && user.isReadyToReceiveMessages()) {
+                if (!this.equals(user) && user.isReadyToReceiveMessages() && user.getJoinedChats().contains(messagePacket.getChat())) {
                     try {
                         chat.addMessage(chatMessage);
                     } catch (IOException e) {
@@ -222,7 +259,7 @@ public class User {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return readyToReceiveMessages == user.readyToReceiveMessages && Objects.equals(connection, user.connection) && Objects.equals(username, user.username);
+        return readyToReceiveMessages == user.readyToReceiveMessages && Objects.equals(connection, user.connection) && Objects.equals(username, user.username) && Objects.equals(joinedChats, user.joinedChats);
     }
 
 

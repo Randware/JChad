@@ -9,10 +9,12 @@ public enum PacketType {
     SERVER_INFORMATION, //The SERVER_INFORMATION packet provides information to the client
     INVALID,
     CLIENT_MESSAGE, //This is the message packet that the client sends to the server
-    SERVER_MESSAGE, //This is the message packet that the server uses internally and sends to all clients. It has additional information.
+    SERVER_MESSAGE,
+    STATUS_MESSAGE, //This is the message packet that the server uses internally and sends to all clients. It has additional information.
     USERNAME,
     PASSWORD,
-    LOAD_CHAT;
+    LOAD_CHAT,
+    CONNECTION_ESTABLISHED;
 
 
 

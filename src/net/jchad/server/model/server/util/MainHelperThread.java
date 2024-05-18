@@ -2,16 +2,19 @@ package net.jchad.server.model.server.util;
 
 import com.google.gson.JsonSyntaxException;
 import net.jchad.server.model.chats.Chat;
+import net.jchad.server.model.server.ConnectionClosedException;
 import net.jchad.server.model.server.ServerThread;
 import net.jchad.shared.networking.packets.InvalidPacket;
 import net.jchad.shared.networking.packets.InvalidPacketException;
 import net.jchad.shared.networking.packets.defaults.ConnectionClosedPacket;
+import net.jchad.shared.networking.packets.defaults.ConnectionEstablishedPacket;
 import net.jchad.shared.networking.packets.defaults.ServerInformationRequestPacket;
 import net.jchad.shared.networking.packets.defaults.ServerInformationResponsePacket;
 import net.jchad.shared.networking.packets.messages.ClientMessagePacket;
 import net.jchad.shared.networking.packets.PacketType;
-import net.jchad.shared.networking.packets.messages.LoadChatRequestPacket;
-import net.jchad.shared.networking.packets.messages.LoadChatResponsePacket;
+import net.jchad.shared.networking.packets.messages.JoinChatRequestPacket;
+import net.jchad.shared.networking.packets.messages.JoinChatResponsePacket;
+import net.jchad.shared.networking.packets.messages.MessageStatusPacket;
 
 /**
  * This is the main helper thread that gets used when everything is initialized
@@ -28,35 +31,44 @@ public class MainHelperThread extends HelperThread {
      * The methode can receive 4 different Packets:
      * <o>
      *     <li>A {@link ClientMessagePacket MessagePacket}</li>
-     *     <li>A {@link LoadChatRequestPacket JoinChatPacket}</li>
+     *     <li>A {@link JoinChatRequestPacket JoinChatPacket}</li>
      *     <li>A {@link ConnectionClosedPacket}</li>
      *     <li>A {@link  ServerInformationRequestPacket ServerInformationPacket}</li>
      * </o>
      */
     public void  start() {
+        writeJSON(new ConnectionEstablishedPacket().toJSON());
         int retries = getRetries();
         for (int failedAttempts = 0; retries >= failedAttempts; failedAttempts++) {
             try {
-                Thread.currentThread().sleep(getSleepInterval());
-                String element = getServerThread().getScanner().nextLine();
+                Thread.sleep(getSleepInterval());
+                String element = getServerThread().next();
+
+                if (element == null) throw new ConnectionClosedException();
                 //This checks if the client sends one of these 4 packet types
 
                 //First check: Checks if the client sent a messagePacket
                 ClientMessagePacket clientMessage = getServerThread().getGson().fromJson(element, ClientMessagePacket.class);
                 if (clientMessage != null && clientMessage.isValid()) {
-                    getServerThread().getUser().sendMessage(clientMessage);
-                    failedAttempts--;
+                    if (getServerThread().getServer().getChatManager().chatExists(clientMessage.getChat())) {
+                        getServerThread().getUser().sendMessage(clientMessage);
+                        writeJSON(new MessageStatusPacket(MessageStatusPacket.Status.SUCCESS, "The message was send successfully").toJSON());
+                        failedAttempts--;
+                    } else {
+                        writeJSON(new MessageStatusPacket(MessageStatusPacket.Status.FAILED, "The provided chat does not exist").toJSON());
+                    }
                     continue;
                 }
 
                 //Second check: Checks if the client sent a JoinChatPacket
-                LoadChatRequestPacket joinChat = getServerThread().getGson().fromJson(element, LoadChatRequestPacket.class);
+                JoinChatRequestPacket joinChat = getServerThread().getGson().fromJson(element, JoinChatRequestPacket.class);
                 if (joinChat != null &&joinChat.isValid()) {
                     Chat chat =  getServerThread().getServer().getChatManager().getChat(joinChat.getChat_name());
                     if (chat == null) {
                         throw new InvalidPacketException("The given chat does not exist");
                     }
-                    writeJSON(new LoadChatResponsePacket(chat.getName(),chat.getMessages()).toJSON());
+                    writeJSON(new JoinChatResponsePacket(chat.getName(),chat.getMessages()).toJSON());
+                    getServerThread().getUser().addJoinedChats(joinChat.getChat_name());
                     failedAttempts--;
                     continue;
                 }
@@ -90,8 +102,7 @@ public class MainHelperThread extends HelperThread {
                             e.getMessage()).toJSON());
                 }
             } catch (InterruptedException e) {
-                getServerThread().getMessageHandler().handleError(new Exception("The client thread connected with %s got interrupted unsuspectingly, during the main execution".formatted(getServerThread().getRemoteAddress()), e));
-                getServerThread().close("Thread got interrupted unsuspectingly");
+               //Thread got probably closed
             }
         }
     }

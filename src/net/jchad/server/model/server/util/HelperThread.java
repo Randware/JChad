@@ -1,6 +1,7 @@
 package net.jchad.server.model.server.util;
 
 import com.google.gson.JsonSyntaxException;
+import net.jchad.server.model.server.ConnectionClosedException;
 import net.jchad.server.model.server.ServerThread;
 import net.jchad.shared.networking.packets.*;
 
@@ -49,7 +50,7 @@ public abstract class HelperThread{
         for (int failedAttempts = 0; retries >= failedAttempts; failedAttempts++) {
             try {
                 Thread.currentThread().sleep(sleepInterval);
-                returningObject = serverThread.getGson().fromJson(serverThread.getScanner().nextLine(), returningClassType); //TODO Fix weird scanner behaviour
+                returningObject = serverThread.getGson().fromJson(serverThread.next(), returningClassType); //TODO Fix weird scanner behaviour
                 if ( returningObject == null || (validatePacket && !returningObject.isValid())) {
                     throw new InvalidPacketException("The received packet is not valid");
                 } else {
@@ -65,12 +66,11 @@ public abstract class HelperThread{
                     writeJSON(new InvalidPacket(reuiredPacketType, "The provided packet was not valid").toJSON());
                 }
             } catch (InterruptedException e) {
-                    serverThread.getMessageHandler().handleError(new Exception("The client thread connected with %s got interrupted unsuspectingly".formatted(serverThread.getRemoteAddress()), e));
-                    serverThread.close("Thread got interrupted unsuspectingly");
+                throw new ConnectionClosedException();
+                //Thread got probably closed
             }
         }
-
-
+        if (returningObject == null) throw new ConnectionClosedException();
         return returningObject;
     }
 

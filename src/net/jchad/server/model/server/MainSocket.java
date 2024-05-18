@@ -58,7 +58,7 @@ public final class MainSocket implements Runnable{
             }
         } catch(SocketException se) {
             if (!running) {
-                Thread.currentThread().interrupt();
+
                 //Ignores the exception if it gets throw, when the server shutdowns.
                 //When I close the serverSocket while the serverSocket.accept()
                 // methode is running a guaranteed Exception gets thrown,
@@ -81,7 +81,7 @@ public final class MainSocket implements Runnable{
     public void shutdown(String message) {
         running = false;
         messageHandler.handleDebug("Closing all connections before shutting the MainSocket down");
-        serverThreadSet.forEach(thread -> thread.close(message));
+        serverThreadSet.forEach(thread -> thread.close(message, false));
         executor.shutdownNow();
         closeServerSocket();
 

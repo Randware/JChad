@@ -58,6 +58,7 @@ public class CLI implements MessageHandler {
     @Override
     public void handleError(Exception e) {
         terminal.outputMessage("[ERROR] " + e);
+        e.printStackTrace();
     }
 
     @Override
