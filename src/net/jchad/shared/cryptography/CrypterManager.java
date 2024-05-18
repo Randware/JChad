@@ -262,6 +262,16 @@ public class CrypterManager {
     }
 
     /**
+     * p>This methode returns a newly random generated AES key.</p>
+     * <p><b><u>The aes key is encoded in Base64</u></b></p>
+     * @return a random AES key
+     */
+    public static String generateAESkey() {
+        byte[] aesKey = CrypterKey.getAESKey().getEncoded();
+        return Base64.getEncoder().encodeToString(aesKey);
+    }
+
+    /**
      * Sets the AES secret key
      * @param secretKey the new secret key
      * @return returns false if the given secret key was null
@@ -294,7 +304,7 @@ public class CrypterManager {
      * The secret key is used for encryption and decryption from the client/server. Because AES is a symmetric key algorithm the client and server needs the same key.
      * To get the base64 encoded String from the {@link CrypterManager CrypterManager} class
      * @param base64EncodedAESKey The base64 encoded Secret/AES key
-     * @return returns true, if the key got successfully set to the remote public key.
+     * @return returns true, if the key got successfully set to aes key.
      *         If an error occurs (like a {@link NullPointerException NullPointerException}, {@link ImpossibleConversionException ImpossibleConversionException}
      *         or a {@link java.security.spec.InvalidKeySpecException InvalidKeySpecException})
      *         this returns "false"
@@ -372,7 +382,7 @@ public class CrypterManager {
      * @param keysize the size of the key must be equal or larger than 512
      * @return If the keyPair gets initialized (or its private/public key) this returns 'true', otherwise this will return 'false'
      */
-    private boolean initKeyPair(int keysize) {
+    public boolean initKeyPair(int keysize) {
         boolean gotChanged = false;
         if (keyPair == null) {
             keyPair = CrypterKey.getRSAKeyPair(keysize);
@@ -406,6 +416,7 @@ public class CrypterManager {
 
     /**
      * Gets the Base64 encoded string representation of the public key
+     * or generates it if it is not set
      * @return Base64 encoded string representation of the public key
      */
     public String getPublicKey() {
@@ -555,9 +566,9 @@ public class CrypterManager {
     }
 
     /**
-     * returns the public key that gets used for encryption.
+     * Returns the public key that gets used for encryption.
      * The remote public key should be the key from the host you're communicating with.
-     * @return The remote public key
+     * @return The remote public key (key could be null)
      */
     public PublicKey getRemotePublicKey() {
         return remotePublicKey;

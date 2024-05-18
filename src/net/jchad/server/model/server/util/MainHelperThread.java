@@ -38,7 +38,8 @@ public class MainHelperThread extends HelperThread {
      */
     public void  start() {
         getServerThread().getMessageHandler().handleDebug("%s finished the steps steps. The MainHelperThread gets started ".formatted(getServerThread().getRemoteAddress()));
-        writeJSON(new ConnectionEstablishedPacket().toJSON());
+        writePacket(new ConnectionEstablishedPacket());
+        writePacket(ServerInformationResponsePacket.getCurrentServerInfo(getServerThread().getServer()));
         int retries = getRetries();
         for (int failedAttempts = 0; retries >= failedAttempts; failedAttempts++) {
             try {
@@ -53,10 +54,10 @@ public class MainHelperThread extends HelperThread {
                 if (clientMessage != null && clientMessage.isValid()) {
                     if (getServerThread().getServer().getChatManager().chatExists(clientMessage.getChat())) {
                         getServerThread().getUser().sendMessage(clientMessage);
-                        writeJSON(new MessageStatusPacket(MessageStatusPacket.Status.SUCCESS, "The message was send successfully").toJSON());
+                        writePacket(new MessageStatusPacket(MessageStatusPacket.Status.SUCCESS, "The message was send successfully"));
                         failedAttempts--;
                     } else {
-                        writeJSON(new MessageStatusPacket(MessageStatusPacket.Status.FAILED, "The provided chat does not exist").toJSON());
+                        writePacket(new MessageStatusPacket(MessageStatusPacket.Status.FAILED, "The provided chat does not exist"));
                     }
                     continue;
                 }
@@ -68,7 +69,7 @@ public class MainHelperThread extends HelperThread {
                     if (chat == null) {
                         throw new InvalidPacketException("The given chat does not exist");
                     }
-                    writeJSON(new JoinChatResponsePacket(chat.getName(),chat.getMessages()).toJSON());
+                    writePacket(new JoinChatResponsePacket(chat.getName(),chat.getMessages()));
                     getServerThread().getUser().addJoinedChats(joinChat.getChat_name());
                     failedAttempts--;
                     continue;
@@ -84,7 +85,7 @@ public class MainHelperThread extends HelperThread {
                 //Fourth check: Checks if the client asks for the server information.
                 ServerInformationRequestPacket informationPacket = getServerThread().getGson().fromJson(element, ServerInformationRequestPacket.class);
                 if (informationPacket != null && informationPacket.isValid()) {
-                    writeJSON(ServerInformationResponsePacket.getCurrentServerInfo(getServerThread().getServer()).toJSON());
+                    writePacket(ServerInformationResponsePacket.getCurrentServerInfo(getServerThread().getServer()));
                     failedAttempts--;
                     continue;
                 }
@@ -99,8 +100,8 @@ public class MainHelperThread extends HelperThread {
                     break;
                 } else {
                     getServerThread().getMessageHandler().handleDebug("%s sent to many invalid packets. The connection gets terminated if the server receives %d more invalid packet(s)".formatted(getServerThread().getRemoteAddress(), retries - failedAttempts));
-                    writeJSON(new InvalidPacket(PacketType.CLIENT_MESSAGE, "The provided packet was not valid. " +
-                            e.getMessage()).toJSON());
+                    writePacket(new InvalidPacket(PacketType.CLIENT_MESSAGE, "The provided packet was not valid. " +
+                            e.getMessage()));
                 }
             } catch (InterruptedException e) {
                //Thread got probably closed

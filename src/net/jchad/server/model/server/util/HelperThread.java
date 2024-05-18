@@ -63,7 +63,7 @@ public abstract class HelperThread{
                     break;
                 } else {
                     serverThread.getMessageHandler().handleDebug("The client sent an invalid packet. The connection gets terminated if the server receives %d more invalid packet(s)".formatted( retries - failedAttempts));
-                    writeJSON(new InvalidPacket(reuiredPacketType, "The provided packet was not valid").toJSON());
+                    writePacket(new InvalidPacket(reuiredPacketType, "The provided packet was not valid"));
                 }
             } catch (InterruptedException e) {
                 throw new ConnectionClosedException();
@@ -75,9 +75,8 @@ public abstract class HelperThread{
     }
 
 
-    <T extends String> void writeJSON(T json) {
-            serverThread.getPrintWriter().println(json);
-            serverThread.getPrintWriter().flush();
+    <T extends Packet> void writePacket(T json) {
+            serverThread.write(json.toJSON());
     }
 
     ServerThread getServerThread() {

@@ -3,20 +3,26 @@ package net.jchad.server.model.server;
 import com.google.gson.Gson;
 import net.jchad.server.model.config.store.Config;
 import net.jchad.server.model.error.MessageHandler;
-import net.jchad.server.model.server.util.MainHelperThread;
-import net.jchad.server.model.server.util.PasswordHelperThread;
-import net.jchad.server.model.server.util.ServerInformationHelperThread;
-import net.jchad.server.model.server.util.UsernameHelperThread;
+import net.jchad.server.model.server.util.*;
 import net.jchad.server.model.users.User;
+import net.jchad.shared.cryptography.CrypterManager;
+import net.jchad.shared.cryptography.CrypterUtil;
+import net.jchad.shared.cryptography.ImpossibleConversionException;
+import net.jchad.shared.cryptography.keys.CrypterKey;
 import net.jchad.shared.networking.packets.defaults.BannedPacket;
 import net.jchad.shared.networking.packets.defaults.ConnectionClosedPacket;
 import net.jchad.shared.networking.packets.defaults.NotWhitelistedPacket;
-import net.jchad.shared.networking.packets.defaults.ServerInformationResponsePacket;
 
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
@@ -32,6 +38,12 @@ public class ServerThread implements Runnable{
     private String remoteAddress = "Unknown"; //The ip address of the client
     private User user = null;
     private final Gson gson = new Gson();
+    private final CrypterManager crypterManager = new CrypterManager();
+    private String messageAESkey = null;
+    private final byte[] messageIV = CrypterUtil.getRandomByteArr();
+    private String communicationsAESkey = null;
+    private final byte[] communicationsIV = CrypterUtil.getRandomByteArr();
+
 
     public ServerThread(Socket socket, MainSocket mainSocket) throws IOException {
         if (mainSocket == null) throw new IllegalArgumentException("Could not connect to [%s]: The MainServer is null".formatted(remoteAddress));
@@ -55,6 +67,8 @@ public class ServerThread implements Runnable{
         printWriter = new PrintWriter(new BufferedOutputStream(socket.getOutputStream()));
         bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         scanner = new Scanner(socket.getInputStream());
+        crypterManager.initKeyPair(2048);
+
     }
 
     public void run() {
@@ -77,6 +91,13 @@ public class ServerThread implements Runnable{
 
         //Send the server information to the client:
             new ServerInformationHelperThread(this).sendInformation();
+
+        //Exchanges encryption keys with the server
+            if (server.getConfig().getServerSettings().isEncryptCommunications() || server.getConfig().getServerSettings().isEncryptMessages()) {
+                RSAHelperThread rsa = new RSAHelperThread(this, crypterManager);
+                rsa.exchangeRSAKeys();
+                rsa.sendAESkeys();
+            }
 
         //Forces the client to provide the correct password
             if (server.getConfig().getServerSettings().isRequiresPassword()) {
@@ -170,12 +191,33 @@ public class ServerThread implements Runnable{
 
     public String next() {
         try {
+
             return scanner.nextLine();
         } catch (NoSuchElementException ignore) {
             //The Connection was probably closed
             //therefor no more elements where found
             return null;
         }
+    }
+
+
+    public void write(String data) {
+        if (communicationsAESkey != null && server.getConfig().getServerSettings().isEncryptCommunications()) {
+            crypterManager.setAESkey(communicationsAESkey);
+            crypterManager.setIV(communicationsIV);
+            try {
+                data = crypterManager.encryptAES(data);
+                printWriter.println(data);
+                printWriter.flush();
+            } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException |
+                     NoSuchAlgorithmException | BadPaddingException | ImpossibleConversionException | InvalidKeyException ignore) {
+                close("An unsuspected error occurred while decrypting the input data");
+            }
+        } else {
+            printWriter.println(data);
+            printWriter.flush();
+        }
+
     }
 
 
@@ -222,5 +264,29 @@ public class ServerThread implements Runnable{
 
     public Gson getGson() {
         return gson;
+    }
+
+    public String getMessageAESkey() {
+        return messageAESkey;
+    }
+
+    public void setMessageAESkey(String messageAESkey) {
+        this.messageAESkey = messageAESkey;
+    }
+
+    public String getCommunicationsAESkey() {
+        return communicationsAESkey;
+    }
+
+    public void setCommunicationsAESkey(String communicationsAESkey) {
+        this.communicationsAESkey = communicationsAESkey;
+    }
+
+    public byte[] getMessageIV() {
+        return messageIV;
+    }
+
+    public byte[] getCommunicationsIV() {
+        return communicationsIV;
     }
 }

@@ -22,7 +22,7 @@ public class PasswordHelperThread extends HelperThread {
      */
     public void getPassword() {
         getServerThread().getMessageHandler().handleDebug("%s started the PasswordHelperThread".formatted(getServerThread().getRemoteAddress()));
-        writeJSON(new PasswordRequestPacket().toJSON());
+        writePacket(new PasswordRequestPacket());
         for (int failedAttempts = 0; failedAttempts < passwordAttempts; failedAttempts++) {
             try {
                 PasswordResponsePacket passwordPacket = readJSON(PasswordResponsePacket.class, PacketType.PASSWORD);
@@ -30,15 +30,15 @@ public class PasswordHelperThread extends HelperThread {
                 if (passwordPacket.getPassword().length() != 44) {
                     //You may wonder: Why 44?
                     // Simple answer: Every base64 encoded sha256 hash has to be 44 Base64 chars long
-                    writeJSON(new PasswordFailedPacket("The provided password is not SHA-256 hashed and base64 encoded").toJSON());
+                    writePacket(new PasswordFailedPacket("The provided password is not SHA-256 hashed and base64 encoded"));
                     throw new InvalidPacketException("The provided password from %s was not SHA-256 hashed and Base64 encoded".formatted(getServerThread().getRemoteAddress()));
                 }
                 if (!passwordPacket.getPassword().equals(getServerThread().getServer().getServerPassword())) {
-                    writeJSON(new PasswordFailedPacket("The provided password did not match the server's password.").toJSON());
+                    writePacket(new PasswordFailedPacket("The provided password did not match the server's password."));
                     throw new InvalidPacketException("The provided password from %s did not match the server's password".formatted(getServerThread().getRemoteAddress()));
                 } else {
                     getServerThread().getMessageHandler().handleDebug("%s authenticated successfully ".formatted(getServerThread().getRemoteAddress()));
-                    writeJSON(new PasswordSuccessPacket().toJSON());
+                    writePacket(new PasswordSuccessPacket());
                     break; //Client sent correct password
                 }
             } catch (InvalidPacketException e) {

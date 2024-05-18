@@ -201,8 +201,7 @@ public class User {
                         connection.getMessageHandler().handleError(new IOException("An IOException occurred while trying to add the message (from %s) to the chat (%s)"
                                 .formatted(connection.getRemoteAddress(), chat.getName()), e));
                     }
-                    user.getConnection().getPrintWriter().println(messagePacket.toJSON());
-                    user.getConnection().getPrintWriter().flush();
+                    user.getConnection().write(messagePacket.toJSON());
                     messagesSent++;
                 }
 
