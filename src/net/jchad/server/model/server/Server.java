@@ -7,6 +7,7 @@ import net.jchad.server.model.config.*;
 import net.jchad.server.model.config.store.Config;
 import net.jchad.server.model.error.MessageHandler;
 import net.jchad.shared.cryptography.CrypterManager;
+import net.jchad.shared.networking.packets.defaults.ServerInformationResponsePacket;
 
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -78,6 +79,11 @@ public class Server implements ConfigObserver {
         chats = chatManager.getAllChats();
 
         messageHandler.handleInfo("Updated server configuration");
+        mainSocket.getServerThreadSet().forEach(serverThread -> {
+            if ( serverThread.getUser() != null && serverThread.getUser().isReadyToReceiveMessages()) {
+                serverThread.write(ServerInformationResponsePacket.getCurrentServerInfo(this).toJSON());
+            }
+        });
     }
 
     public Config getConfig() {

@@ -1,9 +1,12 @@
 package net.jchad.shared.cryptography;
 
+import net.jchad.shared.cryptography.keys.CrypterKey;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.security.*;
+import java.util.Base64;
 
 public class CrypterTest {
     public static void main(String[] args) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, ImpossibleConversionException {
@@ -45,7 +48,19 @@ public class CrypterTest {
         String decryptedString = crypterManager.decryptRSA(encryptedString);
         System.out.println(decryptedString); //Output: Helle World I love AES!*/
 
+        /*CrypterManager crypterManager = new CrypterManager();
+        crypterManager.setPrivateRSAkey(CrypterKey.getPrivateKeyFromBytes(Base64.getDecoder().decode("MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAIVt6vQi/CTlJpn64t4VSOD64P25R94p7DpedMwphrQ7vAEvYNlZoasAsPxlV8i6XEvcmVC3nn7YbqT9z1DT4dpyj3IcwDjUv0EBGyv2+sXG3TViKF3OxrG2MOq2VZOQ2E9kCmxGPoBM2vAB90xG/SH1ACMxH0rUJt7otQLbe3YrAgMBAAECgYAT1y+SpFMhugYJQTJpUKPuJGVpWnA9MQxZ9Oq24yPkeroZjlh/PrdDV3kkhtNMsKgsdaiXRT6RtmWO2NjyOBeDbi8qnksRC7a6pRbab2mmNn55FfFULQuHwwuJOI0HkGJ+BedwmPhbDA/LGpYHRww4MgyBZIpM4nM/VvTx0cLeRQJBAMdcM9rvgwxgyYqUGgvkY+JOygF22pM62j2mWlrpcHZJH9VOpHQVOQxx4okyM0DOYSNentk6BBBqoRZgkiqJpN0CQQCrVnVK6IyoxvUAKXeMOe4uUgUA6bVlu+KBpQF/TeOkt7D3xvZoY3twIOvRxGw2i3OefOGjVhsJc2/Yq7sLuPKnAkBsrsdWQ9ydkuZMthC9CvWpGmrmAXWHbj4r/dSkWz8EPTktgIIHBsrjDfMB+GwYmGo8bgkLQ6WTjY3kNSF6Ly/BAkEAguFia7xEZlDEqkECzx0Zcky5Ab+FD5d8KOhwwlwvPo4LItrbM1Z63mZnfS98MhZIVZKzkd+ee5OwpmRYV1YKFQJAZwozi3F2TuFsCCHVUVwn6Gdc0KC7swYurDQ8ElS4lN4565p4X8AHD4la8U9GUxB3zlOYIf0IIQ8LTRpzzTnh8Q==")));
+        crypterManager.setPublicRSAkey(CrypterKey.getPublicKeyFromBytes(Base64.getDecoder().decode("MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCxCOt7ft77nq9fewOaeS0ntFehfYClHF7tAdZ4iI5+692KU/rBrB5O8bDnhv24XBdY+bDB/jfl6wHjBA91XbTGi7nlkFJHL3ap5Id6QL78gyPv2DKeQwPEY6AvBodP/AZ0m0zLFN/np5vf/wT1AuoKP3lg1yZ2Z9i/5QoeJ0elyQIDAQAB")));
 
+        System.out.println(crypterManager.decryptRSA("YEBpS0vsOqEHcQwDiYpgupZgcDZlF0p21N05xZfWPSOCQqZoUM7UuCUHE8N5fv8i9IkZKkA1+Q25TRiZiBLSTepYWKXQSCXZdjyOspHTBg61uD6ZpoWQxEJXbCzAwHTAhPRf9dMu2wsrKjrCqRS2XVYG8/UqgTxfV3UDDJx3Cdg="));*/
+
+        CrypterManager manager = new CrypterManager();
+        System.out.println(manager.getAESKey());
+        manager.initKeyPair(2048);
+        manager.setRemotePublicKey(manager.getPublicKey());
+        String encryptedData = manager.encryptRSA("kp6/RLEGSxZMpGdKcwk6kxEoMYZFmQ22fJWIE/w1t9g=kp6/RLEGSxZMpGdKcwk6kxEoMYZFmQ22fJWIE/w1t9g=");
+        System.out.println(encryptedData);
+        System.out.println(manager.decryptRSA(encryptedData));
 
     }
 }

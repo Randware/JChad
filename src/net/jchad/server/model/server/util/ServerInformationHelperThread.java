@@ -10,6 +10,6 @@ public class ServerInformationHelperThread extends HelperThread{
 
 
     public void sendInformation() {
-        writeJSON(ServerInformationResponsePacket.getCurrentServerInfo(getServerThread().getServer()).toJSON());
+        writePacket(ServerInformationResponsePacket.getCurrentServerInfo(getServerThread().getServer()));
     }
 }

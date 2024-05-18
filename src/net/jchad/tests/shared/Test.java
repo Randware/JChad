@@ -1,32 +1,34 @@
 package net.jchad.tests.shared;
 
+import net.jchad.shared.cryptography.CrypterManager;
 import net.jchad.shared.networking.packets.defaults.ServerInformationRequestPacket;
+import net.jchad.shared.networking.packets.encryption.PublicRSAkeyPacket;
 import net.jchad.shared.networking.packets.messages.ClientMessagePacket;
 import net.jchad.shared.networking.packets.messages.JoinChatRequestPacket;
+import net.jchad.shared.networking.packets.password.PasswordRequestPacket;
 import net.jchad.shared.networking.packets.password.PasswordResponsePacket;
 import net.jchad.shared.networking.packets.username.UsernameClientPacket;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+
 public class Test {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
        // User user = new User("Test user", null, );
-        System.out.println(new ServerInformationRequestPacket().toJSON());
-        System.out.println(new PasswordResponsePacket("test").toJSON());
-        boolean test0 = "".matches("^[A-Za-z]+(?:_[A-Za-z]+)?$");
-        boolean test1 = "dari_os".matches("^[A-Za-z]+(?:_[A-Za-z]+)?$");
-        boolean test2 = "GHaxZ".matches("^[A-Za-z]+(?:_[A-Za-z]+)?$");
-        boolean test3 = "dari0s".matches("^[A-Za-z]+(?:_[A-Za-z]+)?$");
-        boolean test4 = "_dari_".matches("^[A-Za-z]+(?:_[A-Za-z]+)?$");
-        boolean test5 = "dari_os_os".matches("^[A-Za-z]+(?:_[A-Za-z]+)?$");
+        CrypterManager crypterManager = new CrypterManager();
+        crypterManager.initKeyPair(2048);
+        String privateKey = crypterManager.getPrivateKey();
+        String publicKey = crypterManager.getPublicKey();
+        crypterManager.setRemotePublicKey(crypterManager.getPublicKey());
+        System.out.println(crypterManager.encryptRSA("test"));
 
-        System.out.println(test0);
-        System.out.println(test1);
-        System.out.println(test2);
-        System.out.println(test3);
-        System.out.println(test4);
-        System.out.println(test5);
-
-        System.out.println(new JoinChatRequestPacket("test").toJSON());
+        System.out.println("Private: " + privateKey);
+        System.out.println("Public: " + publicKey);
+        System.out.println(new PasswordResponsePacket("n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg=").toJSON());
         System.out.println(new UsernameClientPacket("Dari_OS").toJSON());
-        System.out.println(new ClientMessagePacket("Hello world", false, "test").toJSON());
+        System.out.println(new PublicRSAkeyPacket(publicKey).toJSON());
     }
 }

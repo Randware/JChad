@@ -20,14 +20,13 @@ public class UsernameHelperThread extends HelperThread {
     public User arrangeUser() {
         getServerThread().getMessageHandler().handleDebug("%s started the UsernameHelperThread".formatted(getServerThread().getRemoteAddress()));
         User user = null;
-        writeJSON(new UsernameServerPacket(UsernameServerPacket.UsernameResponseType.PROVIDE_USERNAME, "Please enter a username.").toJSON());
+        writePacket(new UsernameServerPacket(UsernameServerPacket.UsernameResponseType.PROVIDE_USERNAME, "Please enter a username."));
         for (int fails = 0; fails <= getRetries(); fails++) {
             UsernameClientPacket usernameClientPacket = readJSON(UsernameClientPacket.class, PacketType.USERNAME);
             try {
 
                 user = new User(usernameClientPacket.getUsername(), getServerThread());
-                getServerThread().getPrintWriter().println(new UsernameServerPacket(UsernameServerPacket.UsernameResponseType.SUCCESS_USERNAME_SET, "The username was successfully set").toJSON());
-                getServerThread().getPrintWriter().flush();
+                writePacket(new UsernameServerPacket(UsernameServerPacket.UsernameResponseType.SUCCESS_USERNAME_SET, "The username was successfully set"));
                     return user;
 
             } catch (NullPointerException e) {
@@ -46,7 +45,7 @@ public class UsernameHelperThread extends HelperThread {
                 int retriesLeft = getRetries() - fails;
                 getServerThread().getMessageHandler().handleDebug("The client entered an invalid username. The connection get terminated "
                         + ((retriesLeft <= 0) ? "now": ("after " + retriesLeft + " more failed attempt(s)")), e);
-                writeJSON(new UsernameServerPacket(UsernameServerPacket.UsernameResponseType.ERROR_USERNAME_INVALID, usernameRegexDescription).toJSON());
+                writePacket(new UsernameServerPacket(UsernameServerPacket.UsernameResponseType.ERROR_USERNAME_INVALID, usernameRegexDescription));
                 if (retriesLeft <= 0) {
                     getServerThread().close("Failed to choose a valid username");
                 }
@@ -54,7 +53,7 @@ public class UsernameHelperThread extends HelperThread {
                 int retriesLeft = getRetries() - fails;
                 getServerThread().getMessageHandler().handleDebug("The client tried to get an existing username. The connection get terminated "
                         + ((retriesLeft <= 0) ? "now": ("after " + retriesLeft + " more failed attempt(s)")), e);
-                writeJSON(new UsernameServerPacket(UsernameServerPacket.UsernameResponseType.ERROR_USERNAME_TAKEN, "The username is already taken").toJSON());
+                writePacket(new UsernameServerPacket(UsernameServerPacket.UsernameResponseType.ERROR_USERNAME_TAKEN, "The username is already taken"));
                 if (retriesLeft <= 0) {
                     getServerThread().close("Failed to choose a non existing username");
                 }
