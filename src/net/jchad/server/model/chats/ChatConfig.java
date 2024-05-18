@@ -4,15 +4,17 @@ public class ChatConfig {
     private boolean anonymous = false;
     private boolean loadChatHistory = true;
     private long loadChatHistoryMessageCount = 100;
+    private boolean saveMessages = true;
 
     public ChatConfig() {
 
     }
 
-    public ChatConfig(boolean anonymous, boolean loadChatHistory, long loadChatHistoryMessageCount) {
+    public ChatConfig(boolean anonymous, boolean loadChatHistory, long loadChatHistoryMessageCount, boolean saveMessages) {
         this.anonymous = anonymous;
         this.loadChatHistory = loadChatHistory;
         this.loadChatHistoryMessageCount = loadChatHistoryMessageCount;
+        this.saveMessages = loadChatHistory;
     }
 
     public boolean isAnonymous() {
@@ -37,6 +39,14 @@ public class ChatConfig {
 
     public void setLoadChatHistoryMessageCount(long loadChatHistoryMessageCount) {
         this.loadChatHistoryMessageCount = loadChatHistoryMessageCount;
+    }
+
+    public boolean isSaveMessages() {
+        return saveMessages;
+    }
+
+    public void setSaveMessages(boolean saveMessages) {
+        this.saveMessages = saveMessages;
     }
 
     @Override
