@@ -17,6 +17,7 @@ import net.jchad.shared.networking.packets.defaults.ServerInformationResponsePac
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class ServerThread implements Runnable{
@@ -109,6 +110,7 @@ public class ServerThread implements Runnable{
 
     /**
      * Closes all streams in the {@link net.jchad.server.model.server.ServerThread ServerThread} safely
+     * <font color="red"><p>This should only be used if you are closing the connection thread from inside (=on the same thread).</p></font>
      */
     public void close() {
         close(null);
@@ -116,43 +118,65 @@ public class ServerThread implements Runnable{
 
     /**
      * Closes all streams in the {@link net.jchad.server.model.server.ServerThread ServerThread} safely
+     * <font color="red"><p>This should only be used if you are closing the connection thread from inside (=on the same thread).</p></font>
      * @param reason The reason why the connection gets closed. <b>May be null!</b>
      *               The reason gets "skipped" if it is null!
-     * @throws IOException If an I/O error occurs. Should be caught by the MainSocket
      */
     public void close(String reason) {
-        if (Thread.currentThread().isInterrupted()) {
-            Thread.currentThread().interrupt();
-            return;
-        }
-        printWriter.println(new ConnectionClosedPacket(reason).toJSON());//Sends the client a notification that the connection gets closed
-        printWriter.flush();
-        try {
-            mainSocket.getServerThreadSet(false).remove(this);
-            if (user != null) {
-                User.removeUser(this);
-            }
-            if (printWriter != null) {
-                printWriter.flush();
-                printWriter.close();
-            }
-            if (bufferedReader != null) {
-                bufferedReader.close();
-            }
+        close(reason, true);
+    }
 
-            if (scanner != null) {
-                scanner.close();
+    /**
+     * Closes all streams in the {@link net.jchad.server.model.server.ServerThread ServerThread} safely
+     * @param reason The reason why the connection gets closed. <b>May be null!</b>
+     *               The reason gets "skipped" if it is null!
+     * @param throwException Throws a {@link ConnectionClosedException} when closing the connection.
+     *                       <font color="red"><p>This should only be used if you are closing the connection thread from inside (that means on the same thread),</p>
+     *                       <p>because it shuts down the thread immediately</p></font>
+     *
+     * @throws ConnectionClosedException Throw this exception IF specified, to stop the thread immediately
+     */
+    public void close(String reason, boolean throwException) {
+        if (!socket.isClosed()) {
+            printWriter.println(new ConnectionClosedPacket(reason).toJSON());//Sends the client a notification that the connection gets closed
+            printWriter.flush();
+            try {
+                mainSocket.getServerThreadSet(false).remove(this);
+                if (user != null) {
+                    User.removeUser(this);
+                }
+                if (printWriter != null) {
+                    printWriter.flush();
+                    printWriter.close();
+                }
+                if (bufferedReader != null) {
+                    bufferedReader.close();
+                }
+
+                if (scanner != null) {
+                    scanner.close();
+                }
+                if (socket != null) socket.close();
+            } catch (IOException e) {
+                messageHandler.handleError(new IOException("Info while closing connection to [%s]: An unknown error occurred".formatted(remoteAddress),e));
+            } finally {
+                messageHandler.handleInfo("Closing connection with " + remoteAddress + ((reason == null) ? "" : (" Reason: " + reason)));
+                if (throwException) {
+                    throw new ConnectionClosedException("The connection was closed.");
+                }
             }
-            if (socket != null) socket.close();
-        } catch (IOException e) {
-            messageHandler.handleError(new IOException("Info while closing connection to [%s]: An unknown error occurred".formatted(remoteAddress),e));
-        } finally {
-            messageHandler.handleInfo("Closing connection with " + remoteAddress + ((reason == null) ? "" : (" Reason: " + reason)));
-            Thread.currentThread().interrupt();
-            throw new ConnectionClosedException("The connection was closed.");
         }
     }
 
+    public String next() {
+        try {
+            return scanner.nextLine();
+        } catch (NoSuchElementException ignore) {
+            //The Connection was probably closed
+            //therefor no more elements where found
+            return null;
+        }
+    }
 
 
     public MessageHandler getMessageHandler() {
@@ -187,9 +211,6 @@ public class ServerThread implements Runnable{
         return server.getConfig();
     }
 
-    public Scanner getScanner() {
-        return scanner;
-    }
 
     public User getUser() {
         return user;

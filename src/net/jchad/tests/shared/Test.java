@@ -2,7 +2,7 @@ package net.jchad.tests.shared;
 
 import net.jchad.shared.networking.packets.defaults.ServerInformationRequestPacket;
 import net.jchad.shared.networking.packets.messages.ClientMessagePacket;
-import net.jchad.shared.networking.packets.messages.LoadChatRequestPacket;
+import net.jchad.shared.networking.packets.messages.JoinChatRequestPacket;
 import net.jchad.shared.networking.packets.password.PasswordResponsePacket;
 import net.jchad.shared.networking.packets.username.UsernameClientPacket;
 
@@ -25,7 +25,7 @@ public class Test {
         System.out.println(test4);
         System.out.println(test5);
 
-        System.out.println(new LoadChatRequestPacket("test").toJSON());
+        System.out.println(new JoinChatRequestPacket("test").toJSON());
         System.out.println(new UsernameClientPacket("Dari_OS").toJSON());
         System.out.println(new ClientMessagePacket("Hello world", false, "test").toJSON());
     }

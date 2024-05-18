@@ -24,6 +24,7 @@ public class PasswordHelperThread extends HelperThread {
         for (int failedAttempts = 0; failedAttempts < passwordAttempts; failedAttempts++) {
             try {
                 PasswordResponsePacket passwordPacket = readJSON(PasswordResponsePacket.class, PacketType.PASSWORD);
+
                 if (passwordPacket.getPassword().length() != 44) {
                     //You may wonder: Why 44?
                     // Simple answer: Every base64 encoded sha256 hash has to be 44 Base64 chars long
