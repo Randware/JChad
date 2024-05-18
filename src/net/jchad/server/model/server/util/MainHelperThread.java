@@ -37,6 +37,7 @@ public class MainHelperThread extends HelperThread {
      * </o>
      */
     public void  start() {
+        getServerThread().getMessageHandler().handleDebug("%s finished the steps steps. The MainHelperThread gets started ".formatted(getServerThread().getRemoteAddress()));
         writeJSON(new ConnectionEstablishedPacket().toJSON());
         int retries = getRetries();
         for (int failedAttempts = 0; retries >= failedAttempts; failedAttempts++) {

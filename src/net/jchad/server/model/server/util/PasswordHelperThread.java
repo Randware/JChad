@@ -5,6 +5,7 @@ import net.jchad.shared.networking.packets.*;
 import net.jchad.shared.networking.packets.password.PasswordFailedPacket;
 import net.jchad.shared.networking.packets.password.PasswordRequestPacket;
 import net.jchad.shared.networking.packets.password.PasswordResponsePacket;
+import net.jchad.shared.networking.packets.password.PasswordSuccessPacket;
 
 public class PasswordHelperThread extends HelperThread {
 
@@ -20,6 +21,7 @@ public class PasswordHelperThread extends HelperThread {
      * If the client fails to provide the correct password, the connection gets closed.
      */
     public void getPassword() {
+        getServerThread().getMessageHandler().handleDebug("%s started the PasswordHelperThread".formatted(getServerThread().getRemoteAddress()));
         writeJSON(new PasswordRequestPacket().toJSON());
         for (int failedAttempts = 0; failedAttempts < passwordAttempts; failedAttempts++) {
             try {
@@ -35,6 +37,8 @@ public class PasswordHelperThread extends HelperThread {
                     writeJSON(new PasswordFailedPacket("The provided password did not match the server's password.").toJSON());
                     throw new InvalidPacketException("The provided password from %s did not match the server's password".formatted(getServerThread().getRemoteAddress()));
                 } else {
+                    getServerThread().getMessageHandler().handleDebug("%s authenticated successfully ".formatted(getServerThread().getRemoteAddress()));
+                    writeJSON(new PasswordSuccessPacket().toJSON());
                     break; //Client sent correct password
                 }
             } catch (InvalidPacketException e) {
