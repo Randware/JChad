@@ -12,7 +12,7 @@ public class PasswordHelperThread extends HelperThread {
 
     public PasswordHelperThread(ServerThread serverThread) {
         super(serverThread);
-        this.passwordAttempts = serverThread.getServer().getConfig().getInternalSettings().getRetriesOnInvalidPassword();
+        this.passwordAttempts = serverThread.getServer().getConfig().getInternalSettings().getPasswordAttempts();
     }
 
     /**
@@ -21,7 +21,7 @@ public class PasswordHelperThread extends HelperThread {
      */
     public void getPassword() {
         writeJSON(new PasswordRequestPacket().toJSON());
-        for (int failedAttempts = 0; failedAttempts <= passwordAttempts; failedAttempts++) {
+        for (int failedAttempts = 0; failedAttempts < passwordAttempts; failedAttempts++) {
             try {
                 PasswordResponsePacket passwordPacket = readJSON(PasswordResponsePacket.class, PacketType.PASSWORD);
                 if (passwordPacket.getPassword().length() != 44) {
@@ -37,7 +37,7 @@ public class PasswordHelperThread extends HelperThread {
                     break; //Client sent correct password
                 }
             } catch (InvalidPacketException e) {
-                if (failedAttempts >= passwordAttempts) {
+                if (failedAttempts-1 >= passwordAttempts) {
                     getServerThread().getMessageHandler().handleDebug(e.getMessage() + ". The connection gets terminated.");
                     getServerThread().close(e.getMessage());
                 }

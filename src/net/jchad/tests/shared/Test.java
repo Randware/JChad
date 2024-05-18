@@ -1,13 +1,16 @@
 package net.jchad.tests.shared;
 
-import net.jchad.shared.cryptography.CrypterManager;
+import net.jchad.shared.networking.packets.defaults.ServerInformationRequestPacket;
 import net.jchad.shared.networking.packets.messages.ClientMessagePacket;
+import net.jchad.shared.networking.packets.messages.LoadChatRequestPacket;
+import net.jchad.shared.networking.packets.password.PasswordResponsePacket;
 import net.jchad.shared.networking.packets.username.UsernameClientPacket;
 
 public class Test {
     public static void main(String[] args) {
        // User user = new User("Test user", null, );
-        System.out.println(CrypterManager.hash("Test"));
+        System.out.println(new ServerInformationRequestPacket().toJSON());
+        System.out.println(new PasswordResponsePacket("test").toJSON());
         boolean test0 = "".matches("^[A-Za-z]+(?:_[A-Za-z]+)?$");
         boolean test1 = "dari_os".matches("^[A-Za-z]+(?:_[A-Za-z]+)?$");
         boolean test2 = "GHaxZ".matches("^[A-Za-z]+(?:_[A-Za-z]+)?$");
@@ -22,7 +25,7 @@ public class Test {
         System.out.println(test4);
         System.out.println(test5);
 
-
+        System.out.println(new LoadChatRequestPacket("test").toJSON());
         System.out.println(new UsernameClientPacket("Dari_OS").toJSON());
         System.out.println(new ClientMessagePacket("Hello world", false, "test").toJSON());
     }

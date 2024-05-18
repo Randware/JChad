@@ -43,7 +43,7 @@ public class UsernameHelperThread extends HelperThread {
 
             } catch (UsernameInvalidException e) {
                 int retriesLeft = getRetries() - fails;
-                getServerThread().getMessageHandler().handleDebug("A NullPointerException occurred during the user arrangement. The connection get terminated "
+                getServerThread().getMessageHandler().handleDebug("The client entered an invalid username. The connection get terminated "
                         + ((retriesLeft <= 0) ? "now": ("after " + retriesLeft + " more failed attempt(s)")), e);
                 writeJSON(new UsernameServerPacket(UsernameServerPacket.UsernameResponseType.ERROR_USERNAME_INVALID, usernameRegexDescription).toJSON());
                 if (retriesLeft <= 0) {
