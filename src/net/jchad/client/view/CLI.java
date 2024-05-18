@@ -1,10 +1,14 @@
 package net.jchad.client.view;
 
 import net.jchad.client.controller.ClientController;
-import net.jchad.client.model.error.MessageHandler;
+import net.jchad.client.model.client.ViewCallback;
 
-// Responsible for displaying client output in CLI mode
-public class CLI implements MessageHandler {
+/**
+ * Responsible for displaying the client output in CLI mode.
+ * This class is only really used in development process,
+ * while the GUI is still under construction.
+ */
+public class CLI implements ViewCallback {
     private ClientController client;
 
     public static void main(String[] args) {
@@ -13,9 +17,6 @@ public class CLI implements MessageHandler {
 
     private void runCLI() {
         client = new ClientController(this);
-
-        // Here a new client is created on the backend, that connects to the specified serverAddress and port
-        client.startClient(null,0);
     }
 
     @Override
@@ -36,5 +37,10 @@ public class CLI implements MessageHandler {
     @Override
     public void handleInfo(String info) {
 
+    }
+
+    @Override
+    public String displayPrompt(String promptTitle, String promptMessage) {
+        return "";
     }
 }

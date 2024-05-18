@@ -1,4 +1,4 @@
-package net.jchad.client.model.client;
+package net.jchad.client.model.client.testing;
 
 import java.io.*;
 import java.net.Socket;
