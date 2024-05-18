@@ -8,15 +8,13 @@ import java.util.TimeZone;
 
 public class ChatMessage {
     private int id;
-    private final String content;
-    private final boolean encrypted;
-    private final long timestamp;
-    private final String senderName;
-    private final String senderIP;
+    private String content;
+    private long timestamp;
+    private String senderName;
+    private String senderIP;
 
-    public ChatMessage(String content, boolean encrypted, long timestamp, String senderName, String senderIP) {
+    public ChatMessage(String content, long timestamp, String senderName, String senderIP) {
         this.content = content;
-        this.encrypted = encrypted;
         this.timestamp = timestamp;
         this.senderName = senderName;
         this.senderIP = senderIP;
@@ -32,24 +30,40 @@ public class ChatMessage {
         return id;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public String getContent() {
         return content;
     }
 
-    public boolean isEncrypted() {
-        return encrypted;
+    public void setContent(String content) {
+        this.content = content;
     }
 
     public long getTimestamp() {
         return timestamp;
     }
 
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
     public String getSenderName() {
         return senderName;
     }
 
+    public void setSenderName(String senderName) {
+        this.senderName = senderName;
+    }
+
     public String getSenderIP() {
         return senderIP;
+    }
+
+    public void setSenderIP(String senderIP) {
+        this.senderIP = senderIP;
     }
 
     public LocalDateTime getTimestampAsLocalDateTime() {
@@ -61,7 +75,6 @@ public class ChatMessage {
         return "ChatMessage{" +
                 "id=" + id +
                 ", content='" + content + '\'' +
-                ", encrypted=" + encrypted +
                 ", timestamp=" + timestamp +
                 ", senderName='" + senderName + '\'' +
                 ", senderIP='" + senderIP + '\'' +
@@ -75,6 +88,6 @@ public class ChatMessage {
      * @return a {@link ChatMessage} with the values from the {@link ServerMessagePacket}
      */
     public static ChatMessage fromMessagePacket(ServerMessagePacket messagePacket) {
-        return new ChatMessage(messagePacket.getChat(), messagePacket.getEncrypted(),messagePacket.getTimestamp(), messagePacket.getUsername(), messagePacket.getIp());
+        return new ChatMessage(messagePacket.getChat(), messagePacket.getTimestamp(), messagePacket.getUsername(), messagePacket.getIp());
     }
 }

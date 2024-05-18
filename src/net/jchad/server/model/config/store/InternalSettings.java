@@ -64,6 +64,17 @@ public class InternalSettings {
 
 
     /**
+     * This defines which username should be used for storing anonymous messages.
+     */
+    private String anonymousUserName = "anonymous";
+
+    /**
+     * This defines which IP should be used for storing anonymous messages.
+     */
+    private String anonymousUserIP = "unknown";
+
+
+    /**
      * Default {@link InternalSettings} constructor
      */
     public InternalSettings() {
@@ -200,5 +211,19 @@ public class InternalSettings {
         this.usernameRegexDescription = usernameRegexDescription;
     }
 
+    public String getAnonymousUserName() {
+        return anonymousUserName;
+    }
 
+    public void setAnonymousUserName(String anonymousUserName) {
+        this.anonymousUserName = anonymousUserName;
+    }
+
+    public String getAnonymousUserIP() {
+        return anonymousUserIP;
+    }
+
+    public void setAnonymousUserIP(String anonymousUserIP) {
+        this.anonymousUserIP = anonymousUserIP;
+    }
 }

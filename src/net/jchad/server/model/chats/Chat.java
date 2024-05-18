@@ -9,12 +9,12 @@ import com.fasterxml.jackson.dataformat.yaml.snakeyaml.error.MarkedYAMLException
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import net.jchad.server.model.error.MessageHandler;
+import net.jchad.server.model.server.Server;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 
 /**
  * TODO: Implement a way for accessing the messages, which adheres to the "loadChatHistory" and "loadChatHistoryMessageCount" values
@@ -27,6 +27,7 @@ import java.util.Collections;
 public class Chat {
     private Gson gson;
     private ObjectMapper mapper;
+    private Server server;
     private MessageHandler messageHandler;
 
     private String name;
@@ -37,10 +38,11 @@ public class Chat {
     private Path messagesSavePath;
     private Path configSavePath;
 
-    public Chat(String name, MessageHandler messageHandler) throws IOException {
+    public Chat(String name, Server server) throws IOException {
         this.gson = new GsonBuilder().setPrettyPrinting().create();
         mapper = new ObjectMapper(new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
-        this.messageHandler = messageHandler;
+        this.server = server;
+        this.messageHandler = server.getMessageHandler();
 
         this.name = name;
         this.messages = new ArrayList<>();
@@ -64,6 +66,16 @@ public class Chat {
     Use synchronized here to ensure the messages are added in the right order.
      */
     public synchronized void addMessage(ChatMessage message) throws IOException {
+        if(!config.isSaveMessages()) {
+            return;
+        }
+
+        // This anonymises the message if anonymous is enabled
+        if(config.isAnonymous() || server.getConfig().getServerSettings().isStrictlyAnonymous()) {
+            message.setSenderName(server.getConfig().getInternalSettings().getAnonymousUserName());
+            message.setSenderIP(server.getConfig().getInternalSettings().getAnonymousUserIP());
+        }
+
         messages.add(message.appendID(messages.size()));
 
         saveMessages();

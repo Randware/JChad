@@ -99,7 +99,7 @@ public class ChatManager {
             String chatName = dir.getFileName().toString();
 
             try {
-                chats.add(new Chat(chatName, messageHandler));
+                chats.add(new Chat(chatName, server));
             } catch (IOException e) {
                 messageHandler.handleError(new IOException("Failed loading chat \"" + chatName + "\"", e));
             }
