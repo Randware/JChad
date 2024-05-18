@@ -6,6 +6,7 @@ package net.jchad.client.model.store.connection;
  * the connection process.
  */
 public class ConnectionDetails {
+    private String connectionName;
     private String host;
     private int port;
     private String username;
@@ -16,6 +17,14 @@ public class ConnectionDetails {
         this.port = port;
         this.username = username;
         this.password = password;
+    }
+
+    public String getConnectionName() {
+        return connectionName;
+    }
+
+    public void setConnectionName(String connectionName) {
+        this.connectionName = connectionName;
     }
 
     public String getHost() {

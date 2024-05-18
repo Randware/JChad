@@ -10,6 +10,12 @@ public class ConnectionDetailsBuilder {
         details = new ConnectionDetails(null, 0, null, null);
     }
 
+    public ConnectionDetailsBuilder addConnectionName(String connectionName) {
+        details.setConnectionName(connectionName);
+
+        return this;
+    }
+
     public ConnectionDetailsBuilder addHost(String host) {
         details.setHost(host);
 
