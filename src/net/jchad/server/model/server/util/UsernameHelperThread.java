@@ -18,6 +18,7 @@ public class UsernameHelperThread extends HelperThread {
     }
 
     public User arrangeUser() {
+        getServerThread().getMessageHandler().handleDebug("%s started the UsernameHelperThread".formatted(getServerThread().getRemoteAddress()));
         User user = null;
         writeJSON(new UsernameServerPacket(UsernameServerPacket.UsernameResponseType.PROVIDE_USERNAME, "Please enter a username.").toJSON());
         for (int fails = 0; fails <= getRetries(); fails++) {
@@ -51,7 +52,7 @@ public class UsernameHelperThread extends HelperThread {
                 }
             }  catch (UsernameTakenException e) {
                 int retriesLeft = getRetries() - fails;
-                getServerThread().getMessageHandler().handleDebug("A NullPointerException occurred during the user arrangement. The connection get terminated "
+                getServerThread().getMessageHandler().handleDebug("The client tried to get an existing username. The connection get terminated "
                         + ((retriesLeft <= 0) ? "now": ("after " + retriesLeft + " more failed attempt(s)")), e);
                 writeJSON(new UsernameServerPacket(UsernameServerPacket.UsernameResponseType.ERROR_USERNAME_TAKEN, "The username is already taken").toJSON());
                 if (retriesLeft <= 0) {
@@ -59,7 +60,7 @@ public class UsernameHelperThread extends HelperThread {
                 }
             }
         }
-
+        getServerThread().getMessageHandler().handleDebug("%s selected a username successfully".formatted(getServerThread().getRemoteAddress()));
             return user;
 
     }
