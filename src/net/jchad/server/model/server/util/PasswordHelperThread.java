@@ -37,12 +37,13 @@ public class PasswordHelperThread extends HelperThread {
                     break; //Client sent correct password
                 }
             } catch (InvalidPacketException e) {
-                if (failedAttempts-1 >= passwordAttempts) {
-                    getServerThread().getMessageHandler().handleDebug(e.getMessage() + ". The connection gets terminated.");
+
+                if (failedAttempts+1 >= passwordAttempts) {
+                    getServerThread().getMessageHandler().handleDebug(e.getMessage() + ". The connection gets terminated now.");
                     getServerThread().close(e.getMessage());
                 }
 
-                getServerThread().getMessageHandler().handleDebug("%s . The connection closes after %d more failed attempt(s)".formatted(e.getMessage(), passwordAttempts-failedAttempts));
+                getServerThread().getMessageHandler().handleDebug("%s . The connection closes after %d more failed attempt(s)".formatted(e.getMessage(), passwordAttempts-failedAttempts-1));
             }
         }
     }
