@@ -355,12 +355,23 @@ public class CrypterManager {
     }
 
     /**
-     * sets the key pair to a newly generated one
+     * sets the key pair to a newly generated one (with the key size of 2048)
      * @return This returns false if there were some issues with the provided key pair
      *         that got resolved by filling out the keyPair/privateKey/publicKey field
      */
     public boolean setKeyPair() {
-        this.keyPair = CrypterKey.getRSAKeyPair();
+        return setKeyPair(2048);
+    }
+
+    /**
+     * sets the key pair to a newly generated one
+     * @param keySize The size the generated key should have.
+     *                If it is smaller than 512 a default size (2048) gets assigned
+     * @return This returns false if there were some issues with the provided key pair
+     *         that got resolved by filling out the keyPair/privateKey/publicKey field
+     */
+    public boolean setKeyPair(int keySize) {
+        this.keyPair = CrypterKey.getRSAKeyPair(keySize);
         return !initKeyPair();
     }
 
@@ -373,7 +384,7 @@ public class CrypterManager {
      * Sets the keypair to a valid keypair instead of null
      * @return if some changes where made to the keypair 'true' gets returned
      */
-    public boolean initKeyPair() {
+    private boolean initKeyPair() {
         return initKeyPair(1024);
     }
 
@@ -382,7 +393,7 @@ public class CrypterManager {
      * @param keysize the size of the key must be equal or larger than 512
      * @return If the keyPair gets initialized (or its private/public key) this returns 'true', otherwise this will return 'false'
      */
-    public boolean initKeyPair(int keysize) {
+    private boolean initKeyPair(int keysize) {
         boolean gotChanged = false;
         if (keyPair == null) {
             keyPair = CrypterKey.getRSAKeyPair(keysize);
@@ -555,7 +566,7 @@ public class CrypterManager {
      * @return If the remote PublicKey gets changed this methode returns true,
      *         otherwise this returns false
      */
-    public boolean initRemotePublicKey() {
+    private boolean initRemotePublicKey() {
         initKeyPair();
         if (remotePublicKey == null) {
             this.remotePublicKey = CrypterKey.getRSAKeyPair().getPublic();

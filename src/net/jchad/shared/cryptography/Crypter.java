@@ -48,7 +48,7 @@ public class Crypter {
      * @return the encrypted text
      */
     public static byte[] encryptRSA(byte[] plainText, Key publicKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-            Cipher cipher = Cipher.getInstance("RSA");
+            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             cipher.init(Cipher.ENCRYPT_MODE, publicKey);
             return cipher.doFinal(plainText);
     }
@@ -61,7 +61,7 @@ public class Crypter {
      * @return
      */
     public static byte[] decryptRSA(byte[] encryptedText, Key privateKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-            Cipher cipher = Cipher.getInstance("RSA");
+            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             cipher.init(Cipher.DECRYPT_MODE, privateKey);
             return cipher.doFinal(encryptedText);
 
