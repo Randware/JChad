@@ -2,6 +2,7 @@ package net.jchad.client.view;
 
 import net.jchad.client.controller.ClientController;
 import net.jchad.client.model.client.ViewCallback;
+import net.jchad.client.model.store.chat.ClientChatMessage;
 
 /**
  * Responsible for displaying the client output in CLI mode.
@@ -42,5 +43,15 @@ public class CLI implements ViewCallback {
     @Override
     public String displayPrompt(String promptTitle, String promptMessage) {
         return "";
+    }
+
+    @Override
+    public void displayOwnMessage(ClientChatMessage message) {
+
+    }
+
+    @Override
+    public void displayOtherMessage(ClientChatMessage message) {
+
     }
 }

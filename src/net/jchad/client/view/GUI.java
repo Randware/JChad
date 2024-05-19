@@ -6,6 +6,7 @@ import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import net.jchad.client.controller.ClientController;
 import net.jchad.client.model.client.ViewCallback;
+import net.jchad.client.model.store.chat.ClientChatMessage;
 
 // Responsible for displaying client output in GUI mode
 public class GUI extends Application implements ViewCallback {
@@ -51,5 +52,15 @@ public class GUI extends Application implements ViewCallback {
     @Override
     public String displayPrompt(String promptTitle, String promptMessage) {
         return "";
+    }
+
+    @Override
+    public void displayOwnMessage(ClientChatMessage message) {
+
+    }
+
+    @Override
+    public void displayOtherMessage(ClientChatMessage message) {
+
     }
 }
