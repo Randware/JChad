@@ -2,6 +2,9 @@ package net.jchad.client.controller;
 
 import net.jchad.client.model.client.Client;
 import net.jchad.client.model.client.ViewCallback;
+import net.jchad.client.model.client.config.ClientConfigManager;
+import net.jchad.client.model.store.chat.ClientChat;
+import net.jchad.client.model.store.chat.ClientChatMessage;
 import net.jchad.client.model.store.connection.ConnectionDetails;
 
 import java.util.ArrayList;
@@ -28,30 +31,29 @@ public class ClientController {
     }
 
     /**
-     * Saves a new {@link ConnectionDetails} instance.
+     * This method returns the {@link ClientConfigManager} currently used by the client.
+     * The {@link ClientConfigManager} has all sorts of methods to modify the configuration.
+     * Use this method if you want to manage saved connections, modify configuration values,
+     * or just do anything that modifies the client configuration in general.
      *
-     * @param connectionDetails the {@link ConnectionDetails} instance that should be saved.
+     * @return the {@link ClientConfigManager} currently used by the client.
      */
-    public void addConnection(ConnectionDetails connectionDetails) {
-        client.addConnection(connectionDetails);
+    public ClientConfigManager configuration() {
+        return client.getConfigManager();
     }
 
     /**
-     * Removes the given {@link ConnectionDetails} instance from the saved connections,
-     * if present.
+     * Returns all {@link ClientChatMessage} instances from this specific chat.
+     * <br>
+     * <br>
+     * <font color="red">This method is not implemented yet, it currently returns an empty list.</font>
      *
-     * @param connectionDetails the {@link ConnectionDetails} instance that should be removed.
+     * @param chat the chat from which the {@link ClientChatMessage} instances
+     *             should be returned.
+     * @return an {@link ArrayList} containing all {@link ClientChatMessage} instances
+     * from this chat.
      */
-    public void removeConnection(ConnectionDetails connectionDetails) {
-        client.removeConnection(connectionDetails);
-    }
-
-    /**
-     * This will return all saved {@link ConnectionDetails} instances.
-     *
-     * @return an {@link ArrayList} containing all saved {@link ConnectionDetails} instances.
-     */
-    public ArrayList<ConnectionDetails> getConnections() {
-        return client.getConnections();
+    public ArrayList<ClientChatMessage> getChatMessages(ClientChat chat) {
+        return new ArrayList<>();
     }
 }
