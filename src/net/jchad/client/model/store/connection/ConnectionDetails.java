@@ -12,7 +12,8 @@ public class ConnectionDetails {
     private String username;
     private String password;
 
-    public ConnectionDetails(String host, int port, String username, String password) {
+    public ConnectionDetails(String connectionName, String host, int port, String username, String password) {
+        this.connectionName = connectionName;
         this.host = host;
         this.port = port;
         this.username = username;
@@ -57,5 +58,16 @@ public class ConnectionDetails {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    @Override
+    public String toString() {
+        return "ConnectionDetails{" +
+                "connectionName='" + connectionName + '\'' +
+                ", host='" + host + '\'' +
+                ", port=" + port +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                '}';
     }
 }
