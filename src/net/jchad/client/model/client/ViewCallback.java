@@ -1,5 +1,7 @@
 package net.jchad.client.model.client;
 
+import net.jchad.client.model.store.chat.ClientChatMessage;
+
 /* Is used by the client to send messages to the view,
 which then handles messages based on their types */
 public interface ViewCallback {
@@ -47,4 +49,23 @@ public interface ViewCallback {
      * @return the input of this prompt
      */
     String displayPrompt(String promptTitle, String promptMessage);
+
+    /**
+     * This method is called when the view is expected to display a message as its own.
+     * If a message is considered its "own" message, it means the message was sent by this client.
+     * Use this and the displayOtherMessage() method calls to visually differentiate those two
+     * message types.
+     *
+     * @param message the {@link ClientChatMessage} which should be display as this clients message
+     */
+    void displayOwnMessage(ClientChatMessage message);
+
+    /**
+     * This method is called when the view is expected to display a message from another client.
+     * Use this and the displayOwnMessage() method calls to visually differentiate those two
+     * message types.
+     *
+     * @param message the {@link ClientChatMessage} which should be display as another clients message
+     */
+    void displayOtherMessage(ClientChatMessage message);
 }
