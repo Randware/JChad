@@ -1,14 +1,11 @@
 package net.jchad.client.model.client;
 
-import com.google.gson.JsonParseException;
 import net.jchad.client.controller.ClientController;
 import net.jchad.client.model.client.config.ClientConfigManager;
 import net.jchad.client.model.client.connection.ServerConnection;
+import net.jchad.client.model.client.connection.ServerConnector;
+import net.jchad.client.model.store.chat.ClientChat;
 import net.jchad.client.model.store.connection.ConnectionDetails;
-
-import java.io.IOException;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 
 /**
  * This class represents the entire backend infrastructure for the client.
@@ -19,11 +16,24 @@ import java.util.ArrayList;
 public class Client {
     private ViewCallback viewCallback;
     private final ClientConfigManager configManager;
+    private final ServerConnector serverConnector;
+    private ServerConnection currentConnection;
+
+    /**
+     * This variable stores the chat the client is currently in.
+     * This is needed, because the view needs to be informed when it
+     * is supposed to display a new message. Still need to figure out how
+     * to effectively update this when the client goes into another chat.
+     * Maybe create a method "setCurrentChat(ClientChat chat)" which
+     * returns all messages from the specified chat and updates this
+     * variable.
+     */
+    private ClientChat currentChat;
 
     public Client(ViewCallback viewCallback) {
         this.viewCallback = viewCallback;
         this.configManager = new ClientConfigManager(viewCallback);
-
+        this.serverConnector = new ServerConnector(viewCallback);
     }
 
     /**
@@ -34,28 +44,29 @@ public class Client {
      *                          used to establish a {@link ServerConnection}.
      */
     public void connect(ConnectionDetails connectionDetails) {
-
+        this.currentConnection = serverConnector.connect(connectionDetails);
     }
 
     /**
-     * This method will save a new {@link ConnectionDetails} instance.
-     *
-     * @param connection the connection that should be saved.
+     * Properly close the current {@link ServerConnection}.
      */
-    public void addConnection(ConnectionDetails connection) {
-        configManager.addConnection(connection);
-    }
-
-    public void removeConnection(ConnectionDetails connection) {
-        configManager.removeConnection(connection);
+    public void disconnect() {
+        currentConnection.closeConnection();
     }
 
     /**
-     * This method will return all currently stored {@link ConnectionDetails}.
-     *
-     * @return an {@link ArrayList} of all currently stored {@link ConnectionDetails}.
+     * Stop any currently ongoing server connection process.
      */
-    public ArrayList<ConnectionDetails> getConnections() {
-        return configManager.getConnections();
+    public void stopConnecting() {
+        serverConnector.stop();
+    }
+
+    /**
+     * This method returns the {@link ClientConfigManager} currently used by the client.
+     *
+     * @return the {@link ClientConfigManager} currently used by the client.
+     */
+    public ClientConfigManager getConfigManager() {
+        return configManager;
     }
 }
