@@ -10,7 +10,26 @@ public class ClientChat {
      * Probably use the ConcurrentLinkedQueue, as it maintains order (which is important in
      * this context).
      */
+    private String name;
+
     private ArrayList<ClientChatMessage> messages;
+
+    public ClientChat(String name) {
+        this(name, new ArrayList<>());
+    }
+
+    public ClientChat(String name, ArrayList<ClientChatMessage> messages) {
+        this.name = name;
+        this.messages = messages;
+    }
+
+    public synchronized void addMessage(ClientChatMessage message) {
+        messages.add(message);
+    }
+
+    public String getName() {
+        return name;
+    }
 
     public ArrayList<ClientChatMessage> getMessages() {
         return new ArrayList<>(messages);
