@@ -4,10 +4,7 @@ public enum PacketType {
     BANNED ,
     NOT_WHITELISTED,
     CONNECTION_CLOSED,
-    AES_MSG_ENCRYPTION_KEY,
-    AES_MSG_INITIALIZATION_VECTOR,
-    AES_COM_ENCRYPTION_KEY, //Why not AES_COMMUNICATIONS_ENCRYPTION_KEY? I had to shorten the name in order to encrypt it. The name was to long for rsa
-    AES_COM_INITIALIZATION_VECTOR,
+    AES_ENCRYPTION_KEYS,
     RSA_KEY_EXCHANGE,
     KEY_EXCHANGE_START,
     RSA_KEY_ERROR,

@@ -67,7 +67,6 @@ public class ServerThread implements Runnable{
         printWriter = new PrintWriter(new BufferedOutputStream(socket.getOutputStream()));
         bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         scanner = new Scanner(socket.getInputStream());
-        crypterManager.initKeyPair(2048);
 
     }
 
@@ -289,4 +288,6 @@ public class ServerThread implements Runnable{
     public byte[] getCommunicationsIV() {
         return communicationsIV;
     }
+
+
 }
