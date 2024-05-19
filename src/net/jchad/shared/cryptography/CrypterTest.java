@@ -1,12 +1,11 @@
 package net.jchad.shared.cryptography;
 
-import net.jchad.shared.cryptography.keys.CrypterKey;
+import net.jchad.shared.networking.packets.encryption.AESencryptionKeysPacket;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.security.*;
-import java.util.Base64;
 
 public class CrypterTest {
     public static void main(String[] args) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, ImpossibleConversionException {
@@ -55,12 +54,12 @@ public class CrypterTest {
         System.out.println(crypterManager.decryptRSA("YEBpS0vsOqEHcQwDiYpgupZgcDZlF0p21N05xZfWPSOCQqZoUM7UuCUHE8N5fv8i9IkZKkA1+Q25TRiZiBLSTepYWKXQSCXZdjyOspHTBg61uD6ZpoWQxEJXbCzAwHTAhPRf9dMu2wsrKjrCqRS2XVYG8/UqgTxfV3UDDJx3Cdg="));*/
 
         CrypterManager manager = new CrypterManager();
-        System.out.println(manager.getAESKey());
-        manager.initKeyPair(2048);
+        manager.setKeyPair(4096 );
         manager.setRemotePublicKey(manager.getPublicKey());
-        String encryptedData = manager.encryptRSA("kp6/RLEGSxZMpGdKcwk6kxEoMYZFmQ22fJWIE/w1t9g=kp6/RLEGSxZMpGdKcwk6kxEoMYZFmQ22fJWIE/w1t9g=");
-        System.out.println(encryptedData);
-        System.out.println(manager.decryptRSA(encryptedData));
+        String dataToEncrypt = new AESencryptionKeysPacket(manager.getAESKey(),manager.getBase64IV(),manager.getAESKey(),manager.getBase64IV()).toJSON();
+        System.out.println(dataToEncrypt);
+        //dataToEncrypt = Base64.getEncoder().encodeToString(dataToEncrypt.getBytes());
+        System.out.println(manager.encryptRSA(dataToEncrypt));
 
     }
 }
