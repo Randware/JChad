@@ -142,13 +142,6 @@ public class CrypterUtil {
         return new String(bytes);
     }
 
-    /**
-     * Checks is the given string can be {@link Base64 Base64} encoded
-     * @param stringToTest The String that gets tested
-     * @return returns <b>true</b> if the provided string is decodable in base64
-     */
-    public static boolean isBase64(String stringToTest) {
-        return Pattern.matches(stringToTest, "^[A-Za-z0-9+/\\r\\n]+={0,2}$");
-    }
+
 
 }

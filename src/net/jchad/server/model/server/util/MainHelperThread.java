@@ -37,7 +37,7 @@ public class MainHelperThread extends HelperThread {
      * </o>
      */
     public void  start() {
-        getServerThread().getMessageHandler().handleDebug("%s finished the steps steps. The MainHelperThread gets started ".formatted(getServerThread().getRemoteAddress()));
+        getServerThread().getMessageHandler().handleDebug("%s finished the initialization steps. The MainHelperThread gets started ".formatted(getServerThread().getRemoteAddress()));
         writePacket(new ConnectionEstablishedPacket());
         writePacket(ServerInformationResponsePacket.getCurrentServerInfo(getServerThread().getServer()));
         int retries = getRetries();

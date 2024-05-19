@@ -9,6 +9,7 @@ import net.jchad.shared.cryptography.CrypterManager;
 import net.jchad.shared.cryptography.CrypterUtil;
 import net.jchad.shared.cryptography.ImpossibleConversionException;
 import net.jchad.shared.cryptography.keys.CrypterKey;
+import net.jchad.shared.networking.packets.InvalidPacket;
 import net.jchad.shared.networking.packets.defaults.BannedPacket;
 import net.jchad.shared.networking.packets.defaults.ConnectionClosedPacket;
 import net.jchad.shared.networking.packets.defaults.NotWhitelistedPacket;
@@ -188,12 +189,34 @@ public class ServerThread implements Runnable{
         }
     }
 
+    /**
+     * This methode gets the next data in the {@link InputStream}
+     * If the CommunicationEncryption is enabled the data will get decrypted.
+     * @return The (decrypted) data from the {@link InputStream}
+     */
     public String next() {
         try {
             String nextData = scanner.nextLine();
             if (communicationsAESkey != null && server.getConfig().getServerSettings().isEncryptCommunications()) {
                 crypterManager.setAESkey(communicationsAESkey);
                 crypterManager.setIV(communicationsIV);
+                int retries = server.getConfig().getInternalSettings().getRetriesOnInvalidPackets();
+                for (int fails = 0; fails <= retries; fails++) {
+
+                        try {
+                            return crypterManager.decryptAES(nextData);
+                        } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException
+                                 | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException | ImpossibleConversionException e) {
+                            if (retries <= fails) {
+                                messageHandler.handleDebug("An error occurred while decrypting the received data from %s. The connection gets terminated immediately".formatted(remoteAddress), e);
+                                close( "An error occurred while decrypting the received data. Error: " + e.getMessage());
+                                break;
+                            } else {
+                                messageHandler.handleDebug("An error occurred while decrypting the received data from %s. The connection gets terminated after %d more failed attempt(s)".formatted(remoteAddress, retries - fails), e);
+                                write(new InvalidPacket(null, "An error occurred while decrypting the received data. Error: " + e.getMessage()).toJSON());
+                            }
+                        }
+                }
                 return null;
             } else {
                 return nextData;
@@ -206,7 +229,12 @@ public class ServerThread implements Runnable{
         }
     }
 
-
+    /**
+     * This methode writes the data to the {@link ServerThread#printWriter}
+     * If CommunicationEncryption is enabled
+     * and {@link ServerThread#communicationsAESkey} is set all outgoing data gets encrypted automatically
+     * @param data The data that gets send to the client
+     */
     public void write(String data) {
         if (communicationsAESkey != null && server.getConfig().getServerSettings().isEncryptCommunications()) {
             crypterManager.setAESkey(communicationsAESkey);
@@ -218,6 +246,7 @@ public class ServerThread implements Runnable{
             } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException |
                      NoSuchAlgorithmException | BadPaddingException | ImpossibleConversionException | InvalidKeyException ignore) {
                 close("An unsuspected error occurred while decrypting the input data");
+                messageHandler.handleDebug("An unknown exception occurred while encrypting data that gets send to the client", ignore);
             }
         } else {
             printWriter.println(data);
@@ -296,5 +325,7 @@ public class ServerThread implements Runnable{
         return communicationsIV;
     }
 
-
+    public CrypterManager getCrypterManager() {
+        return crypterManager;
+    }
 }
