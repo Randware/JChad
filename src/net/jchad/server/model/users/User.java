@@ -160,7 +160,6 @@ public class User {
     public int sendMessage(ClientMessagePacket messagePacket) {
         return sendMessage(new ServerMessagePacket(
                 messagePacket.getMessage(),
-                messagePacket.getEncrypted(),
                 messagePacket.getChat(),
                 getUsername(),
                 System.currentTimeMillis()
