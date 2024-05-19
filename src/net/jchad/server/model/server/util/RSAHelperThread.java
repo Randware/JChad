@@ -28,8 +28,7 @@ public class RSAHelperThread extends HelperThread{
         writePacket(new RSAkeyPacket(crypterManager.getPublicKey()));
         RSAkeyPacket remotePublicRSA = readJSON(RSAkeyPacket.class, PacketType.RSA_KEY_EXCHANGE);
         crypterManager.setRemotePublicKey(remotePublicRSA.getPublic_key());
-        writePacket(new KeyExchangeEndPacket());
-        getServerThread().getMessageHandler().handleDebug("Public RSA keys got exchanged successfully %s".formatted(getServerThread().getRemoteAddress()));
+        getServerThread().getMessageHandler().handleDebug("Public RSA keys got exchanged successfully with %s".formatted(getServerThread().getRemoteAddress()));
         return this;
     }
 
@@ -43,7 +42,6 @@ public class RSAHelperThread extends HelperThread{
 
         try {
             Base64.Encoder encoder = Base64.getEncoder();
-            System.out.println(messageAESkey + ":" + encoder.encodeToString(getServerThread().getMessageIV()));
             String aesKeys = new AESencryptionKeysPacket(messageAESkey, encoder.encodeToString(getServerThread().getMessageIV()),
                     communicationAESkey, encoder.encodeToString(getServerThread().getCommunicationsIV())).toJSON();
             String encryptedAesKeys = crypterManager.encryptRSA(aesKeys); //Format: AES_KEY:IV
@@ -53,7 +51,7 @@ public class RSAHelperThread extends HelperThread{
             writePacket(new RSAkeyErrorPacket("An unsuspected error occurred"));
             getServerThread().close("An unknown error occurred while trying to encrypt data with the client provided RSA key");
         } catch (IllegalBlockSizeException e) {
-            getServerThread().getMessageHandler().handleDebug("The client provide RSA key is to short (The key size has to be 4096)", e);
+            getServerThread().getMessageHandler().handleDebug("The client provide RSA key is to short (The key size has to be 4096) or invalid", e);
             writePacket(new RSAkeyErrorPacket("Data could not be encrypted, because the RSA key is to short. Make sure that the key size is 4096"));
             getServerThread().close("Data could not be encrypted, because the client provided RSA key is to short");
         } catch (InvalidKeyException e) {
@@ -64,6 +62,7 @@ public class RSAHelperThread extends HelperThread{
 
         getServerThread().setMessageAESkey(messageAESkey);
         getServerThread().setCommunicationsAESkey(communicationAESkey);
+        writePacket(new KeyExchangeEndPacket());
         return this;
     }
 }

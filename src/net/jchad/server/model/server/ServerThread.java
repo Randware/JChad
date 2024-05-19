@@ -190,8 +190,15 @@ public class ServerThread implements Runnable{
 
     public String next() {
         try {
+            String nextData = scanner.nextLine();
+            if (communicationsAESkey != null && server.getConfig().getServerSettings().isEncryptCommunications()) {
+                crypterManager.setAESkey(communicationsAESkey);
+                crypterManager.setIV(communicationsIV);
+                return null;
+            } else {
+                return nextData;
+            }
 
-            return scanner.nextLine();
         } catch (NoSuchElementException ignore) {
             //The Connection was probably closed
             //therefor no more elements where found
