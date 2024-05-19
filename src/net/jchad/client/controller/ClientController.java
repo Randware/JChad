@@ -43,6 +43,25 @@ public class ClientController {
     }
 
     /**
+     * Send the specified string as a message into the current channel
+     *
+     * @param message the message string that should be sent.
+     */
+    public void sendMessage(String message) {
+        client.sendMessageString(message);
+    }
+
+    /**
+     * This method should be called when the user opens a new chat. It will send all messages for
+     * the specified {@link ClientChat} to the view, so it can display them.
+     *
+     * @param chat the {@link ClientChat} that was opened by the user.
+     */
+    public void setCurrentChat(ClientChat chat) {
+        client.setCurrentChat(chat);
+    }
+
+    /**
      * Returns all {@link ClientChatMessage} instances from this specific chat.
      * <br>
      * <br>
