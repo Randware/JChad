@@ -5,18 +5,25 @@ which then handles messages based on their types */
 public interface ViewCallback {
     /**
      * When a fatal error occurs, the connection to the server can't be kept upright.
+     * When this method is called, a prompt should be displayed with the exception message.
+     * It should also be made clear to the user, that the connection was closed.
+     *
      * @param e the exception that occurred
      */
     void handleFatalError(Exception e);
 
     /**
-     * This error is non-fatal, but should be displayed and acknowledged.
+     * This error is non-fatal, but should be acknowledged.
+     * When this method is called, a prompt should be displayed with the exception message.
+     *
      * @param e the exception that occurred
      */
     void handleError(Exception e);
 
     /**
      * A warning should only be displayed in a debugging context, but can be ignored.
+     *
+     * (Maybe create a separate window that displays these messages?)
      *
      * @param warning the warning provided
      */
@@ -25,6 +32,7 @@ public interface ViewCallback {
     /**
      * The information should only be display in a debugging context.
      *
+     * (Maybe create a separate window that displays these messages?)
      * @param info the information provided
      */
     void handleInfo(String info);

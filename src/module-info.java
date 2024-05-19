@@ -35,5 +35,7 @@ module net.jchad {
     opens net.jchad.shared.networking.packets.encryption to com.google.gson;
     opens net.jchad.shared.networking.packets.messages to com.google.gson;
     opens net.jchad.shared.networking.packets.defaults to com.google.gson;
+    opens net.jchad.client.model.client.config to com.google.gson;
+    opens net.jchad.client.model.store.connection to com.google.gson;
     opens net.jchad.client.model.client.testing to javafx.fxml;
 }

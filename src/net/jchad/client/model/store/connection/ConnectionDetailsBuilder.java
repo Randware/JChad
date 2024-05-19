@@ -7,7 +7,7 @@ public class ConnectionDetailsBuilder {
     private final ConnectionDetails details;
 
     public ConnectionDetailsBuilder() {
-        details = new ConnectionDetails(null, 0, null, null);
+        details = new ConnectionDetails(null, null, 0, null, null);
     }
 
     public ConnectionDetailsBuilder addConnectionName(String connectionName) {
