@@ -1,5 +1,6 @@
 package net.jchad.shared.cryptography;
 
+import net.jchad.shared.cryptography.keys.CrypterKey;
 import net.jchad.shared.networking.packets.encryption.AESencryptionKeysPacket;
 
 import javax.crypto.BadPaddingException;
@@ -54,7 +55,8 @@ public class CrypterTest {
         System.out.println(crypterManager.decryptRSA("YEBpS0vsOqEHcQwDiYpgupZgcDZlF0p21N05xZfWPSOCQqZoUM7UuCUHE8N5fv8i9IkZKkA1+Q25TRiZiBLSTepYWKXQSCXZdjyOspHTBg61uD6ZpoWQxEJXbCzAwHTAhPRf9dMu2wsrKjrCqRS2XVYG8/UqgTxfV3UDDJx3Cdg="));*/
 
         CrypterManager manager = new CrypterManager();
-        manager.setKeyPair(4096 );
+        manager.setKeyPair(4096);
+        CrypterKey.getAESKey();
         manager.setRemotePublicKey(manager.getPublicKey());
         String dataToEncrypt = new AESencryptionKeysPacket(manager.getAESKey(),manager.getBase64IV(),manager.getAESKey(),manager.getBase64IV()).toJSON();
         System.out.println(dataToEncrypt);

@@ -45,6 +45,8 @@ public class InternalSettings {
      */
     private int passwordAttempts = 3;
 
+
+
     /**
      * This regex checks if the wanted username (from the client) is valid.
      * It gives control on what the usernames should look like.

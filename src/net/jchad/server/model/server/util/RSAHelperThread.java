@@ -25,7 +25,7 @@ public class RSAHelperThread extends HelperThread{
     public RSAHelperThread exchangeRSAKeys() {
         getServerThread().getMessageHandler().handleDebug("Trying to exchange public RSA keys with %s".formatted(getServerThread().getRemoteAddress()));
         writePacket(new KeyExchangeStartPacket());
-        writePacket(new RSAkeyPacket(crypterManager.getPublicKey()));
+        //writePacket(new RSAkeyPacket(crypterManager.getPublicKey())); //Server's public key is never needed
         RSAkeyPacket remotePublicRSA = readJSON(RSAkeyPacket.class, PacketType.RSA_KEY_EXCHANGE);
         crypterManager.setRemotePublicKey(remotePublicRSA.getPublic_key());
         getServerThread().getMessageHandler().handleDebug("Public RSA keys got exchanged successfully with %s".formatted(getServerThread().getRemoteAddress()));

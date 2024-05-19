@@ -483,10 +483,15 @@ public class CrypterManager {
      * @return returns 'false' if the given vector was not base64 encoded
      *         returns 'true'  if the given vector was base64 encoded
      */
-    public boolean setBase64IV(String base64EncodedIv) {
-        boolean valid = CrypterUtil.isBase64(base64EncodedIv);
-        if (valid) this.iv = base64EncodedIv;
-        return valid;
+    public CrypterManager setBase64IV(String base64EncodedIv) throws ImpossibleConversionException {
+        try {
+            Base64.getDecoder().decode(base64EncodedIv);
+        } catch (Exception e) {
+            throw new ImpossibleConversionException(e);
+        }
+        this.iv = base64EncodedIv;
+
+        return this;
     }
 
     /**
@@ -513,7 +518,7 @@ public class CrypterManager {
      * Sets the secret key to a valid one instead of null
      * @return If the aes key gets initialized this returns 'true', otherwise this will return 'false'
      */
-    public boolean initAESKey() {
+    private boolean initAESKey() {
         return initAESKey(KeyUnit.DEFAULT);
     }
 

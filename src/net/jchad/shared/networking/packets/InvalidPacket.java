@@ -3,10 +3,10 @@ package net.jchad.shared.networking.packets;
 public class InvalidPacket implements Packet{
     private final PacketType packet_type = PacketType.INVALID;
 
-
+    @IgnoreValidation
     private final PacketType required_packet_type;
 
-    @IgnoreValidation
+
     private final String message;
 
     public InvalidPacket(PacketType required_packet_type, String message) {
