@@ -7,8 +7,8 @@ public final class ServerMessagePacket extends MessagePacket {
     private String username;
     private final Long timestamp;
 
-    public ServerMessagePacket(String message, boolean encrypted, String chat, String username, long timestamp) {
-        super(PacketType.SERVER_MESSAGE, message, encrypted, chat);
+    public ServerMessagePacket(String message, String chat, String username, long timestamp) {
+        super(PacketType.SERVER_MESSAGE, message,  chat);
         this.username = username;
         this.timestamp = timestamp;
 
