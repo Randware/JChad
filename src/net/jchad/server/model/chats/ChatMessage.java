@@ -87,7 +87,7 @@ public class ChatMessage {
      * @param messagePacket The packet that get converted to a {@link ChatMessage}
      * @return a {@link ChatMessage} with the values from the {@link ServerMessagePacket}
      */
-    public static ChatMessage fromMessagePacket(ServerMessagePacket messagePacket) {
-        return new ChatMessage(messagePacket.getChat(), messagePacket.getTimestamp(), messagePacket.getUsername(), messagePacket.getIp());
+    public static ChatMessage fromMessagePacket(ServerMessagePacket messagePacket, String senderIP) {
+        return new ChatMessage(messagePacket.getChat(), messagePacket.getTimestamp(), messagePacket.getUsername(), senderIP);
     }
 }

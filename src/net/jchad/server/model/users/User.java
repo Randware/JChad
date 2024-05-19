@@ -163,8 +163,7 @@ public class User {
                 messagePacket.getEncrypted(),
                 messagePacket.getChat(),
                 getUsername(),
-                System.currentTimeMillis(),
-                connection.getRemoteAddress()
+                System.currentTimeMillis()
         ));
     }
 
@@ -187,7 +186,7 @@ public class User {
         if (messagePacket.getUsername() == null) messagePacket.setUsername(this.getUsername());
         if (!messagePacket.isValid()) {return 0;}
         Chat chat = connection.getServer().getChatManager().getChat(messagePacket.getChat());
-        ChatMessage chatMessage = ChatMessage.fromMessagePacket(messagePacket);
+        ChatMessage chatMessage = ChatMessage.fromMessagePacket(messagePacket, connection.getRemoteAddress());
         if (chat == null) {
             connection.getMessageHandler().handleDebug("%s tried to send a message to a chat that does not exist".formatted(getConnection().getRemoteAddress()));
             return 0;

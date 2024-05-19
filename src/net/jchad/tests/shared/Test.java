@@ -15,7 +15,7 @@ public class Test {
     public static void main(String[] args) throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
        // User user = new User("Test user", null, );
         CrypterManager crypterManager = new CrypterManager();
-        crypterManager.setKeyPair(2048);
+        crypterManager.setKeyPair(4096);
         String privateKey = crypterManager.getPrivateKey();
         String publicKey = crypterManager.getPublicKey();
         crypterManager.setRemotePublicKey(crypterManager.getPublicKey());

@@ -6,13 +6,12 @@ public final class ServerMessagePacket extends MessagePacket {
 
     private String username;
     private final Long timestamp;
-    private final String ip;
 
-    public ServerMessagePacket(String message, boolean encrypted, String chat, String username, long timestamp, String ip) {
+    public ServerMessagePacket(String message, boolean encrypted, String chat, String username, long timestamp) {
         super(PacketType.SERVER_MESSAGE, message, encrypted, chat);
         this.username = username;
         this.timestamp = timestamp;
-        this.ip = ip;
+
     }
 
     public void setUsername(String username) {
@@ -27,7 +26,4 @@ public final class ServerMessagePacket extends MessagePacket {
         return timestamp;
     }
 
-    public String getIp() {
-        return ip;
-    }
 }
