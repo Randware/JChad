@@ -16,6 +16,8 @@ import net.jchad.shared.networking.packets.messages.JoinChatRequestPacket;
 import net.jchad.shared.networking.packets.messages.JoinChatResponsePacket;
 import net.jchad.shared.networking.packets.messages.MessageStatusPacket;
 
+import java.util.List;
+
 /**
  * This is the main helper thread that gets used when everything is initialized
  */
@@ -53,7 +55,19 @@ public class MainHelperThread extends HelperThread {
                 ClientMessagePacket clientMessage = getServerThread().getGson().fromJson(element, ClientMessagePacket.class);
                 if (clientMessage != null && clientMessage.isValid()) {
                     if (getServerThread().getServer().getChatManager().chatExists(clientMessage.getChat())) {
-                        getServerThread().getUser().sendMessage(clientMessage);
+                        if (getServerThread().isEncryptMessages() && getServerThread().getMessageAESkey() != null) {
+                            try {
+
+                                ClientMessagePacket decryptedClientMessage = new ClientMessagePacket(getServerThread().getCrypterManager().decryptAES(clientMessage.getMessage()), clientMessage.getChat());
+                                getServerThread().getUser().sendMessage(decryptedClientMessage);
+                            } catch (Exception e) {
+                                throw new InvalidPacketException("An error occurred while decrypting the received message", e);
+                            }
+
+                        } else {
+                            getServerThread().getUser().sendMessage(clientMessage);
+                        }
+
                         writePacket(new MessageStatusPacket(MessageStatusPacket.Status.SUCCESS, "The message was send successfully"));
                         failedAttempts--;
                     } else {
@@ -92,7 +106,7 @@ public class MainHelperThread extends HelperThread {
 
                     //If none of the above matched, the given packet is invalid.
                     throw new InvalidPacketException("The packet that the client sent was not recognized");
-            } catch (JsonSyntaxException | InvalidPacketException e) {
+            }  catch (JsonSyntaxException | InvalidPacketException e) {
                 if (failedAttempts >= retries) {
                     getServerThread().getMessageHandler().handleDebug("%s sent to many invalid packets. The connection get terminated now!".formatted(getServerThread().getRemoteAddress()));
                     getServerThread().close("The client exceeded the invalid packets limit. " +
@@ -100,7 +114,8 @@ public class MainHelperThread extends HelperThread {
                     break;
                 } else {
                     getServerThread().getMessageHandler().handleDebug("%s sent to many invalid packets. The connection gets terminated if the server receives %d more invalid packet(s)".formatted(getServerThread().getRemoteAddress(), retries - failedAttempts));
-                    writePacket(new InvalidPacket(PacketType.CLIENT_MESSAGE, "The provided packet was not valid. " +
+                    writePacket(new InvalidPacket(List.of(PacketType.CLIENT_MESSAGE, PacketType.LOAD_CHAT, PacketType.CONNECTION_CLOSED, PacketType.SERVER_INFORMATION)
+                            , "The provided packet was not valid. " +
                             e.getMessage()));
                 }
             } catch (InterruptedException e) {

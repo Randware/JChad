@@ -38,7 +38,6 @@ public final class MainSocket implements Runnable{
         if (1024 > port || port > 49151) messageHandler.handleWarning("Server-Port is outside of the User ports! Refer to https://en.wikipedia.org/wiki/Registered_port");
         this.port = port;
         executor = Executors.newVirtualThreadPerTaskExecutor();
-
     }
 
 
