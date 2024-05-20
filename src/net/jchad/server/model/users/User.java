@@ -85,7 +85,7 @@ public class User {
         }
 
         if (!username.matches(connection.getServer().getConfig().getInternalSettings().getUsernameRegex())) {
-            throw new UsernameInvalidException(connection.getServer().getConfig().getInternalSettings().getUsernameRegexDescription());
+            throw new UsernameInvalidException(connection.getServer().getConfig().getInternalSettings().getUsernameRegexDescription() ,username);
         }
         boolean usernameExists = false;
         Collection<User> checkWithUsers = users.values();
