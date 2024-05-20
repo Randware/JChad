@@ -57,7 +57,6 @@ Public: MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAzYjE0Cx46blikHJYs2wKXdWatMTE
                     while ((response = in.readLine()) != null) {
                         if (keysExchanged) {
                             try {
-                                //TODO fix ImppossibleConversionException
                                 System.out.println("Server response: " + crypterManager.decryptAES(response));
                             } catch (InvalidAlgorithmParameterException e) {
                                 throw new RuntimeException(e);
@@ -72,6 +71,7 @@ Public: MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAzYjE0Cx46blikHJYs2wKXdWatMTE
                             } catch (InvalidKeyException e) {
                                 throw new RuntimeException(e);
                             } catch (ImpossibleConversionException e) {
+                                System.out.println(response);
                                 throw new RuntimeException(e);
                             }
                         } else {
@@ -111,13 +111,15 @@ Public: MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAzYjE0Cx46blikHJYs2wKXdWatMTE
             Scanner scanner = new Scanner(System.in);
 
             out.println("{\"packet_type\":\"RSA_KEY_EXCHANGE\",\"public_key\":\"MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAzYjE0Cx46blikHJYs2wKXdWatMTEomVIwq+gmrvKuMr32yvm+ZBJYFHTOF+wN0FWs5dsenjJEiKHl0q23AlWCbgvDo3iEHxuXHl5NkAdMKNEynHYQ+dy5sCMG4p4+7xaKIUjswtUAxkrwkaL7Ug61Da3xdfjKE6c/Kfj2qeE7igs12Ow63KlgtX/x9I5YJw0AtvXpItHqy1fqM/1vGu+Uno16ymkgr9HzBgsVpAUbLafheqRF1z97ca+lZ6o1ELZIbG9EVPVDl0zlN+nfzvsdlaR6WU6JNS0Q8H4h3vJayrorXkcLaJi43zNczhmCzuit9C3JCiBrN+NsGrETx/SzGV6qUTHi+8S3LgmrhhWfleZAhqiSjKRu5p43haKcJ4b0ueZS3MrdJqTH9xLE1xjETAfndSSPRYVt3mOW2bXbntAe6d1LYN73dAB5FILhFftBhwAzOQvR88Kqf5OLBC2lCSJNxc/2PdHgUWkwRAEzPhrvz5p1xFB+3Er5Pg60ZF3FpcIzInAU8mrLGTZ88SoaEEWhb4XpwzyhwpeAqvYf5EW2DxQqxqK3Cidz9Ahc2RFmhNDxVZ4yB8fHvPj2SkMckHDgD0qd0gfaTerfVBoQc7zITA0KSD4UbF3mN+q4O53/+cYHvY3ZVBuECfHYDhO6eyyGTECdF8PACTGTQ2ILI0CAwEAAQ\\u003d\\u003d\"}");
-            out.println("{\"password\":\"n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg\\u003d\",\"packet_type\":\"PASSWORD\",\"password_packet_type\":\"PASSWORD_RESPONSE\"}");
-            String randChars= "ascoajhfdodosadojdsKJSÖOJDÖANSGFANFJESFAOKFDAD";
+            Thread.sleep(1000);
+            out.println(crypterManager.encryptAES("{\"password\":\"n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg\\u003d\",\"packet_type\":\"PASSWORD\",\"password_packet_type\":\"PASSWORD_RESPONSE\"}"));
+            String randChars= "abcdefghijklmnopQRSTUVWXYZ";
             String username = "";
             for (int i = 0; 6 > i ; i++) {
-                username += new Random().nextInt(0, randChars.length());
+                username += randChars.charAt(new Random().nextInt(0, randChars.length()));
             }
-            out.println("{\"username\":\"" + username + "\",\"packet_type\":\"USERNAME\"}");
+
+            out.println(crypterManager.encryptAES("{\"username\":\"" + username + "\",\"packet_type\":\"USERNAME\"}"));
             // Start sending user input to the server
 
             while (true) {
@@ -143,6 +145,8 @@ Public: MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAzYjE0Cx46blikHJYs2wKXdWatMTE
         } catch (BadPaddingException e) {
             throw new RuntimeException(e);
         } catch (InvalidKeyException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
