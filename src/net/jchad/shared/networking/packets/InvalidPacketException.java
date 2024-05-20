@@ -16,10 +16,10 @@ public class InvalidPacketException extends Exception{
          * Constructs an {@code InvalidPacketException} with the
          * specified detail message.
          *
-         * @param   s   the detail message.
+         * @param   message   the detail message.
          */
-        public InvalidPacketException(String s) {
-            super(s);
+        public InvalidPacketException(String message) {
+            super(message);
         }
 
         /**
