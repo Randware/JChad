@@ -51,7 +51,10 @@ public abstract class HelperThread{
             try {
                 Thread.currentThread().sleep(sleepInterval);
                 returningObject = serverThread.getGson().fromJson(serverThread.next(), returningClassType); //TODO Fix weird scanner behaviour
-                if ( returningObject == null || (validatePacket && !returningObject.isValid())) {
+                if (returningObject == null) {
+                    throw new ConnectionClosedException();
+                }
+                if (validatePacket && !returningObject.isValid()) {
                     throw new InvalidPacketException("The received packet is not valid");
                 } else {
                     break;
@@ -65,6 +68,10 @@ public abstract class HelperThread{
                     serverThread.getMessageHandler().handleDebug("The client sent an invalid packet. The connection gets terminated if the server receives %d more invalid packet(s)".formatted( retries - failedAttempts));
                     writePacket(new InvalidPacket(reuiredPacketType, "The provided packet was not valid"));
                 }
+            } catch (ConnectionClosedException e) {
+                serverThread.getMessageHandler().handleDebug("The connection with %s was lost abruptly".formatted(serverThread.getRemoteAddress()));
+                serverThread.close("Client disconnected abruptly");
+                break;
             } catch (InterruptedException e) {
                 throw new ConnectionClosedException();
                 //Thread got probably closed
