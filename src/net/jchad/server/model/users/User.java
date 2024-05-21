@@ -199,7 +199,22 @@ public class User {
                         connection.getMessageHandler().handleError(new IOException("An IOException occurred while trying to add the message (from %s) to the chat (%s)"
                                 .formatted(connection.getRemoteAddress(), chat.getName()), e));
                     }
-                    user.getConnection().write(messagePacket.toJSON());
+                    if (user.getConnection().isEncryptMessages()) {
+                        user.getConnection().useMessageKey();
+                        try {
+                            ServerMessagePacket encryptedMessagePacket = new ServerMessagePacket(
+                                    user.getConnection().getCrypterManager().encryptAES(messagePacket.getMessage()),
+                                    messagePacket.getChat(),
+                                    messagePacket.getUsername(),
+                                    messagePacket.getTimestamp()
+                            );
+                        } catch (Exception e) {
+                            getConnection().getMessageHandler().handleDebug("An error occurred while encrypting message data for " + user.getConnection().getRemoteAddress());
+                            user.getConnection().close("An error occurred while encrypting message data");
+                        }
+                    } else {
+                        user.getConnection().write(messagePacket.toJSON());
+                    }
                     messagesSent++;
                 }
 

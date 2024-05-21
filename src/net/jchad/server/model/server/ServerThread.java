@@ -8,7 +8,6 @@ import net.jchad.server.model.users.User;
 import net.jchad.shared.cryptography.CrypterManager;
 import net.jchad.shared.cryptography.CrypterUtil;
 import net.jchad.shared.cryptography.ImpossibleConversionException;
-import net.jchad.shared.cryptography.keys.CrypterKey;
 import net.jchad.shared.networking.packets.InvalidPacket;
 import net.jchad.shared.networking.packets.defaults.BannedPacket;
 import net.jchad.shared.networking.packets.defaults.ConnectionClosedPacket;
@@ -24,6 +23,7 @@ import java.net.Socket;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
@@ -44,6 +44,8 @@ public class ServerThread implements Runnable{
     private final byte[] messageIV = CrypterUtil.getRandomByteArr();
     private String communicationsAESkey = null;
     private final byte[] communicationsIV = CrypterUtil.getRandomByteArr();
+    private final boolean encryptMessages;
+    private final boolean encryptCommunication;
 
 
     public ServerThread(Socket socket, MainSocket mainSocket) throws IOException {
@@ -68,7 +70,8 @@ public class ServerThread implements Runnable{
         printWriter = new PrintWriter(new BufferedOutputStream(socket.getOutputStream()));
         bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         scanner = new Scanner(socket.getInputStream());
-
+        encryptMessages = server.getConfig().getServerSettings().isEncryptMessages();
+        encryptCommunication = server.getConfig().getServerSettings().isEncryptCommunications();
     }
 
     public void run() {
@@ -159,25 +162,19 @@ public class ServerThread implements Runnable{
      */
     public void close(String reason, boolean throwException) {
         if (!socket.isClosed()) {
-            printWriter.println(new ConnectionClosedPacket(reason).toJSON());//Sends the client a notification that the connection gets closed
-            printWriter.flush();
+            write(new ConnectionClosedPacket(reason).toJSON());//Sends the client a notification that the connection gets closed
             try {
                 mainSocket.getServerThreadSet(false).remove(this);
                 if (user != null) {
                     User.removeUser(this);
                 }
-                if (printWriter != null) {
-                    printWriter.flush();
-                    printWriter.close();
-                }
-                if (bufferedReader != null) {
-                    bufferedReader.close();
-                }
 
                 if (scanner != null) {
                     scanner.close();
                 }
-                if (socket != null) socket.close();
+                if (socket != null) {
+                    socket.close();
+                };
             } catch (IOException e) {
                 messageHandler.handleError(new IOException("Info while closing connection to [%s]: An unknown error occurred".formatted(remoteAddress),e));
             } finally {
@@ -197,9 +194,8 @@ public class ServerThread implements Runnable{
     public String next() {
         try {
             String nextData = scanner.nextLine();
-            if (communicationsAESkey != null && server.getConfig().getServerSettings().isEncryptCommunications()) {
-                crypterManager.setAESkey(communicationsAESkey);
-                crypterManager.setIV(communicationsIV);
+            if (communicationsAESkey != null && encryptCommunication) {
+                useCommunicationsKey();
                 int retries = server.getConfig().getInternalSettings().getRetriesOnInvalidPackets();
                 for (int fails = 0; fails <= retries; fails++) {
 
@@ -213,7 +209,7 @@ public class ServerThread implements Runnable{
                                 break;
                             } else {
                                 messageHandler.handleDebug("An error occurred while decrypting the received data from %s. The connection gets terminated after %d more failed attempt(s)".formatted(remoteAddress, retries - fails), e);
-                                write(new InvalidPacket(null, "An error occurred while decrypting the received data. Error: " + e.getMessage()).toJSON());
+                                write(new InvalidPacket(List.of(), "An error occurred while decrypting the received data. Error: " + e.getMessage()).toJSON());
                             }
                         }
                 }
@@ -236,9 +232,8 @@ public class ServerThread implements Runnable{
      * @param data The data that gets send to the client
      */
     public void write(String data) {
-        if (communicationsAESkey != null && server.getConfig().getServerSettings().isEncryptCommunications()) {
-            crypterManager.setAESkey(communicationsAESkey);
-            crypterManager.setIV(communicationsIV);
+        if (communicationsAESkey != null && encryptCommunication) {
+            useCommunicationsKey();
             try {
                 data = crypterManager.encryptAES(data);
                 printWriter.println(data);
@@ -255,6 +250,23 @@ public class ServerThread implements Runnable{
 
     }
 
+    /**
+     * This methode sets the {@link ServerThread#crypterManager} keys to the communications aes keys
+     * It also changes the initialization vector
+     */
+    public void useMessageKey() {
+        crypterManager.setAESkey(messageAESkey);
+        crypterManager.setIV(messageIV);
+    }
+
+    /**
+     * This methode sets the {@link ServerThread#crypterManager} keys to the message aes keys
+     * It also changes the initialization vector
+     */
+    public void useCommunicationsKey() {
+        crypterManager.setAESkey(communicationsAESkey);
+        crypterManager.setIV(communicationsIV);
+    }
 
     public MessageHandler getMessageHandler() {
         return messageHandler;
@@ -328,4 +340,14 @@ public class ServerThread implements Runnable{
     public CrypterManager getCrypterManager() {
         return crypterManager;
     }
+
+    public boolean isEncryptMessages() {
+        return encryptMessages;
+    }
+
+    public boolean isEncryptCommunication() {
+        return encryptCommunication;
+    }
+
+
 }
