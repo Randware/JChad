@@ -15,6 +15,8 @@ module net.jchad {
     requires org.jline;
     requires org.fxmisc.richtext;
     requires jdk.unsupported;
+    requires javafx.web;
+
 
 
     opens net.jchad.client to javafx.fxml;
@@ -30,6 +32,7 @@ module net.jchad {
     opens net.jchad.server.model.config.store to com.fasterxml.jackson.databind;
     opens net.jchad.server.model.chats to com.google.gson;
     exports net.jchad.tests.shared;
+    exports net.jchad.client.view;
     opens net.jchad.shared.networking.packets.password to com.google.gson;
     opens net.jchad.shared.networking.packets.username to com.google.gson;
     opens net.jchad.shared.networking.packets.encryption to com.google.gson;
