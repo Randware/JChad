@@ -33,4 +33,6 @@ public class ServerConnection {
     public void closeConnection() {
         // Do everything that must be done in order to properly close the current connection
     }
+
+
 }

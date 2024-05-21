@@ -11,6 +11,9 @@ import java.util.ArrayList;
 
 /**
  * Used for controlling the {@link Client} from the view.
+ *
+ * TODO: Figure out what should happen when a method is called that requires a connection, when
+ *          no connection is present.
  */
 public class ClientController {
     private final Client client;
