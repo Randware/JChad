@@ -58,8 +58,8 @@ public abstract class HelperThread{
                 }
             } catch ( JsonSyntaxException | InvalidPacketException e) {
                 if (failedAttempts >= retries) {
-                    serverThread.getMessageHandler().handleDebug("The client sent an invalid packet. The connection get terminated now!");
-                    serverThread.close("The client sent to many invalid packets");
+                    serverThread.getMessageHandler().handleDebug("The client sent an invalid packet. The connection will get terminated now!");
+                    serverThread.close("The client sent too many invalid packets");
                     break;
                 } else {
                     serverThread.getMessageHandler().handleDebug("The client sent an invalid packet. The connection gets terminated if the server receives %d more invalid packet(s)".formatted( retries - failedAttempts));

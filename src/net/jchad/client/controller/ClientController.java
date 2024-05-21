@@ -34,6 +34,13 @@ public class ClientController {
     }
 
     /**
+     * Disconnect from both the server connecting process and the current connection.
+     */
+    public void disconnect() {
+        client.disconnect();
+    }
+
+    /**
      * This method returns the {@link ClientConfigManager} currently used by the client.
      * The {@link ClientConfigManager} has all sorts of methods to modify the configuration.
      * Use this method if you want to manage saved connections, modify configuration values,

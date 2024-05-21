@@ -1,5 +1,7 @@
 package net.jchad.client.model.client.connection;
 
+import net.jchad.client.model.client.packets.PacketHandler;
+
 import java.io.*;
 import java.util.function.Consumer;
 
@@ -10,21 +12,17 @@ import java.util.function.Consumer;
  * for performance reasons, the package this class returns still needs to possibly be decrypted and
  * deserialized.
  */
-public class ConnectionReader extends Thread {
+public class ConnectionReader extends Thread implements AutoCloseable {
     /**
      * This PrintWriter wraps the {@link InputStream} provided on construction of this object.
      */
     private BufferedReader in;
 
     /**
-     * This callback will be called when the reader has read a new packet string.
+     * This packet handler will be called when a new packet string is read
+     * or an error occurs during the reading of data.
      */
-    private Consumer<String> packetCallback;
-
-    /**
-     * This callback will be called when the runs into an error.
-     */
-    private Consumer<Exception> errorCallback;
+    private PacketHandler handler;
 
     /**
      * Define if the reader should be reading.
@@ -37,14 +35,14 @@ public class ConnectionReader extends Thread {
      * it will call the errorCallback.
      *
      * @param in the {@link InputStream} that should be read.
-     * @param packetCallback the callback that will be provided with the packet string.
-     * @param errorCallback the callback that will be called if an error occurs.
+     * @param handler the {@link PacketHandler} that will be provided with packet strings and
+     *                notified when an error occurs.
      */
-    public ConnectionReader(InputStream in, Consumer<String> packetCallback, Consumer<Exception> errorCallback) {
+    public ConnectionReader(InputStream in, PacketHandler handler) {
         this.in = new BufferedReader(new InputStreamReader(in));
-        this.packetCallback = packetCallback;
-        this.errorCallback = errorCallback;
+        this.handler = handler;
         this.reading = true;
+        start();
     }
 
     @Override
@@ -52,7 +50,9 @@ public class ConnectionReader extends Thread {
         try {
             read();
         } catch (IOException e) {
-            errorCallback.accept(e);
+            if(handler != null) {
+                handler.handlePacketReaderError(e);
+            }
         }
     }
 
@@ -64,9 +64,14 @@ public class ConnectionReader extends Thread {
      */
     private void read() throws IOException {
         while(reading) {
-            if(packetCallback != null) {
-                packetCallback.accept(in.readLine());
+            if(handler != null) {
+                handler.handlePacketString(in.readLine());
             }
         }
+    }
+
+    @Override
+    public void close() throws Exception {
+        in.close();
     }
 }

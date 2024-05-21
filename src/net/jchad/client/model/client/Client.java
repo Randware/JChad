@@ -46,8 +46,13 @@ public class Client {
      */
     public void connect(ConnectionDetails connectionDetails) {
         try {
-            this.currentConnection = serverConnector.connect(connectionDetails);
-        } catch (ClosedConnectionException e) {
+            if(currentConnection != null) {
+                currentConnection.closeConnection();
+            }
+
+            currentConnection = serverConnector.connect(connectionDetails);
+            serverConnector.shutdown();
+        } catch (Exception e) {
             viewCallback.handleFatalError(e);
         }
     }
@@ -57,31 +62,32 @@ public class Client {
      * if there is an ongoing connection process.
      */
     public void disconnect() {
-        currentConnection.closeConnection();
-        serverConnector.stop();
+        try {
+            if(currentConnection != null) {
+                currentConnection.closeConnection();
+            }
+
+            serverConnector.shutdown();
+        } catch (Exception e) {
+            viewCallback.handleFatalError(e);
+        }
 
         currentConnection = null;
-
-
     }
 
     /**
-     * This method converts a simple message string into a complete
-     * {@link ClientChatMessage} and then adds it to the messages like
-     * any other message. This is method is used to easily send messages from
-     * the view.
-     * <p>
-     * TODO: Send this chat message to the server in addition to adding it to its local chat messages
+     * This method hands the specified message string to the currentConnection,
+     * so it will be sent to the server. It also adds the chat message to the chat.
      *
-     * @param messageString the message string which
+     * @param messageString the message string which should be sent.
      */
     public void sendMessageString(String messageString) {
-        /*
-        ClientChatMessage message = new ClientChatMessage(messageString);
-        message.setOwn(true);
+        if(currentConnection != null) {
+            ClientChatMessage message = currentConnection.sendMessage(messageString, currentChat);
+            message.setOwn(true);
 
-        addMessage(currentChat, message);
-        */
+            addMessage(currentChat, message);
+        }
     }
 
     /**

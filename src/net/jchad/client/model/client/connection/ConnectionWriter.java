@@ -6,15 +6,14 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 
 /**
- * This class is responsible for sending packets to the server. Because this class
- * should not handle the encryption process for performance reasons, it will only send
- * the serialized packet string to the server, not serialize it itself.
+ * This class is responsible for sending packets to the server. It also handles the encryption and
+ * serialization process.
  */
-public class ConnectionWriter extends Thread {
+public class ConnectionWriter extends Thread implements AutoCloseable {
     /**
      * This PrintWriter wraps the {@link OutputStream} provided on construction of this object.
      */
-    private PrintWriter out;
+    private final PrintWriter out;
 
     public ConnectionWriter(OutputStream out) {
         this.out = new PrintWriter(out, true);
@@ -23,12 +22,17 @@ public class ConnectionWriter extends Thread {
     }
 
     /**
-     * This method will write a serialized and possibly encrypted {@link Packet} string
-     * into the {@link OutputStream} previously provided to this ConnectionWriter.
+     * This method will serialize and encrypt the specified {@link Packet}. After that
+     * it will be sent to the server.
      *
-     * @param packetString the serialized and possibly encrypted {@link Packet} string.
+     * @param packet the {@link Packet} which will be serialized and encrypted and sent to the server.
      */
-    public void writePacketString(String packetString) {
-        out.println(packetString);
+    public void sendPacket(Packet packet) {
+        out.println(packet);
+    }
+
+    @Override
+    public void close() throws Exception {
+        out.close();
     }
 }

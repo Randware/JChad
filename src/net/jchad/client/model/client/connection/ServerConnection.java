@@ -1,15 +1,25 @@
 package net.jchad.client.model.client.connection;
 
 import net.jchad.client.model.client.ViewCallback;
+import net.jchad.client.model.client.packets.PacketHandler;
+import net.jchad.client.model.store.chat.ClientChat;
+import net.jchad.client.model.store.chat.ClientChatMessage;
+import net.jchad.client.model.store.connection.ConnectionDetails;
+import net.jchad.shared.networking.packets.Packet;
+import net.jchad.shared.networking.packets.messages.ClientMessagePacket;
 
 /**
  * This class represents an active connection to a server. It will do things such
  * as informing the front end of new display information, handle the Threads responsible
  * for reading from and writing to the server, manage the decryption and deserialization process
  * and execute the code responsible for a specific packet type.
+ *
+ * TODO: Implement proper closing functionality
  */
-public class ServerConnection {
+public final class ServerConnection extends Thread implements PacketHandler {
     private final ViewCallback viewCallback;
+
+    private final ConnectionDetails connectionDetails;
 
     /**
      * The {@link ConnectionWriter} which will be used to send data to the server.
@@ -21,18 +31,52 @@ public class ServerConnection {
      */
     private ConnectionReader connectionReader;
 
-    public ServerConnection(ViewCallback viewCallback, ConnectionWriter connectionWriter, ConnectionReader connectionReader) {
+    public ServerConnection(ViewCallback viewCallback, ConnectionDetails connectionDetails, ConnectionWriter connectionWriter, ConnectionReader connectionReader) {
         this.viewCallback = viewCallback;
+        this.connectionDetails = connectionDetails;
         this.connectionWriter = connectionWriter;
         this.connectionReader = connectionReader;
     }
 
     /**
-     * Stop any currently running processes and also close all Streams.
+     * Stop any currently running processes and also close all streams.
      */
     public void closeConnection() {
         // Do everything that must be done in order to properly close the current connection
     }
 
+    /**
+     * This method converts the specified message content and message chat into a {@link ClientChatMessage}.
+     * It will be sent to the server and then returned.
+     *
+     * @param messageContent the content of the message.
+     * @param chat the {@link ClientChat} this message was sent in.
+     * @return the converted and sent {@link ClientChatMessage}
+     */
+    public ClientChatMessage sendMessage(String messageContent, ClientChat chat) {
+        ClientChatMessage message = new ClientChatMessage(chat.getName(), messageContent, connectionDetails.getUsername(), System.currentTimeMillis());
 
+        connectionWriter.sendPacket(new ClientMessagePacket(messageContent, chat.getName()));
+
+        return message;
+    }
+
+    @Override
+    public void handlePacketString(String string) {
+        /**
+         * Check if encryption is enabled -> if yes decrypt string
+         * Convert string into packet object
+         * PacketMapper.executePacket(packet, this);
+         */
+    }
+
+    @Override
+    public void handlePacketReaderError(Exception e) {
+        viewCallback.handleError(e);
+    }
+
+    @Override
+    public void disposePacket(Packet packet) {
+        viewCallback.handleWarning("Disposing undefined packet: " + packet.toString());
+    }
 }
