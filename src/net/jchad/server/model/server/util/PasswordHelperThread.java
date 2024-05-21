@@ -25,7 +25,7 @@ public class PasswordHelperThread extends HelperThread {
         writePacket(new PasswordRequestPacket());
         for (int failedAttempts = 0; failedAttempts < passwordAttempts; failedAttempts++) {
             try {
-                PasswordResponsePacket passwordPacket = readJSON(PasswordResponsePacket.class, PacketType.PASSWORD);
+                PasswordResponsePacket passwordPacket = readJSON(PasswordResponsePacket.class, PacketType.PASSWORD_RESPONSE);
 
                 if (passwordPacket.getPassword().length() != 44) {
                     //You may wonder: Why 44?

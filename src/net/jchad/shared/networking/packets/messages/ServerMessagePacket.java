@@ -1,14 +1,19 @@
 package net.jchad.shared.networking.packets.messages;
 
+import net.jchad.shared.networking.packets.Packet;
 import net.jchad.shared.networking.packets.PacketType;
 
-public final class ServerMessagePacket extends MessagePacket {
+public final class ServerMessagePacket implements Packet {
 
+    private final PacketType packet_type = PacketType.SERVER_MESSAGE;
+    private final String message;
+    private final String chat;
     private String username;
     private final Long timestamp;
 
     public ServerMessagePacket(String message, String chat, String username, long timestamp) {
-        super(PacketType.SERVER_MESSAGE, message,  chat);
+        this.message = message;
+        this.chat = chat;
         this.username = username;
         this.timestamp = timestamp;
 
@@ -26,4 +31,11 @@ public final class ServerMessagePacket extends MessagePacket {
         return timestamp;
     }
 
+    public String getMessage() {
+        return message;
+    }
+
+    public String getChat() {
+        return chat;
+    }
 }

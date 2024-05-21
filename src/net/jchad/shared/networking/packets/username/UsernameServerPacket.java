@@ -1,6 +1,10 @@
 package net.jchad.shared.networking.packets.username;
 
-public class UsernameServerPacket extends UsernamePacket {
+import net.jchad.shared.networking.packets.Packet;
+import net.jchad.shared.networking.packets.PacketType;
+
+public class UsernameServerPacket implements Packet {
+    private final PacketType packet_type = PacketType.USERNAME_SERVER;
     private final UsernameResponseType username_response_type;
     private final String username_response_reason;
 

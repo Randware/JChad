@@ -1,24 +1,47 @@
 package net.jchad.shared.networking.packets;
 
-public enum PacketType {
-    BANNED ,
-    NOT_WHITELISTED,
-    CONNECTION_CLOSED,
-    AES_ENCRYPTION_KEYS,
-    RSA_KEY_EXCHANGE,
-    KEY_EXCHANGE_START,
-    RSA_KEY_ERROR,
-    KEY_EXCHANGE_END,
-    SERVER_INFORMATION, //The SERVER_INFORMATION packet provides information to the client
-    INVALID,
-    CLIENT_MESSAGE, //This is the message packet that the client sends to the server
-    SERVER_MESSAGE,
-    STATUS_MESSAGE, //This is the message packet that the server uses internally and sends to all clients. It has additional information.
-    USERNAME,
-    PASSWORD,
-    LOAD_CHAT,
-    CONNECTION_ESTABLISHED;
+import net.jchad.shared.networking.packets.defaults.*;
+import net.jchad.shared.networking.packets.encryption.*;
+import net.jchad.shared.networking.packets.messages.*;
+import net.jchad.shared.networking.packets.password.PasswordFailedPacket;
+import net.jchad.shared.networking.packets.password.PasswordRequestPacket;
+import net.jchad.shared.networking.packets.password.PasswordResponsePacket;
+import net.jchad.shared.networking.packets.password.PasswordSuccessPacket;
+import net.jchad.shared.networking.packets.username.UsernameClientPacket;
+import net.jchad.shared.networking.packets.username.UsernameServerPacket;
 
+public enum PacketType {
+    BANNED(BannedPacket.class),
+    NOT_WHITELISTED(NotWhitelistedPacket.class),
+    CONNECTION_CLOSED(ConnectionClosedPacket.class),
+    CONNECTION_ESTABLISHED(ConnectionEstablishedPacket.class),
+    AES_ENCRYPTION_KEYS(AESencryptionKeysPacket.class),
+    RSA_KEY_EXCHANGE(RSAkeyPacket.class),
+    KEY_EXCHANGE_START(KeyExchangeStartPacket.class),
+    RSA_KEY_ERROR(RSAkeyErrorPacket.class),
+    KEY_EXCHANGE_END(KeyExchangeEndPacket.class),
+    SERVER_INFORMATION_RESPONSE(ServerInformationResponsePacket.class), //The SERVER_INFORMATION packet provides information to the client
+    SERVER_INFORMATION_REQUEST(ServerInformationRequestPacket.class),
+    INVALID(InvalidPacket.class),
+    CLIENT_MESSAGE(ClientMessagePacket.class), //This is the message packet that the client sends to the server
+    SERVER_MESSAGE(ServerMessagePacket.class),
+    STATUS_MESSAGE_SUCCESS(MessageStatusSuccessPacket.class),
+    STATUS_MESSAGE_FAILED(MessageStatusFailedPacket.class),//This is the message packet that the server uses internally and sends to all clients. It has additional information.
+    USERNAME_SERVER(UsernameServerPacket.class),
+    USERNAME_CLIENT(UsernameClientPacket.class),
+    PASSWORD_REQUEST(PasswordRequestPacket.class),
+    PASSWORD_RESPONSE(PasswordResponsePacket.class),
+    PASSWORD_SUCCESS(PasswordSuccessPacket.class),
+    PASSWORD_FAILED(PasswordFailedPacket.class),
+    JOIN_CHAT_REQUEST(JoinChatRequestPacket.class),
+    JOIN_CHAT_RESPONSE(JoinChatResponsePacket.class);
+
+
+    private final Class<? extends Packet> associatedPacket;
+
+    PacketType(Class<? extends Packet> associatedPacket) {
+        this.associatedPacket = associatedPacket;
+    }
 
 
     /**
@@ -43,5 +66,7 @@ public enum PacketType {
         return valueOf(readableStringOfEnum.replace(" ", "_").toUpperCase());
     }
 
-
+    public Class<? extends Packet> getAssociatedPacket() {
+        return associatedPacket;
+    }
 }

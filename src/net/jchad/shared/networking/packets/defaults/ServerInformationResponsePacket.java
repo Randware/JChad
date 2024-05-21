@@ -8,7 +8,7 @@ import net.jchad.shared.networking.packets.PacketType;
 import java.util.Arrays;
 
 public class ServerInformationResponsePacket implements Packet {
-    private final PacketType packet_type = PacketType.SERVER_INFORMATION;
+    private final PacketType packet_type = PacketType.SERVER_INFORMATION_RESPONSE;
 
     private final Double server_version;
     private final Boolean encrypt_communications;

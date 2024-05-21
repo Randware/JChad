@@ -6,6 +6,8 @@ import com.google.gson.JsonSyntaxException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This interface provides some useful methods for Packets. Like serialization and deserialization by using the {@link com.google.gson GSON} library.
@@ -76,13 +78,26 @@ public interface Packet{
 
     /**
      * This deserializes JSON strings into the given objects.
-     * @param jsonObjectString The JSON string that represents the Object that implements {@link Packet Packet}
-     * @param classOfPacket The class of the Object that it should be deserialized to.
-     * @return The deserialized subclass of {@link Packet Packet}
-     * @throws JsonSyntaxException When the JSON string is not valid JSON this exception gets thrown.
+     * @param jsonString The JSON string that represents the Object that implements {@link Packet Packet}
+     * @return The deserialized subclass of {@link Packet Packet} <b><u>OR null if the provided json sting is not valid</u></b>
+     *
      */
-    static <T extends Packet> T fromJSON(String jsonObjectString, Class<T> classOfPacket) throws JsonSyntaxException {
-        return gson.fromJson(jsonObjectString, classOfPacket);
+    static <T extends Packet> T fromJSON(String jsonString)  {
+        Pattern patter = Pattern.compile("\"packet_type\":\"([A-Z_]+)\"");
+        Matcher matcher = patter.matcher(jsonString);
+        if (matcher.find()) {
+            String packet_type = matcher.group(1);
+            try {
+                PacketType packetType = PacketType.valueOf(packet_type);
+                T returningPacket = (T) gson.fromJson(jsonString, packetType.getAssociatedPacket());
+                if (returningPacket.isValid()) {
+                    return returningPacket;
+                }
+            } catch (Exception ignore) {}
+
+        }
+            return null;
+
     }
 
     /**

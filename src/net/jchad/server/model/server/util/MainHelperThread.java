@@ -10,11 +10,8 @@ import net.jchad.shared.networking.packets.defaults.ConnectionClosedPacket;
 import net.jchad.shared.networking.packets.defaults.ConnectionEstablishedPacket;
 import net.jchad.shared.networking.packets.defaults.ServerInformationRequestPacket;
 import net.jchad.shared.networking.packets.defaults.ServerInformationResponsePacket;
-import net.jchad.shared.networking.packets.messages.ClientMessagePacket;
+import net.jchad.shared.networking.packets.messages.*;
 import net.jchad.shared.networking.packets.PacketType;
-import net.jchad.shared.networking.packets.messages.JoinChatRequestPacket;
-import net.jchad.shared.networking.packets.messages.JoinChatResponsePacket;
-import net.jchad.shared.networking.packets.messages.MessageStatusPacket;
 
 import java.util.List;
 
@@ -55,23 +52,11 @@ public class MainHelperThread extends HelperThread {
                 ClientMessagePacket clientMessage = getServerThread().getGson().fromJson(element, ClientMessagePacket.class);
                 if (clientMessage != null && clientMessage.isValid()) {
                     if (getServerThread().getServer().getChatManager().chatExists(clientMessage.getChat())) {
-                        if (getServerThread().isEncryptMessages() && getServerThread().getMessageAESkey() != null) {
-                            try {
-
-                                ClientMessagePacket decryptedClientMessage = new ClientMessagePacket(getServerThread().getCrypterManager().decryptAES(clientMessage.getMessage()), clientMessage.getChat());
-                                getServerThread().getUser().sendMessage(decryptedClientMessage);
-                            } catch (Exception e) {
-                                throw new InvalidPacketException("An error occurred while decrypting the received message", e);
-                            }
-
-                        } else {
                             getServerThread().getUser().sendMessage(clientMessage);
-                        }
-
-                        writePacket(new MessageStatusPacket(MessageStatusPacket.Status.SUCCESS, "The message was send successfully"));
+                        writePacket(new MessageStatusSuccessPacket());
                         failedAttempts--;
                     } else {
-                        writePacket(new MessageStatusPacket(MessageStatusPacket.Status.FAILED, "The provided chat does not exist"));
+                        writePacket(new MessageStatusFailedPacket("The provided chat does not exist"));
                     }
                     continue;
                 }
@@ -114,7 +99,7 @@ public class MainHelperThread extends HelperThread {
                     break;
                 } else {
                     getServerThread().getMessageHandler().handleDebug("%s sent to many invalid packets. The connection gets terminated if the server receives %d more invalid packet(s)".formatted(getServerThread().getRemoteAddress(), retries - failedAttempts));
-                    writePacket(new InvalidPacket(List.of(PacketType.CLIENT_MESSAGE, PacketType.LOAD_CHAT, PacketType.CONNECTION_CLOSED, PacketType.SERVER_INFORMATION)
+                    writePacket(new InvalidPacket(List.of(PacketType.CLIENT_MESSAGE, PacketType.JOIN_CHAT_REQUEST, PacketType.CONNECTION_CLOSED, PacketType.SERVER_INFORMATION_REQUEST)
                             , "The provided packet was not valid. " +
                             e.getMessage()));
                 }

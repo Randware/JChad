@@ -21,8 +21,8 @@ public abstract class HelperThread{
 
 
     /**
-     * <p>This methode reads the JSON in the {@link net.jchad.server.model.server.ServerThread ServerThread} using the {@link com.google.gson.stream.JsonReader JsonReader}</p>
-     * <p>It may occur that this methode returns null BUT this is rare. If the methode returns null just close the {@link net.jchad.server.model.server.ServerThread ServerThread} </p>
+     * <p>This methode reads the JSON in the {@link net.jchad.server.model.server.ServerThread ServerThread} using the {@link java.util.Scanner}</p>
+     *
      *
      * @param returningClassType The object which should get returned wi
      * @param reuiredPacketType The required packet type that gets sent to the client when he sends an invalid packet.
