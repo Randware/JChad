@@ -11,6 +11,7 @@ public class ChatMessage {
     private String content;
     private long timestamp;
     private String senderName;
+
     private String senderIP;
 
     public ChatMessage(String content, long timestamp, String senderName, String senderIP) {

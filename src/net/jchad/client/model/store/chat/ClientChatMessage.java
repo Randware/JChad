@@ -1,5 +1,7 @@
 package net.jchad.client.model.store.chat;
 
+// TODO: Figure out how to differentiate the chat messages that are received by the server and which are sent by the client
+//          (See Client class sendMessageString() method)
 public class ClientChatMessage {
     /**
      * This boolean represents if this specific message was sent by this
@@ -8,12 +10,31 @@ public class ClientChatMessage {
     private boolean own;
 
     /**
+     * The chat this message was sent in.
+     */
+    private String chat;
+
+    /**
      * The string content of this message.
      */
     private String content;
 
-    public ClientChatMessage(String content) {
+    /**
+     * The username of the user this message was sent from.
+     */
+    private String username;
+
+    /**
+     * The epoch timestamp of when this chat message was received by the server.
+     */
+    private long timestamp;
+
+
+    public ClientChatMessage(String chat, String content, String username, long timestamp) {
+        this.chat = chat;
         this.content = content;
+        this.username = username;
+        this.timestamp = timestamp;
     }
 
     public boolean isOwn() {
@@ -23,4 +44,6 @@ public class ClientChatMessage {
     public void setOwn(boolean own) {
         this.own = own;
     }
+
+
 }

@@ -2,6 +2,7 @@ package net.jchad.client.model.client;
 
 import net.jchad.client.controller.ClientController;
 import net.jchad.client.model.client.config.ClientConfigManager;
+import net.jchad.client.model.client.connection.ClosedConnectionException;
 import net.jchad.client.model.client.connection.ServerConnection;
 import net.jchad.client.model.client.connection.ServerConnector;
 import net.jchad.client.model.store.chat.ClientChat;
@@ -17,7 +18,7 @@ import java.util.ArrayList;
  * methods from the view will be called on.
  */
 public class Client {
-    private ViewCallback viewCallback;
+    private final ViewCallback viewCallback;
     private final ClientConfigManager configManager;
     private final ServerConnector serverConnector;
     private ServerConnection currentConnection;
@@ -26,11 +27,7 @@ public class Client {
     /**
      * This variable stores the chat the client is currently in.
      * This is needed, because the view needs to be informed when it
-     * is supposed to display a new message. Still need to figure out how
-     * to effectively update this when the client goes into another chat.
-     * Maybe create a method "setCurrentChat(ClientChat chat)" which
-     * returns all messages from the specified chat and updates this
-     * variable.
+     * is supposed to display a new message.
      */
     private ClientChat currentChat;
 
@@ -48,21 +45,24 @@ public class Client {
      *                          used to establish a {@link ServerConnection}.
      */
     public void connect(ConnectionDetails connectionDetails) {
-        this.currentConnection = serverConnector.connect(connectionDetails);
+        try {
+            this.currentConnection = serverConnector.connect(connectionDetails);
+        } catch (ClosedConnectionException e) {
+            viewCallback.handleFatalError(e);
+        }
     }
 
     /**
-     * Properly close the current {@link ServerConnection}.
+     * Properly close the current {@link ServerConnection} and the {@link ServerConnector}
+     * if there is an ongoing connection process.
      */
     public void disconnect() {
         currentConnection.closeConnection();
-    }
-
-    /**
-     * Stop any currently ongoing server connection process.
-     */
-    public void stopConnecting() {
         serverConnector.stop();
+
+        currentConnection = null;
+
+
     }
 
     /**
@@ -70,14 +70,18 @@ public class Client {
      * {@link ClientChatMessage} and then adds it to the messages like
      * any other message. This is method is used to easily send messages from
      * the view.
+     * <p>
+     * TODO: Send this chat message to the server in addition to adding it to its local chat messages
      *
      * @param messageString the message string which
      */
     public void sendMessageString(String messageString) {
+        /*
         ClientChatMessage message = new ClientChatMessage(messageString);
         message.setOwn(true);
 
         addMessage(currentChat, message);
+        */
     }
 
     /**
@@ -85,13 +89,13 @@ public class Client {
      * If the message was sent in the currently active chat, it also notifies the view
      * that it needs to display this new message.
      *
-     * @param chat the {@link ClientChat} in which the specified {@link ClientChatMessage} should be sent.
+     * @param chat    the {@link ClientChat} in which the specified {@link ClientChatMessage} should be sent.
      * @param message the {@link ClientChatMessage} that should be sent in the specified {@link ClientChat}.
      */
     private void addMessage(ClientChat chat, ClientChatMessage message) {
         chat.addMessage(message);
 
-        if(chat.equals(currentChat)) {
+        if (chat.equals(currentChat)) {
             displayMessage(message);
         }
     }
@@ -104,7 +108,7 @@ public class Client {
      * @param message the {@link ClientChatMessage} that should be displayed.
      */
     private void displayMessage(ClientChatMessage message) {
-        if(message.isOwn()) {
+        if (message.isOwn()) {
             viewCallback.displayOwnMessage(message);
         } else {
             viewCallback.displayOtherMessage(message);
@@ -114,20 +118,24 @@ public class Client {
     /**
      * This method sets the currentChat variable to the specified {@link ClientChat}.
      * It also calls the displayMessage() method for every {@link ClientChatMessage} in
-     * the specified {@link ClientChat}.
+     * the specified {@link ClientChat}. It also has some safety mechanisms in order to
+     * avoid adding messages to the wrong chat, if the user switches chat before messages finished loading.
      * <br>
      * <br>
      * <font color="red">It is important that this method gets called after the view has
-     * updated its current chat display otherwise it can lead to duplicate chat messages being displayed.</font>
+     * updated its current chat display otherwise it can lead to messages being displayed in
+     * the wrong chat.</font>
      *
      * @param chat the {@link ClientChat} that should be set as the current chat.
      */
     public void setCurrentChat(ClientChat chat) {
         this.currentChat = chat;
 
-       for(ClientChatMessage message : chat.getMessages()) {
-           displayMessage(message);
-       }
+        ArrayList<ClientChatMessage> messages = chat.getMessages();
+
+        for (int x = 0; this.currentChat.equals(chat) && x < messages.size(); x++) {
+            displayMessage(messages.get(x));
+        }
     }
 
     /**
@@ -138,8 +146,8 @@ public class Client {
      * @return the {@link ClientChat} instance for this chat name, null if no chat with this name was found.
      */
     public ClientChat getChat(String name) {
-        for(ClientChat chat : chats) {
-            if(chat.getName().equals(name)) {
+        for (ClientChat chat : chats) {
+            if (chat.getName().equals(name)) {
                 return chat;
             }
         }
