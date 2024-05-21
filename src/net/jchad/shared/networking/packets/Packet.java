@@ -76,6 +76,7 @@ public interface Packet{
         return gson.toJson(this);
     }
 
+
     /**
      * This deserializes JSON strings into the given objects.
      * @param jsonString The JSON string that represents the Object that implements {@link Packet Packet}
