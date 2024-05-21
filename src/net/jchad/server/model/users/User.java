@@ -3,11 +3,20 @@ package net.jchad.server.model.users;
 import net.jchad.server.model.chats.Chat;
 import net.jchad.server.model.chats.ChatMessage;
 import net.jchad.server.model.server.ServerThread;
+import net.jchad.shared.cryptography.ImpossibleConversionException;
+import net.jchad.shared.networking.packets.InvalidPacket;
+
+import net.jchad.shared.networking.packets.PacketType;
 import net.jchad.shared.networking.packets.messages.ClientMessagePacket;
 import net.jchad.shared.networking.packets.messages.ServerMessagePacket;
-import net.jchad.shared.networking.packets.messages.MessagePacket;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -152,10 +161,10 @@ public class User {
      *
      *     <li> Does not equal the current user. Object.equals(this, user) has to be false. </li>
      *
-     *     <li> Has already joint the specified chat in the {@link MessagePacket messagePacket} </li>
+     *     <li> Has already joint the specified chat in the {@link ServerMessagePacket messagePacket} </li>
      * </ul>
      * @param messagePacket the packet that gets send to the valid users
-     * @return to how many users the {@link MessagePacket messagePacket} was sent
+     * @return to how many users the {@link ServerMessagePacket messagePacket} was sent
      */
     public int sendMessage(ClientMessagePacket messagePacket) {
         return sendMessage(new ServerMessagePacket(
@@ -174,16 +183,42 @@ public class User {
      *
      *     <li> Does not equal the current user. Object.equals(this, user) has to be false. </li>
      *
-     *     <li> Has already joint the specified chat in the {@link MessagePacket messagePacket} </li>
+     *     <li> Has already joint the specified chat in the {@link ServerMessagePacket messagePacket} </li>
      * </ul>
      * @param messagePacket the packet that gets sent to the valid users. If the username is null, it gets set to the username of this instance.
-     * @return to how many users the {@link MessagePacket messagePacket} was sent
+     * @return to how many users the {@link ServerMessagePacket messagePacket} was sent
      */
     public int sendMessage(ServerMessagePacket messagePacket) {
         int messagesSent = 0;
         if (messagePacket == null) {return 0;}
         if (messagePacket.getUsername() == null) messagePacket.setUsername(this.getUsername());
         if (!messagePacket.isValid()) {return 0;}
+        //Encrypts message content if necessary
+
+        if (connection.isEncryptMessages() && connection.getMessageAESkey() != null) {
+                try {
+                    messagePacket =
+                            new ServerMessagePacket(
+                                    connection.getCrypterManager().encryptAES(messagePacket.getMessage()),
+                                    messagePacket.getChat(),
+                                    messagePacket.getUsername(),
+                                    messagePacket.getTimestamp()
+
+                            );
+                } catch (InvalidAlgorithmParameterException | NoSuchPaddingException|  NoSuchAlgorithmException | BadPaddingException | InvalidKeyException | IllegalBlockSizeException e) {
+                    connection.getMessageHandler().handleDebug("An unknown error occurred while trying to decrypt the content of the received from %s".formatted(connection.getRemoteAddress()), e);
+                    connection.write(new InvalidPacket(PacketType.CLIENT_MESSAGE, "The content of the client message could not be decrypted: " + e.getMessage()).toJSON());
+                    connection.close("The content of the client message could not be decrypted");
+                } catch (ImpossibleConversionException e) {
+                    connection.getMessageHandler().handleDebug("The received message content from %s could not be encrypted, because it is not Base64 encoded".formatted(connection.getRemoteAddress()), e);
+                    connection.write(new InvalidPacket(PacketType.CLIENT_MESSAGE, "The content of the client message was not Base64 encoded: " + e.getMessage()).toJSON());
+                    connection.close("The content of the client message was not Base64 encoded");
+                }
+
+        }
+
+
+        //Sends messages to all users
         Chat chat = connection.getServer().getChatManager().getChat(messagePacket.getChat());
         ChatMessage chatMessage = ChatMessage.fromMessagePacket(messagePacket, connection.getRemoteAddress());
         if (chat == null) {

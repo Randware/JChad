@@ -22,7 +22,7 @@ public class UsernameHelperThread extends HelperThread {
         User user = null;
         writePacket(new UsernameServerPacket(UsernameServerPacket.UsernameResponseType.PROVIDE_USERNAME, "Please enter a username."));
         for (int fails = 0; fails <= getRetries(); fails++) {
-            UsernameClientPacket usernameClientPacket = readJSON(UsernameClientPacket.class, PacketType.USERNAME);
+            UsernameClientPacket usernameClientPacket = readJSON(UsernameClientPacket.class, PacketType.USERNAME_CLIENT);
             try {
 
                 user = new User(usernameClientPacket.getUsername(), getServerThread());

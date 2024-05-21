@@ -1,7 +1,7 @@
 package net.jchad.shared.networking.packets.password;
 
-public class PasswordSuccessPacket extends PasswordPacket{
-    public PasswordSuccessPacket() {
-        super(PasswordPacketType.PASSWORD_SUCCESS);
-    }
+import net.jchad.shared.networking.packets.Packet;
+
+public class PasswordSuccessPacket implements Packet {
+    public PasswordSuccessPacket() {}
 }
