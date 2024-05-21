@@ -3,6 +3,7 @@ package net.jchad.client.view;
 import net.jchad.client.controller.ClientController;
 import net.jchad.client.model.client.ViewCallback;
 import net.jchad.client.model.store.chat.ClientChatMessage;
+import net.jchad.client.model.store.connection.ConnectionDetails;
 
 public class TestView implements ViewCallback {
     private ClientController controller;
@@ -13,6 +14,7 @@ public class TestView implements ViewCallback {
 
     private void run() {
         this.controller = new ClientController(this);
+        controller.connect(new ConnectionDetails("test", "127.0.0.1", 13814, "user", ""));
     }
 
     @Override

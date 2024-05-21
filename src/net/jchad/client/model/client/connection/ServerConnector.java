@@ -1,17 +1,27 @@
 package net.jchad.client.model.client.connection;
 
 import net.jchad.client.model.client.ViewCallback;
+import net.jchad.client.model.client.packets.PacketHandler;
+import net.jchad.client.model.client.packets.PacketMapper;
 import net.jchad.client.model.store.connection.ConnectionDetails;
+import net.jchad.shared.networking.packets.Packet;
+import net.jchad.shared.networking.packets.PacketType;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.function.Consumer;
 
 /**
  * This class is responsible for everything that needs to be done before the client
  * can successfully connect to the server. Examples of that may be connecting to the server,
  * exchanging encryption information and handling the password verification process.
  */
-public class ServerConnector {
+public final class ServerConnector extends Thread implements PacketHandler {
+    private static final Object lock = new Object();
+
+    private volatile boolean isRunning;
+    private boolean streamsTransfered;
+
     private ViewCallback viewCallback;
 
     /**
@@ -35,6 +45,8 @@ public class ServerConnector {
 
     public ServerConnector(ViewCallback viewCallback) {
         this.viewCallback = viewCallback;
+        this.isRunning = false;
+        streamsTransfered = false;
     }
 
     /**
@@ -47,7 +59,15 @@ public class ServerConnector {
      * @return a valid {@link ServerConnection} if a connection was successfully established.
      * @throws ClosedConnectionException if an error occurred during the connection process.
      */
-    public ServerConnection connect(ConnectionDetails connectionDetails) throws ClosedConnectionException {
+    public ServerConnection connect(ConnectionDetails connectionDetails) throws Exception {
+        synchronized (lock) {
+            if (isRunning) {
+                shutdown();
+            }
+            isRunning = true;
+            start();
+        }
+
         String host = connectionDetails.getHost();
         int port = connectionDetails.getPort();
 
@@ -63,13 +83,54 @@ public class ServerConnector {
             throw new ClosedConnectionException("Could not open output and input streams for connection", e);
         }
 
-        return new ServerConnection(viewCallback, connectionWriter, connectionReader);
+        try {
+            connectionReader = new ConnectionReader(socket.getInputStream(), this);
+        } catch (IOException e) {
+            throw new ClosedConnectionException("Could not open output and input streams for connection", e);
+        }
+
+        ServerConnection connection = new ServerConnection(viewCallback, connectionDetails, connectionWriter, connectionReader);
+        connection.start();
+        streamsTransfered = true;
+
+        return connection;
     }
 
     /**
-     * Stop any currently ongoing connection process.
+     * Stop any currently ongoing connection process and eliminate this thread.
      */
-    public void stop() {
+    public void shutdown() throws Exception {
+        synchronized (lock) {
+            isRunning = false;
+            interrupt();
 
+            if(!streamsTransfered) {
+                connectionWriter.close();
+                connectionReader.close();
+            } else {
+                connectionWriter = null;
+                connectionReader = null;
+            }
+        }
+    }
+
+    @Override
+    public void handlePacketString(String string) {
+        /**
+         * Check if encryption is enabled -> if yes decrypt string
+         * Convert string into packet object
+         * PacketMapper.executePacket(packet, this);
+         */
+        viewCallback.handleInfo(string);
+    }
+
+    @Override
+    public void handlePacketReaderError(Exception e) {
+        viewCallback.handleError(e);
+    }
+
+    @Override
+    public void disposePacket(Packet packet) {
+        viewCallback.handleWarning("Disposing undefined packet: " + packet.toString());
     }
 }
