@@ -89,6 +89,15 @@ public class ChatMessage {
      * @return a {@link ChatMessage} with the values from the {@link ServerMessagePacket}
      */
     public static ChatMessage fromMessagePacket(ServerMessagePacket messagePacket, String senderIP) {
-        return new ChatMessage(messagePacket.getChat(), messagePacket.getTimestamp(), messagePacket.getUsername(), senderIP);
+        return new ChatMessage(messagePacket.getMessage(), messagePacket.getTimestamp(), messagePacket.getUsername(), senderIP);
+    }
+
+    /**
+     * Converts the current {@link ChatMessage} to a {@link ServerMessagePacket}
+     * @param chatName The name of the Chat that the {@link ServerMessagePacket} was sent to
+     * @return The converted message
+     */
+    public ServerMessagePacket toMessagePacket(String chatName) {
+        return new ServerMessagePacket(content, chatName, senderName, timestamp);
     }
 }

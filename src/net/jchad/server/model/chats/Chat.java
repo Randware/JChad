@@ -10,11 +10,13 @@ import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import net.jchad.server.model.error.MessageHandler;
 import net.jchad.server.model.server.Server;
+import net.jchad.shared.networking.packets.messages.ServerMessagePacket;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * TODO: Implement a way for accessing the messages, which adheres to the "loadChatHistory" and "loadChatHistoryMessageCount" values
@@ -75,6 +77,7 @@ public class Chat {
             message.setSenderName(server.getConfig().getInternalSettings().getAnonymousUserName());
             message.setSenderIP(server.getConfig().getInternalSettings().getAnonymousUserIP());
         }
+
 
         messages.add(message.appendID(messages.size()));
 
@@ -200,6 +203,30 @@ public class Chat {
             selectedMessages.add(messages.get(x));
         }
 
+        return selectedMessages;
+    }
+
+    /**
+     * <font color="red">This method should be called when accessing messages in this chat,
+     * as it respects the configured message loading values.</font>
+     *
+     * It is sorted from oldest to newest. That means the first index is the oldest message
+     * and the last index is the newest message.
+     *
+     *
+     * @return all messages from this chat according to the configuration of this chat converted into {@link ServerMessagePacket}
+     */
+    public List<ServerMessagePacket> getServerMessages() {
+
+        if (!config.isLoadChatHistory()) return new ArrayList<>();
+
+        ArrayList<ServerMessagePacket> selectedMessages = new ArrayList<>();
+
+        int messageCount = (int) Math.min(config.getLoadChatHistoryMessageCount(), messages.size());
+
+        for (int x = messages.size() - messageCount; x < messages.size(); x++) {
+            selectedMessages.add(messages.get(x).toMessagePacket(name));
+        }
         return selectedMessages;
     }
 

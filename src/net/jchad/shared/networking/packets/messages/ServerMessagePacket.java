@@ -38,4 +38,15 @@ public final class ServerMessagePacket implements Packet {
     public String getChat() {
         return chat;
     }
+
+    @Override
+    public String toString() {
+        return "ServerMessagePacket{" +
+                "packet_type=" + packet_type +
+                ", message='" + message + '\'' +
+                ", chat='" + chat + '\'' +
+                ", username='" + username + '\'' +
+                ", timestamp=" + timestamp +
+                '}';
+    }
 }
