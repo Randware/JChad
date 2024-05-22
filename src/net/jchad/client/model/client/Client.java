@@ -2,7 +2,6 @@ package net.jchad.client.model.client;
 
 import net.jchad.client.controller.ClientController;
 import net.jchad.client.model.client.config.ClientConfigManager;
-import net.jchad.client.model.client.connection.ClosedConnectionException;
 import net.jchad.client.model.client.connection.ServerConnection;
 import net.jchad.client.model.client.connection.ServerConnector;
 import net.jchad.client.model.store.chat.ClientChat;
@@ -34,7 +33,7 @@ public class Client {
     public Client(ViewCallback viewCallback) {
         this.viewCallback = viewCallback;
         this.configManager = new ClientConfigManager(viewCallback);
-        this.serverConnector = new ServerConnector(viewCallback);
+        this.serverConnector = new ServerConnector(this);
     }
 
     /**
@@ -98,7 +97,7 @@ public class Client {
      * @param chat    the {@link ClientChat} in which the specified {@link ClientChatMessage} should be sent.
      * @param message the {@link ClientChatMessage} that should be sent in the specified {@link ClientChat}.
      */
-    private void addMessage(ClientChat chat, ClientChatMessage message) {
+    public void addMessage(ClientChat chat, ClientChatMessage message) {
         chat.addMessage(message);
 
         if (chat.equals(currentChat)) {
@@ -168,5 +167,9 @@ public class Client {
      */
     public ClientConfigManager getConfigManager() {
         return configManager;
+    }
+
+    public ViewCallback getViewCallback() {
+        return viewCallback;
     }
 }
