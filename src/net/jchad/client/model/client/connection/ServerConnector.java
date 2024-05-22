@@ -10,6 +10,7 @@ import net.jchad.shared.networking.packets.PacketType;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
 /**
@@ -17,12 +18,12 @@ import java.util.function.Consumer;
  * can successfully connect to the server. Examples of that may be connecting to the server,
  * exchanging encryption information and handling the password verification process.
  */
-public final class ServerConnector extends Thread implements PacketHandler {
+public final class ServerConnector  implements PacketHandler, Callable<ServerConnection> {
     private static final Object lock = new Object();
 
     private volatile boolean isRunning;
     private boolean streamsTransfered;
-
+    private final ConnectionDetails connectionDetails;
     private Client client;
     private ViewCallback viewCallback;
 
@@ -45,10 +46,14 @@ public final class ServerConnector extends Thread implements PacketHandler {
      */
     private ConnectionReader connectionReader;
 
-    public ServerConnector(Client client) {
+    public ServerConnector(Client client, ConnectionDetails connectionDetails) {
+        if (client == null || connectionDetails == null) {
+            throw new NullPointerException("The parameters can not be null");
+        }
         this.client = client;
         this.viewCallback = client.getViewCallback();
         this.isRunning = false;
+        this.connectionDetails = connectionDetails;
         streamsTransfered = false;
     }
 
@@ -62,15 +67,26 @@ public final class ServerConnector extends Thread implements PacketHandler {
      * @return a valid {@link ServerConnection} if a connection was successfully established.
      * @throws ClosedConnectionException if an error occurred during the connection process.
      */
+    @Deprecated(forRemoval = true)
     public ServerConnection connect(ConnectionDetails connectionDetails) throws Exception {
         synchronized (lock) {
             if (isRunning) {
                 shutdown();
             }
             isRunning = true;
-            start();
-        }
 
+        }
+            return null;
+
+    }
+
+
+    @Override
+    public ServerConnection call() throws Exception {
+        if (isRunning) {
+            shutdown();
+        }
+        isRunning = true;
         String host = connectionDetails.getHost();
         int port = connectionDetails.getPort();
 
@@ -99,13 +115,14 @@ public final class ServerConnector extends Thread implements PacketHandler {
         return connection;
     }
 
+
     /**
      * Stop any currently ongoing connection process and eliminate this thread.
      */
     public void shutdown() throws Exception {
         synchronized (lock) {
             isRunning = false;
-            interrupt();
+
 
             if(!streamsTransfered) {
                 connectionWriter.close();
@@ -114,6 +131,7 @@ public final class ServerConnector extends Thread implements PacketHandler {
                 connectionWriter = null;
                 connectionReader = null;
             }
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -131,4 +149,6 @@ public final class ServerConnector extends Thread implements PacketHandler {
     public void handlePacketReaderError(Exception e) {
         viewCallback.handleError(e);
     }
+
+
 }

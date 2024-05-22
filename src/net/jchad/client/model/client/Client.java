@@ -9,6 +9,9 @@ import net.jchad.client.model.store.chat.ClientChatMessage;
 import net.jchad.client.model.store.connection.ConnectionDetails;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * This class represents the entire backend infrastructure for the client.
@@ -19,7 +22,8 @@ import java.util.ArrayList;
 public class Client {
     private final ViewCallback viewCallback;
     private final ClientConfigManager configManager;
-    private final ServerConnector serverConnector;
+    private ServerConnector serverConnector = null;
+    private final ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
     private ServerConnection currentConnection;
     private ArrayList<ClientChat> chats;
 
@@ -33,7 +37,7 @@ public class Client {
     public Client(ViewCallback viewCallback) {
         this.viewCallback = viewCallback;
         this.configManager = new ClientConfigManager(viewCallback);
-        this.serverConnector = new ServerConnector(this);
+
     }
 
     /**
@@ -45,13 +49,13 @@ public class Client {
      */
     public void connect(ConnectionDetails connectionDetails) {
         
-
+        serverConnector = new ServerConnector(this, connectionDetails);
         try {
-            if(currentConnection != null) {
+            if(currentConnection != null ) {
                 currentConnection.closeConnection();
             }
-
-            currentConnection = serverConnector.connect(connectionDetails);
+            Future<ServerConnection> future = executorService.submit(serverConnector);
+            currentConnection = future.get();
             serverConnector.shutdown();
         } catch (Exception e) {
             viewCallback.handleFatalError(e);
