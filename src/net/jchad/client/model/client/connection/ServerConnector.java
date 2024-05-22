@@ -1,5 +1,6 @@
 package net.jchad.client.model.client.connection;
 
+import net.jchad.client.model.client.Client;
 import net.jchad.client.model.client.ViewCallback;
 import net.jchad.client.model.client.packets.PacketHandler;
 import net.jchad.client.model.client.packets.PacketMapper;
@@ -22,6 +23,7 @@ public final class ServerConnector extends Thread implements PacketHandler {
     private volatile boolean isRunning;
     private boolean streamsTransfered;
 
+    private Client client;
     private ViewCallback viewCallback;
 
     /**
@@ -43,8 +45,9 @@ public final class ServerConnector extends Thread implements PacketHandler {
      */
     private ConnectionReader connectionReader;
 
-    public ServerConnector(ViewCallback viewCallback) {
-        this.viewCallback = viewCallback;
+    public ServerConnector(Client client) {
+        this.client = client;
+        this.viewCallback = client.getViewCallback();
         this.isRunning = false;
         streamsTransfered = false;
     }
@@ -89,7 +92,7 @@ public final class ServerConnector extends Thread implements PacketHandler {
             throw new ClosedConnectionException("Could not open output and input streams for connection", e);
         }
 
-        ServerConnection connection = new ServerConnection(viewCallback, connectionDetails, connectionWriter, connectionReader);
+        ServerConnection connection = new ServerConnection(client, connectionDetails, connectionWriter, connectionReader);
         connection.start();
         streamsTransfered = true;
 
@@ -127,10 +130,5 @@ public final class ServerConnector extends Thread implements PacketHandler {
     @Override
     public void handlePacketReaderError(Exception e) {
         viewCallback.handleError(e);
-    }
-
-    @Override
-    public void disposePacket(Packet packet) {
-        viewCallback.handleWarning("Disposing undefined packet: " + packet.toString());
     }
 }
