@@ -89,7 +89,7 @@ public class ChatMessage {
      * @return a {@link ChatMessage} with the values from the {@link ServerMessagePacket}
      */
     public static ChatMessage fromMessagePacket(ServerMessagePacket messagePacket, String senderIP) {
-        return new ChatMessage(messagePacket.getChat(), messagePacket.getTimestamp(), messagePacket.getUsername(), senderIP);
+        return new ChatMessage(messagePacket.getMessage(), messagePacket.getTimestamp(), messagePacket.getUsername(), senderIP);
     }
 
     /**

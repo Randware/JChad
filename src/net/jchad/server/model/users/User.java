@@ -225,15 +225,16 @@ public class User {
             connection.getMessageHandler().handleDebug("%s tried to send a message to a chat that does not exist".formatted(getConnection().getRemoteAddress()));
             return 0;
         }
+        try {
+
+            chat.addMessage(chatMessage);
+        } catch (IOException e) {
+            connection.getMessageHandler().handleError(new IOException("An IOException occurred while trying to add the message (from %s) to the chat (%s)"
+                    .formatted(connection.getRemoteAddress(), chat.getName()), e));
+        }
             Collection<User> userValues = users.values();
             for (User user : userValues) {
                 if (!this.equals(user) && user.isReadyToReceiveMessages() && user.getJoinedChats().contains(messagePacket.getChat())) {
-                    try {
-                        chat.addMessage(chatMessage);
-                    } catch (IOException e) {
-                        connection.getMessageHandler().handleError(new IOException("An IOException occurred while trying to add the message (from %s) to the chat (%s)"
-                                .formatted(connection.getRemoteAddress(), chat.getName()), e));
-                    }
                     if (user.getConnection().isEncryptMessages()) {
                         user.getConnection().useMessageKey();
                         try {
