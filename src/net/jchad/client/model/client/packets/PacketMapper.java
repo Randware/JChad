@@ -13,6 +13,7 @@ import java.util.Optional;
  * This class maps every package to its respective code that should be executed
  * when this packet is received.
  */
+@Deprecated
 public enum PacketMapper {
     SERVER_MESSAGE(ServerMessagePacket.class, new ServerMessage());
 
