@@ -18,7 +18,7 @@ import java.util.function.Consumer;
  * can successfully connect to the server. Examples of that may be connecting to the server,
  * exchanging encryption information and handling the password verification process.
  */
-public final class ServerConnector  implements PacketHandler, Callable<ServerConnection> {
+public class ServerConnector implements Callable<ServerConnection> {
     private static final Object lock = new Object();
 
     private volatile boolean isRunning;
@@ -77,15 +77,14 @@ public final class ServerConnector  implements PacketHandler, Callable<ServerCon
 
         }
             return null;
-
     }
 
-
     @Override
-    public ServerConnection call() throws Exception {
+    public ServerConnection call() throws IOException, ClosedConnectionException {
         if (isRunning) {
             shutdown();
         }
+
         isRunning = true;
         String host = connectionDetails.getHost();
         int port = connectionDetails.getPort();
@@ -103,10 +102,13 @@ public final class ServerConnector  implements PacketHandler, Callable<ServerCon
         }
 
         try {
-            connectionReader = new ConnectionReader(socket.getInputStream(), this);
+            connectionReader = new ConnectionReader(socket.getInputStream());
+            connectionReader.start();
         } catch (IOException e) {
             throw new ClosedConnectionException("Could not open output and input streams for connection", e);
         }
+
+        client.getViewCallback().handleInfo(readPacket());
 
         ServerConnection connection = new ServerConnection(client, connectionDetails, connectionWriter, connectionReader);
         connection.start();
@@ -115,14 +117,17 @@ public final class ServerConnector  implements PacketHandler, Callable<ServerCon
         return connection;
     }
 
+    private String readPacket() throws IOException, ClosedConnectionException {
+        return connectionReader.read();
+    }
+
 
     /**
      * Stop any currently ongoing connection process and eliminate this thread.
      */
-    public void shutdown() throws Exception {
+    public void shutdown() throws IOException {
         synchronized (lock) {
             isRunning = false;
-
 
             if(!streamsTransfered) {
                 connectionWriter.close();
@@ -134,21 +139,4 @@ public final class ServerConnector  implements PacketHandler, Callable<ServerCon
             Thread.currentThread().interrupt();
         }
     }
-
-    @Override
-    public void handlePacketString(String string) {
-        /**
-         * Check if encryption is enabled -> if yes decrypt string
-         * Convert string into packet object
-         * PacketMapper.executePacket(packet, this);
-         */
-        viewCallback.handleInfo(string);
-    }
-
-    @Override
-    public void handlePacketReaderError(Exception e) {
-        viewCallback.handleError(e);
-    }
-
-
 }
