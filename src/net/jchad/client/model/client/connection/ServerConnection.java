@@ -1,5 +1,6 @@
 package net.jchad.client.model.client.connection;
 
+import net.jchad.client.model.client.Client;
 import net.jchad.client.model.client.ViewCallback;
 import net.jchad.client.model.client.packets.PacketHandler;
 import net.jchad.client.model.store.chat.ClientChat;
@@ -14,8 +15,11 @@ import net.jchad.shared.networking.packets.messages.ClientMessagePacket;
  * and execute the code responsible for a specific packet type.
  *
  * TODO: Implement proper closing functionality
+ * TODO: Maybe handle chats in here?
  */
 public final class ServerConnection extends Thread implements PacketHandler {
+    private Client client;
+
     private final ViewCallback viewCallback;
 
     private final ConnectionDetails connectionDetails;
@@ -30,8 +34,9 @@ public final class ServerConnection extends Thread implements PacketHandler {
      */
     private ConnectionReader connectionReader;
 
-    public ServerConnection(ViewCallback viewCallback, ConnectionDetails connectionDetails, ConnectionWriter connectionWriter, ConnectionReader connectionReader) {
-        this.viewCallback = viewCallback;
+    public ServerConnection(Client client, ConnectionDetails connectionDetails, ConnectionWriter connectionWriter, ConnectionReader connectionReader) {
+        this.client = client;
+        this.viewCallback = client.getViewCallback();
         this.connectionDetails = connectionDetails;
         this.connectionWriter = connectionWriter;
         this.connectionReader = connectionReader;

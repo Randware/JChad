@@ -2,10 +2,14 @@ package net.jchad.client.model.client.connection;
 
 import net.jchad.client.model.client.ViewCallback;
 import net.jchad.client.model.client.packets.PacketHandler;
+import net.jchad.client.model.client.packets.PacketMapper;
 import net.jchad.client.model.store.connection.ConnectionDetails;
+import net.jchad.shared.networking.packets.Packet;
+import net.jchad.shared.networking.packets.PacketType;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.function.Consumer;
 
 /**
  * This class is responsible for everything that needs to be done before the client
@@ -16,7 +20,7 @@ public final class ServerConnector extends Thread implements PacketHandler {
     private static final Object lock = new Object();
 
     private volatile boolean isRunning;
-    private boolean objectsTransfered;
+    private boolean streamsTransfered;
 
     private ViewCallback viewCallback;
 
@@ -39,13 +43,10 @@ public final class ServerConnector extends Thread implements PacketHandler {
      */
     private ConnectionReader connectionReader;
 
-
-    private ConnectionDetails connectionDetails;
-
     public ServerConnector(ViewCallback viewCallback) {
         this.viewCallback = viewCallback;
         this.isRunning = false;
-        objectsTransfered = false;
+        streamsTransfered = false;
     }
 
     /**
@@ -66,8 +67,6 @@ public final class ServerConnector extends Thread implements PacketHandler {
             isRunning = true;
             start();
         }
-
-        this.connectionDetails = connectionDetails;
 
         String host = connectionDetails.getHost();
         int port = connectionDetails.getPort();
@@ -92,14 +91,9 @@ public final class ServerConnector extends Thread implements PacketHandler {
 
         ServerConnection connection = new ServerConnection(viewCallback, connectionDetails, connectionWriter, connectionReader);
         connection.start();
-        objectsTransfered = true;
+        streamsTransfered = true;
 
         return connection;
-    }
-
-    @Override
-    public void run() {
-        super.run();
     }
 
     /**
@@ -110,31 +104,33 @@ public final class ServerConnector extends Thread implements PacketHandler {
             isRunning = false;
             interrupt();
 
-            if(!objectsTransfered) {
+            if(!streamsTransfered) {
                 connectionWriter.close();
                 connectionReader.close();
             } else {
                 connectionWriter = null;
                 connectionReader = null;
             }
-
-            connectionDetails = null;
         }
     }
 
     @Override
     public void handlePacketString(String string) {
-        /*
+        /**
          * Check if encryption is enabled -> if yes decrypt string
          * Convert string into packet object
          * PacketMapper.executePacket(packet, this);
          */
-
         viewCallback.handleInfo(string);
     }
 
     @Override
     public void handlePacketReaderError(Exception e) {
         viewCallback.handleError(e);
+    }
+
+    @Override
+    public void disposePacket(Packet packet) {
+        viewCallback.handleWarning("Disposing undefined packet: " + packet.toString());
     }
 }
