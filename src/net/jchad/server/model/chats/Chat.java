@@ -78,6 +78,7 @@ public class Chat {
             message.setSenderIP(server.getConfig().getInternalSettings().getAnonymousUserIP());
         }
 
+
         messages.add(message.appendID(messages.size()));
 
         saveMessages();
@@ -216,6 +217,7 @@ public class Chat {
      * @return all messages from this chat according to the configuration of this chat converted into {@link ServerMessagePacket}
      */
     public List<ServerMessagePacket> getServerMessages() {
+
         if (!config.isLoadChatHistory()) return new ArrayList<>();
 
         ArrayList<ServerMessagePacket> selectedMessages = new ArrayList<>();
@@ -225,7 +227,6 @@ public class Chat {
         for (int x = messages.size() - messageCount; x < messages.size(); x++) {
             selectedMessages.add(messages.get(x).toMessagePacket(name));
         }
-
         return selectedMessages;
     }
 
