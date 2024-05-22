@@ -8,7 +8,7 @@ public class ServerMessage extends PacketMapBase<ServerMessagePacket> {
 
     @Override
     protected void executeConnector(ServerMessagePacket packet, ServerConnector connector) {
-        connector.disposePacket(packet);
+
     }
 
     @Override

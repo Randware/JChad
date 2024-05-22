@@ -45,6 +45,8 @@ public class Client {
      *                          used to establish a {@link ServerConnection}.
      */
     public void connect(ConnectionDetails connectionDetails) {
+        
+
         try {
             if(currentConnection != null) {
                 currentConnection.closeConnection();

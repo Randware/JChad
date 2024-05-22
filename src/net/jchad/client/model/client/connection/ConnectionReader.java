@@ -1,6 +1,7 @@
 package net.jchad.client.model.client.connection;
 
 import net.jchad.client.model.client.packets.PacketHandler;
+import net.jchad.server.model.server.ConnectionClosedException;
 
 import java.io.*;
 import java.util.function.Consumer;
@@ -63,10 +64,12 @@ public class ConnectionReader extends Thread implements AutoCloseable {
      * @throws IOException if something goes wrong when reading input.
      */
     private void read() throws IOException {
-        while(reading) {
-            if(handler != null) {
-                handler.handlePacketString(in.readLine());
-            }
+        String read = in.readLine();
+
+        if(read != null) {
+            handler.handlePacketString(read);
+        } else {
+            handler.handlePacketReaderError(new ClosedConnectionException("Connection closed"));
         }
     }
 

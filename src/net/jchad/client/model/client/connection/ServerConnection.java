@@ -5,7 +5,6 @@ import net.jchad.client.model.client.packets.PacketHandler;
 import net.jchad.client.model.store.chat.ClientChat;
 import net.jchad.client.model.store.chat.ClientChatMessage;
 import net.jchad.client.model.store.connection.ConnectionDetails;
-import net.jchad.shared.networking.packets.Packet;
 import net.jchad.shared.networking.packets.messages.ClientMessagePacket;
 
 /**
@@ -73,10 +72,5 @@ public final class ServerConnection extends Thread implements PacketHandler {
     @Override
     public void handlePacketReaderError(Exception e) {
         viewCallback.handleError(e);
-    }
-
-    @Override
-    public void disposePacket(Packet packet) {
-        viewCallback.handleWarning("Disposing undefined packet: " + packet.toString());
     }
 }
