@@ -9,7 +9,7 @@ import java.io.PrintWriter;
  * This class is responsible for sending packets to the server. It also handles the encryption and
  * serialization process.
  */
-public class ConnectionWriter extends Thread implements AutoCloseable {
+public class ConnectionWriter extends Thread {
     /**
      * This PrintWriter wraps the {@link OutputStream} provided on construction of this object.
      */
@@ -17,8 +17,6 @@ public class ConnectionWriter extends Thread implements AutoCloseable {
 
     public ConnectionWriter(OutputStream out) {
         this.out = new PrintWriter(out, true);
-
-        start();
     }
 
     /**
@@ -31,8 +29,8 @@ public class ConnectionWriter extends Thread implements AutoCloseable {
         out.println(packet);
     }
 
-    @Override
-    public void close() throws Exception {
+
+    public void close() {
         out.close();
     }
 }

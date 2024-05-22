@@ -1,10 +1,11 @@
 package net.jchad.client.model.client.packets;
 
-import net.jchad.client.model.client.connection.ServerConnection;
-import net.jchad.client.model.client.connection.ServerConnector;
+import net.jchad.shared.networking.packets.Packet;
 
-public sealed interface PacketHandler permits ServerConnector, ServerConnection {
-    void handlePacketString(String string);
+public interface PacketHandler {
+    void disposePacket(Packet packet);
+
+    void handlePacketString(String packetString);
 
     void handlePacketReaderError(Exception e);
 }

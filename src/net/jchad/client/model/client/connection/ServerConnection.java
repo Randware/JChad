@@ -2,7 +2,6 @@ package net.jchad.client.model.client.connection;
 
 import net.jchad.client.model.client.Client;
 import net.jchad.client.model.client.ViewCallback;
-import net.jchad.client.model.client.packets.PacketHandler;
 import net.jchad.client.model.store.chat.ClientChat;
 import net.jchad.client.model.store.chat.ClientChatMessage;
 import net.jchad.client.model.store.connection.ConnectionDetails;
@@ -17,7 +16,7 @@ import net.jchad.shared.networking.packets.messages.ClientMessagePacket;
  * TODO: Implement proper closing functionality
  * TODO: Maybe handle chats in here?
  */
-public final class ServerConnection extends Thread implements PacketHandler {
+public class ServerConnection extends Thread {
     private Client client;
 
     private final ViewCallback viewCallback;
@@ -63,19 +62,5 @@ public final class ServerConnection extends Thread implements PacketHandler {
         connectionWriter.sendPacket(new ClientMessagePacket(messageContent, chat.getName()));
 
         return message;
-    }
-
-    @Override
-    public void handlePacketString(String string) {
-        /**
-         * Check if encryption is enabled -> if yes decrypt string
-         * Convert string into packet object
-         * PacketMapper.executePacket(packet, this);
-         */
-    }
-
-    @Override
-    public void handlePacketReaderError(Exception e) {
-        viewCallback.handleError(e);
     }
 }

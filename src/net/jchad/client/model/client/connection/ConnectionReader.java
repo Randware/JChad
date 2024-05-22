@@ -13,22 +13,11 @@ import java.util.function.Consumer;
  * for performance reasons, the package this class returns still needs to possibly be decrypted and
  * deserialized.
  */
-public class ConnectionReader extends Thread implements AutoCloseable {
+public class ConnectionReader extends Thread {
     /**
      * This PrintWriter wraps the {@link InputStream} provided on construction of this object.
      */
     private BufferedReader in;
-
-    /**
-     * This packet handler will be called when a new packet string is read
-     * or an error occurs during the reading of data.
-     */
-    private PacketHandler handler;
-
-    /**
-     * Define if the reader should be reading.
-     */
-    private boolean reading;
 
     /**
      * This class runs on a separate thread and reads string from the provided {@link InputStream}.
@@ -36,45 +25,29 @@ public class ConnectionReader extends Thread implements AutoCloseable {
      * it will call the errorCallback.
      *
      * @param in the {@link InputStream} that should be read.
-     * @param handler the {@link PacketHandler} that will be provided with packet strings and
-     *                notified when an error occurs.
      */
-    public ConnectionReader(InputStream in, PacketHandler handler) {
+    public ConnectionReader(InputStream in) {
         this.in = new BufferedReader(new InputStreamReader(in));
-        this.handler = handler;
-        this.reading = true;
-        start();
-    }
-
-    @Override
-    public void run() {
-        try {
-            read();
-        } catch (IOException e) {
-            if(handler != null) {
-                handler.handlePacketReaderError(e);
-            }
-        }
     }
 
     /**
-     * Starts the reading process. If a string was successfully read it will be provided to
-     * this classes holder using the packetCallback.
+     * Reads and returns the next line from the stream.
      *
+     * @return the read string, null if the connection was closed by the server.
      * @throws IOException if something goes wrong when reading input.
+     * @throws ClosedConnectionException if the server closes the connection.
      */
-    private void read() throws IOException {
+    public String read() throws IOException, ClosedConnectionException {
         String read = in.readLine();
 
         if(read != null) {
-            handler.handlePacketString(read);
+            return read;
         } else {
-            handler.handlePacketReaderError(new ClosedConnectionException("Connection closed"));
+            throw new ClosedConnectionException("Connection was closed by the server");
         }
     }
 
-    @Override
-    public void close() throws Exception {
+    public void close() throws IOException {
         in.close();
     }
 }
