@@ -32,7 +32,6 @@ module net.jchad {
     opens net.jchad.server.model.config.store to com.fasterxml.jackson.databind;
     opens net.jchad.server.model.chats to com.google.gson;
     exports net.jchad.tests.shared;
-    exports net.jchad.client.view;
     opens net.jchad.shared.networking.packets.password to com.google.gson;
     opens net.jchad.shared.networking.packets.username to com.google.gson;
     opens net.jchad.shared.networking.packets.encryption to com.google.gson;
@@ -41,4 +40,5 @@ module net.jchad {
     opens net.jchad.client.model.client.config to com.google.gson;
     opens net.jchad.client.model.store.connection to com.google.gson;
     opens net.jchad.client.model.client.testing to javafx.fxml;
+    exports net.jchad.client.view.gui;
 }
