@@ -119,16 +119,13 @@ public class GUI extends Application implements BarDisplay {
                 alert.getButtonTypes().setAll(cancelButton, overwriteButton);
 
                 if (selectedDirectory != null && selectedDirectory.listFiles() != null) {
-                    System.out.println(selectedDirectory);
                     boolean filesExist = false;
-                    System.out.println("in " + softwareComboBox.getSelectionModel().getSelectedIndex() + " drinnen");
                     for (File file : selectedDirectory.listFiles()) {
                         switch (softwareComboBox.getSelectionModel().getSelectedIndex()) {
                             case 0: // Client and Server
                                 if (file.getName().equals(server)) {
                                     for (File file2 : selectedDirectory.listFiles()) {
                                         if (file2.getName().equals(client)) {
-                                            System.out.println("Both existing");
                                             filesExist = true;
                                             break;
                                         }
@@ -137,13 +134,11 @@ public class GUI extends Application implements BarDisplay {
                                 break;
                             case 1: // Server
                                 if (file.getName().equals(server)) {
-                                    System.out.println("server existing");
                                     filesExist = true;
                                 }
                                 break;
                             case 2: // Client
                                 if (file.getName().equals(client)) {
-                                    System.out.println("client existing");
                                     filesExist = true;
                                 }
                                 break;
