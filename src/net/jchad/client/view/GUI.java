@@ -63,4 +63,9 @@ public class GUI extends Application implements ViewCallback {
     public void displayOtherMessage(ClientChatMessage message) {
 
     }
+
+    @Override
+    public void updateDisplay() {
+
+    }
 }

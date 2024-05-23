@@ -12,6 +12,17 @@ import java.util.ArrayList;
 public class KickCommand extends BaseCommand {
     @Override
     public void execute(Server server, ArrayList<String> args) {
-        server.getMessageHandler().handleInfo("Kick command was executed with args: " + args);
+        if(args != null && !args.isEmpty()) {
+            server.getMainSocket().getServerThreadSet().forEach(serverThread -> {
+                if(args.contains(serverThread.getRemoteAddress()) || args.getFirst().equals("all")) {
+                    serverThread.close("You were kicked from the server.", false);
+                }
+            });
+
+            server.getMessageHandler().handleInfo("Successfully kicked all specified clients");
+        } else {
+            server.getMessageHandler().handleInfo("Please supply at least one IP address to the kick command");
+        }
+
     }
 }

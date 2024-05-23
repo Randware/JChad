@@ -119,6 +119,7 @@ public class ServerConnection implements Callable<Void> {
         // Do everything that must be done in order to properly close the current connection
         connectionWriter.close();
         connectionReader.close();
+        socket.close();
     }
 
     /**
@@ -138,7 +139,7 @@ public class ServerConnection implements Callable<Void> {
     }
 
     /**
-     * Get the currently knows information about the server.
+     * Get the currently known information about the server.
      *
      * @return the currently known {@link ServerInformation}-
      */

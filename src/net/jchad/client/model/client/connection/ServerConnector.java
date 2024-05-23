@@ -139,17 +139,21 @@ public class ServerConnector implements Callable<ServerConnection> {
         } catch (InvalidPacketException e) {
             throw new ClosedConnectionException("The server packet is invalid", e);
         } catch (ConnectionClosedException e) {
-            throw new ClosedConnectionException("The server closed the connection", e);
+            throw new ClosedConnectionException(e.getMessage(), e);
         } catch (IOException e) {
             throw new ClosedConnectionException("An IOException occurred while trying to read data", e);
         }
         ServerConnection connection = new ServerConnection(client, connectionDetails, connectionWriter, connectionReader, serverInformation, socket);
         streamsTransfered = true;
 
+
        return connection;
     }
 
     private <T extends Packet> T readPacket() throws IOException, ClosedConnectionException, InvalidPacketException {
+
+
+
         return connectionReader.readPacket();
     }
 
