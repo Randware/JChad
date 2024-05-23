@@ -55,4 +55,9 @@ public class TestView implements ViewCallback {
     public void displayOtherMessage(ClientChatMessage message) {
 
     }
+
+    @Override
+    public void updateDisplay() {
+
+    }
 }

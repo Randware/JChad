@@ -28,10 +28,10 @@ public class Test {
         System.out.println(new UsernameClientPacket("Dari_OS").toJSON());
         System.out.println(new ClientMessagePacket("Hello lovely world", "test").toJSON());
         System.out.println(new JoinChatRequestPacket("test").toJSON());
-        readPacket(new PasswordResponsePacket(CrypterManager.hash("test")).toJSON());
+        //System.out.println(new C);
         System.out.println(new ConnectionClosedPacket("").toJSON());
-        System.out.println(new ConnectionClosedPacket("").isValid());
-        readPacket("{\"packet_type\":\"CONNECTION_CLOSE\",\"message\":\"\"}");
+
+
 
 
     }
