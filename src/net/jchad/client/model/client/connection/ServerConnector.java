@@ -9,6 +9,9 @@ import net.jchad.server.model.server.ConnectionClosedException;
 import net.jchad.shared.networking.packets.InvalidPacketException;
 import net.jchad.shared.networking.packets.Packet;
 import net.jchad.shared.networking.packets.PacketType;
+import net.jchad.shared.networking.packets.defaults.BannedPacket;
+import net.jchad.shared.networking.packets.defaults.NotWhitelistedPacket;
+import net.jchad.shared.networking.packets.defaults.ServerInformationResponsePacket;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -109,19 +112,41 @@ public class ServerConnector implements Callable<ServerConnection> {
         } catch (IOException e) {
             throw new ClosedConnectionException("Could not open output and input streams for connection", e);
         }
-
+        ServerInformation serverInformation;
         try {
             Packet incomingPacket = readPacket();
+            if (incomingPacket.getClass().equals(NotWhitelistedPacket.class)) {
+                throw new ClosedConnectionException("Client is not whitelisted on this server");
+            }
+            if (incomingPacket.getClass().equals(BannedPacket.class)) {
+                throw new ClosedConnectionException("Client is banned on this server");
+            }
+            if (incomingPacket.getClass().equals(ServerInformationResponsePacket.class)) {
+                ServerInformationResponsePacket serverInfo = (ServerInformationResponsePacket) incomingPacket;
+                serverInformation = new ServerInformation(
+                        serverInfo.getServer_version(),
+                        serverInfo.isEncrypt_communications(),
+                        serverInfo.isEncrypt_messages(),
+                        serverInfo.getAvailable_chats(),
+                        serverInfo.isRequires_password(),
+                        serverInfo.isStrictly_anonymous(),
+                        serverInfo.getUsername_validation_regex(),
+                        serverInfo.getUsername_validation_description()
+                );
+            } else {
+                throw new InvalidPacketException("The received packet from the server was not recognised");
+            }
         } catch (InvalidPacketException e) {
-
+            throw new ClosedConnectionException("The server packet is invalid", e);
         } catch (ConnectionClosedException e) {
-
-        } catch (IOException e) {}
-        //ServerConnection connection = new ServerConnection(client, connectionDetails, connectionWriter, connectionReader, );
-       // connection.start();
+            throw new ClosedConnectionException("The server closed the connection", e);
+        } catch (IOException e) {
+            throw new ClosedConnectionException("An IOException occurred while trying to read data", e);
+        }
+        ServerConnection connection = new ServerConnection(client, connectionDetails, connectionWriter, connectionReader, serverInformation, socket);
         streamsTransfered = true;
-            return null;
-       // return connection;
+
+       return connection;
     }
 
     private <T extends Packet> T readPacket() throws IOException, ClosedConnectionException, InvalidPacketException {
