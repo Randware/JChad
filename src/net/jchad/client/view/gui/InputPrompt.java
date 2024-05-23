@@ -1,8 +1,6 @@
 package net.jchad.client.view.gui;
 
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 
@@ -38,6 +36,14 @@ public class InputPrompt extends Alert {
         GridPane.setHgrow(inputField, Priority.ALWAYS);
 
         getDialogPane().setContent(grid);
+
+        Button okButton = (Button) getDialogPane().lookupButton(ButtonType.OK);
+        okButton.setText("Submit");
+        okButton.setDisable(true);
+
+        inputField.textProperty().addListener((observable, oldValue, newValue) -> {
+            okButton.setDisable(newValue.trim().isEmpty());
+        });
     }
 
     public String getInput() {
