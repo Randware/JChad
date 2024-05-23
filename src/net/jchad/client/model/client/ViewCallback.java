@@ -68,4 +68,16 @@ public interface ViewCallback {
      * @param message the {@link ClientChatMessage} which should be display as another clients message
      */
     void displayOtherMessage(ClientChatMessage message);
+
+
+    /**
+     * This method is called when the client backends configuration has been updates,
+     * and the view should display it.
+     *
+     * Updates values could be:
+     * - the available chats -> "getChats() retrieves the new chat configuration"
+     *
+     * This is all for now, but this could possibly change.
+     */
+    void updateDisplay();
 }

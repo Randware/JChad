@@ -55,4 +55,40 @@ public class ServerInformationResponsePacket implements Packet {
                server.getConfig().getInternalSettings().getUsernameRegex(),
            server.getConfig().getInternalSettings().getUsernameRegexDescription());
     }
+
+    public double getServer_version() {
+        return server_version;
+    }
+
+    public boolean isEncrypt_communications() {
+        return encrypt_communications;
+    }
+
+    public PacketType getPacket_type() {
+        return packet_type;
+    }
+
+    public boolean isEncrypt_messages() {
+        return encrypt_messages;
+    }
+
+    public String[] getAvailable_chats() {
+        return available_chats;
+    }
+
+    public boolean isRequires_password() {
+        return requires_password;
+    }
+
+    public boolean isStrictly_anonymous() {
+        return strictly_anonymous;
+    }
+
+    public String getUsername_validation_regex() {
+        return username_validation_regex;
+    }
+
+    public String getUsername_validation_description() {
+        return username_validation_description;
+    }
 }

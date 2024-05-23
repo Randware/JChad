@@ -7,13 +7,19 @@ import net.jchad.client.model.store.chat.ClientChatMessage;
 import net.jchad.client.model.store.connection.ConnectionDetails;
 import net.jchad.shared.networking.packets.InvalidPacketException;
 import net.jchad.shared.networking.packets.Packet;
+import net.jchad.shared.networking.packets.defaults.ConnectionClosedPacket;
+import net.jchad.shared.networking.packets.defaults.ServerInformationResponsePacket;
 import net.jchad.shared.networking.packets.messages.ClientMessagePacket;
+import net.jchad.shared.networking.packets.messages.MessageStatusFailedPacket;
 import net.jchad.shared.networking.packets.messages.ServerMessagePacket;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 
 import java.net.Socket;
+import java.util.stream.Collectors;
 
 /**
  * This class represents an active connection to a server. It will do things such
@@ -31,7 +37,7 @@ public class ServerConnection implements Callable<Void> {
 
     private final ConnectionDetails connectionDetails;
 
-    private final ServerInformation serverInformation;
+    private ServerInformation serverInformation;
 
     private final Socket socket;
 
@@ -63,12 +69,45 @@ public class ServerConnection implements Callable<Void> {
     @Override
     public Void call() throws ClosedConnectionException, IOException, InvalidPacketException {
         while(true) {
-            Packet packet = connectionReader.readPacket();
+            Packet readPacket = connectionReader.readPacket();
 
-            // check for possible packet types
+            // first check if the connection was closed by the server
+            if(readPacket instanceof ConnectionClosedPacket packet) {
+                throw new ClosedConnectionException(packet.getMessage());
+            }
 
-            if (packet instanceof ServerMessagePacket) {
-                // handle message packet here
+            // check if the server sent new information about its configuration
+            if(readPacket instanceof ServerInformationResponsePacket packet) {
+                this.serverInformation = new ServerInformation(
+                        packet.getServer_version(),
+                        packet.isEncrypt_communications(),
+                        packet.isEncrypt_messages(),
+                        packet.getAvailable_chats(),
+                        packet.isRequires_password(),
+                        packet.isStrictly_anonymous(),
+                        packet.getUsername_validation_regex(),
+                        packet.getUsername_validation_description()
+                );
+
+                client.updateChats(new ArrayList<>(Arrays.stream(packet.getAvailable_chats())
+                        .map(client::getChat)
+                        .collect(Collectors.toCollection(ArrayList::new))));
+            }
+
+            // check if there was a new message sent by someone, if yes add it to the client
+            if(readPacket instanceof ServerMessagePacket packet) {
+                client.addMessage(client.getChat(packet.getChat()),
+                        new ClientChatMessage(
+                                packet.getChat(),
+                                packet.getMessage(),
+                                packet.getUsername(),
+                                packet.getTimestamp()
+                        ));
+            }
+
+            // this packet will be sent by the server if the client sent an invalid message
+            if(readPacket instanceof MessageStatusFailedPacket packet) {
+                viewCallback.handleWarning("Server failed receiving message packet: " + packet.getReason());
             }
         }
     }
@@ -96,5 +135,14 @@ public class ServerConnection implements Callable<Void> {
         connectionWriter.sendPacket(new ClientMessagePacket(messageContent, chat.getName()));
 
         return message;
+    }
+
+    /**
+     * Get the currently knows information about the server.
+     *
+     * @return the currently known {@link ServerInformation}-
+     */
+    public ServerInformation getServerInformation() {
+        return serverInformation;
     }
 }

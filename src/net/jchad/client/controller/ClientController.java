@@ -72,6 +72,16 @@ public class ClientController {
     }
 
     /**
+     * Get all currently available chats from the client.
+     *
+     * @return an {@link ArrayList} of all currently available
+     * {@link ClientChat} instances.
+     */
+    public ArrayList<ClientChat> getChats() {
+        return client.getChats();
+    }
+
+    /**
      * Returns all {@link ClientChatMessage} instances from this specific chat.
      * <br>
      * <br>
