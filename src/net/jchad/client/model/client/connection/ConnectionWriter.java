@@ -29,6 +29,9 @@ public class ConnectionWriter extends Thread {
         out.println(packet);
     }
 
+    public void send(String data) {
+        out.println(data);
+    }
 
     public void close() {
         out.close();

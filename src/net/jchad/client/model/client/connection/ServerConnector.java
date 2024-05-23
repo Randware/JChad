@@ -6,15 +6,31 @@ import net.jchad.client.model.client.packets.PacketHandler;
 import net.jchad.client.model.client.packets.PacketMapper;
 import net.jchad.client.model.store.connection.ConnectionDetails;
 import net.jchad.server.model.server.ConnectionClosedException;
+import net.jchad.shared.cryptography.CrypterManager;
+import net.jchad.shared.cryptography.ImpossibleConversionException;
 import net.jchad.shared.networking.packets.InvalidPacketException;
 import net.jchad.shared.networking.packets.Packet;
 import net.jchad.shared.networking.packets.PacketType;
-import net.jchad.shared.networking.packets.defaults.BannedPacket;
-import net.jchad.shared.networking.packets.defaults.NotWhitelistedPacket;
-import net.jchad.shared.networking.packets.defaults.ServerInformationResponsePacket;
+import net.jchad.shared.networking.packets.defaults.*;
+import net.jchad.shared.networking.packets.encryption.AESencryptionKeysPacket;
+import net.jchad.shared.networking.packets.encryption.KeyExchangeStartPacket;
+import net.jchad.shared.networking.packets.encryption.RSAkeyErrorPacket;
+import net.jchad.shared.networking.packets.encryption.RSAkeyPacket;
+import net.jchad.shared.networking.packets.password.PasswordFailedPacket;
+import net.jchad.shared.networking.packets.password.PasswordRequestPacket;
+import net.jchad.shared.networking.packets.password.PasswordResponsePacket;
+import net.jchad.shared.networking.packets.password.PasswordSuccessPacket;
+import net.jchad.shared.networking.packets.username.UsernameClientPacket;
+import net.jchad.shared.networking.packets.username.UsernameServerPacket;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
 import java.net.Socket;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
@@ -31,6 +47,11 @@ public class ServerConnector implements Callable<ServerConnection> {
     private final ConnectionDetails connectionDetails;
     private Client client;
     private ViewCallback viewCallback;
+    private ServerInformation serverInformation;
+    private final CrypterManager crypterManager = new CrypterManager();
+    private AESencryptionKeysPacket keys = new AESencryptionKeysPacket("", "", "" ,"");
+
+
 
     /**
      * The Socket the connection will run on.
@@ -60,6 +81,7 @@ public class ServerConnector implements Callable<ServerConnection> {
         this.isRunning = false;
         this.connectionDetails = connectionDetails;
         streamsTransfered = false;
+        crypterManager.setKeyPair(4096);
     }
 
     /**
@@ -109,10 +131,11 @@ public class ServerConnector implements Callable<ServerConnection> {
         try {
             connectionReader = new ConnectionReader(socket.getInputStream());
             connectionReader.start();
+
         } catch (IOException e) {
             throw new ClosedConnectionException("Could not open output and input streams for connection", e);
         }
-        ServerInformation serverInformation;
+
         try {
             Packet incomingPacket = readPacket();
             if (incomingPacket.getClass().equals(NotWhitelistedPacket.class)) {
@@ -136,6 +159,39 @@ public class ServerConnector implements Callable<ServerConnection> {
             } else {
                 throw new InvalidPacketException("The received packet from the server was not recognised");
             }
+            Packet nextPacket = connectionReader.readPacket();
+            encryption(nextPacket);
+            password();
+            username();
+
+            Packet hopefullySuccess = readPacket();
+            Packet newServerInfos = readPacket();
+            if (hopefullySuccess!= null  && hopefullySuccess.getClass().equals(ConnectionEstablishedPacket.class) &&
+                    newServerInfos != null && newServerInfos.getClass().equals(ServerInformationResponsePacket.class)) {
+
+                    ServerInformationResponsePacket newServerInfosCasted = (ServerInformationResponsePacket) newServerInfos;
+                    serverInformation = new ServerInformation(
+                            newServerInfosCasted.getServer_version(),
+                            newServerInfosCasted.isEncrypt_communications(),
+                            newServerInfosCasted.isEncrypt_messages(),
+                            newServerInfosCasted.getAvailable_chats(),
+                            newServerInfosCasted.isRequires_password(),
+                            newServerInfosCasted.isStrictly_anonymous(),
+                            newServerInfosCasted.getUsername_validation_regex(),
+                            newServerInfosCasted.getUsername_validation_description()
+                    );
+                    ServerConnection connection = new ServerConnection(client, connectionDetails, connectionWriter, connectionReader, serverInformation, socket);
+                    streamsTransfered = true;
+                    return connection;
+
+
+
+
+            } else {
+                throw new ConnectionClosedException("The connection could NOT be established");
+            }
+
+
         } catch (InvalidPacketException e) {
             throw new ClosedConnectionException("The server packet is invalid", e);
         } catch (ConnectionClosedException e) {
@@ -143,18 +199,142 @@ public class ServerConnector implements Callable<ServerConnection> {
         } catch (IOException e) {
             throw new ClosedConnectionException("An IOException occurred while trying to read data", e);
         }
-        ServerConnection connection = new ServerConnection(client, connectionDetails, connectionWriter, connectionReader, serverInformation, socket);
-        streamsTransfered = true;
 
 
-       return connection;
+
+
+    }
+
+    private void username() throws ClosedConnectionException, IOException, InvalidPacketException {
+        while (true) {
+            Packet nextPacket = readPacket();
+            if (nextPacket == null) throw new ConnectionClosedException("The connection to the server was lost during the username process");
+            if (nextPacket.getClass().equals(ConnectionClosedPacket.class)) {
+                throw new ClosedConnectionException(((ConnectionClosedPacket) nextPacket).getMessage());
+            }
+            if (nextPacket.getClass().equals(UsernameServerPacket.class)) {
+                UsernameServerPacket usernameServerPacket = (UsernameServerPacket) nextPacket;
+                if (usernameServerPacket.getUsername_response_type().equals(UsernameServerPacket.UsernameResponseType.PROVIDE_USERNAME)) {
+                    writePacket(new UsernameClientPacket(connectionDetails.getUsername()));
+                } else {
+                    UsernameServerPacket.UsernameResponseType responseType = usernameServerPacket.getUsername_response_type();
+                    switch (responseType) {
+                        case ERROR_USERNAME_TAKEN -> connectionDetails.setUsername(client.getViewCallback().displayPrompt("Enter a username", "The requested username is already taken. Pleases enter a new one: "));
+                        case ERROR_USERNAME_INVALID -> connectionDetails.setUsername(client.getViewCallback().displayPrompt("Enter a username", "The requested username is invalid make sure to follow these rules: " + serverInformation.username_validation_description()));
+                        case ERROR_USERNAME_INAPROPRIATE -> connectionDetails.setUsername(client.getViewCallback().displayPrompt("Enter a username", "The requested username is inappropriate. Please enter a new one: "));
+                        default -> {
+                            return;
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+
+    private void password() throws ClosedConnectionException, IOException, InvalidPacketException {
+        while (true) {
+            Packet nextPacket = readPacket();
+            if (nextPacket == null) throw new ConnectionClosedException("The connection to the server was lost during the password authentication process");
+            if (nextPacket.getClass().equals(ConnectionClosedPacket.class)) {
+                throw new ClosedConnectionException(((ConnectionClosedPacket) nextPacket).getMessage());
+            }
+            if (nextPacket.getClass().equals(PasswordRequestPacket.class)) {
+                writePacket(new PasswordResponsePacket(CrypterManager.hash(connectionDetails.getPassword())));
+                Packet nextNextPacket = readPacket(); //I just want to get over this project. I don't have enough energy to think of creative variable names.
+                if (nextNextPacket == null) throw new ConnectionClosedException("The connection to the server was lost during the password authentication process");
+                if (nextNextPacket.getClass().equals(PasswordSuccessPacket.class)) {
+                    return;
+                }
+                if (nextNextPacket.getClass().equals(PasswordFailedPacket.class)) {
+                    client.getViewCallback().displayPrompt("Password", "The provided password was wrong. Please enter the correct one: ");
+                }
+                throw new ConnectionClosedException("An unknown error occurred during the password authentication process");
+            }
+        }
+
+    }
+
+    /**
+     * Encrypts packets if the provided packet is a {@link KeyExchangeStartPacket}.
+     * @param packet the next packet that was received by the server
+     * @return if the keys got exchanged
+     */
+    private boolean encryption(Packet packet) {
+        if (packet.getClass().equals(KeyExchangeStartPacket.class)) {
+             connectionWriter.sendPacket(new RSAkeyPacket(crypterManager.getPublicKey()));
+            try {
+                String keys = connectionReader.read();
+
+                if (Packet.fromJSON(keys) == null) {
+                    Packet keysPacket = Packet.fromJSON(crypterManager.decryptRSA(keys));
+                    if ( keysPacket != null && keysPacket.getClass().equals(AESencryptionKeysPacket.class)) {
+                        this.keys = (AESencryptionKeysPacket) keysPacket;
+                        connectionReader.read(); //consumes the {"packet_type":"KEY_EXCHANGE_END"} Packet
+                        return true;
+                    } else {
+                        throw new InvalidPacketException((keysPacket != null && keysPacket.getClass().equals(RSAkeyErrorPacket.class)) ? ((RSAkeyErrorPacket) keysPacket).getError_message() : "");
+                    }
+                } else {
+                    throw new ConnectionClosedException("An error occurred during the key exchange process");
+                }
+            } catch (IOException e) {
+                throw new ConnectionClosedException("An IOException occurred during the key exchange process", e);
+            } catch (ClosedConnectionException e) {
+                throw new ConnectionClosedException("The server closed the connection during the key exchange process", e);
+            } catch (ImpossibleConversionException e) {
+                throw new ConnectionClosedException("The server side encrypted encryption keys are not correctly encrypted during the key exchange process", e);
+            } catch (NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException |
+                     BadPaddingException e) {
+                throw new ConnectionClosedException("An unknown error during the key exchange process", e);
+            } catch (InvalidKeyException e) {
+                throw new ConnectionClosedException("The server encrypted the keys incorrect during the key exchange process", e);
+            } catch (InvalidPacketException e) {
+                throw new ConnectionClosedException("The server sent wrong or invalid packets during the key exchange process", e);
+            }
+        } else {
+            return false;
+        }
+
     }
 
     private <T extends Packet> T readPacket() throws IOException, ClosedConnectionException, InvalidPacketException {
 
 
 
-        return connectionReader.readPacket();
+        try {
+            if (keys != null) {
+                crypterManager.setAESkey(keys.getCommunication_key());
+                crypterManager.setBase64IV(keys.getCommunication_initialization_vector());
+
+                return Packet.fromJSON(crypterManager.decryptAES(connectionReader.read()));
+
+            } else {
+                return connectionReader.readPacket();
+            }
+        } catch (ImpossibleConversionException | NoSuchPaddingException | IllegalBlockSizeException |
+                 NoSuchAlgorithmException | BadPaddingException | InvalidAlgorithmParameterException |
+                 InvalidKeyException e) {
+            throw new ClosedConnectionException("An unknown encryption related error while trying to send a Packet", e);
+        }
+    }
+
+    private <T extends Packet> void writePacket(T packet) throws ClosedConnectionException {
+        try {
+            if (keys != null) {
+                crypterManager.setAESkey(keys.getCommunication_key());
+                crypterManager.setBase64IV(keys.getCommunication_initialization_vector());
+
+                connectionWriter.send(crypterManager.encryptAES(packet.toJSON()));
+
+            } else {
+                connectionWriter.sendPacket(packet);
+            }
+        } catch (ImpossibleConversionException | NoSuchPaddingException | IllegalBlockSizeException |
+                 NoSuchAlgorithmException | BadPaddingException | InvalidAlgorithmParameterException |
+                 InvalidKeyException e) {
+            throw new ClosedConnectionException("An unknown encryption related error while trying to send a Packet", e);
+        }
     }
 
 
