@@ -5,6 +5,8 @@ import net.jchad.client.model.client.ViewCallback;
 import net.jchad.client.model.client.packets.PacketHandler;
 import net.jchad.client.model.client.packets.PacketMapper;
 import net.jchad.client.model.store.connection.ConnectionDetails;
+import net.jchad.server.model.server.ConnectionClosedException;
+import net.jchad.shared.networking.packets.InvalidPacketException;
 import net.jchad.shared.networking.packets.Packet;
 import net.jchad.shared.networking.packets.PacketType;
 
@@ -108,17 +110,22 @@ public class ServerConnector implements Callable<ServerConnection> {
             throw new ClosedConnectionException("Could not open output and input streams for connection", e);
         }
 
-        client.getViewCallback().handleInfo(readPacket());
+        try {
+            Packet incomingPacket = readPacket();
+        } catch (InvalidPacketException e) {
 
-        ServerConnection connection = new ServerConnection(client, connectionDetails, connectionWriter, connectionReader);
-        connection.start();
+        } catch (ConnectionClosedException e) {
+
+        } catch (IOException e) {}
+        //ServerConnection connection = new ServerConnection(client, connectionDetails, connectionWriter, connectionReader, );
+       // connection.start();
         streamsTransfered = true;
-
-        return connection;
+            return null;
+       // return connection;
     }
 
-    private String readPacket() throws IOException, ClosedConnectionException {
-        return connectionReader.read();
+    private <T extends Packet> T readPacket() throws IOException, ClosedConnectionException, InvalidPacketException {
+        return connectionReader.readPacket();
     }
 
 
@@ -130,6 +137,7 @@ public class ServerConnector implements Callable<ServerConnection> {
             isRunning = false;
 
             if(!streamsTransfered) {
+                socket.close();
                 connectionWriter.close();
                 connectionReader.close();
             } else {

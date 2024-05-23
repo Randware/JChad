@@ -7,6 +7,8 @@ import net.jchad.client.model.store.chat.ClientChatMessage;
 import net.jchad.client.model.store.connection.ConnectionDetails;
 import net.jchad.shared.networking.packets.messages.ClientMessagePacket;
 
+import java.net.Socket;
+
 /**
  * This class represents an active connection to a server. It will do things such
  * as informing the front end of new display information, handle the Threads responsible
@@ -25,6 +27,8 @@ public class ServerConnection extends Thread {
 
     private final ServerInformation serverInformation;
 
+    private final Socket socket;
+
     /**
      * The {@link ConnectionWriter} which will be used to send data to the server.
      */
@@ -35,13 +39,14 @@ public class ServerConnection extends Thread {
      */
     private ConnectionReader connectionReader;
 
-    public ServerConnection(Client client, ConnectionDetails connectionDetails, ConnectionWriter connectionWriter, ConnectionReader connectionReader, ServerInformation serverInformation) {
+    public ServerConnection(Client client, ConnectionDetails connectionDetails, ConnectionWriter connectionWriter, ConnectionReader connectionReader, ServerInformation serverInformation, Socket socket) {
         this.client = client;
         this.viewCallback = client.getViewCallback();
         this.connectionDetails = connectionDetails;
         this.connectionWriter = connectionWriter;
         this.connectionReader = connectionReader;
         this.serverInformation = serverInformation;
+        this.socket = socket;
     }
 
     /**

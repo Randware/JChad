@@ -245,6 +245,8 @@ public class User {
                                     messagePacket.getTimestamp()
                             );
                         } catch (Exception e) {
+                            //UHH SCARY!!! MAY CLOSE ALL CONNECTIONS IF THE CLIENT SENDS A STRING THAT IS NOT ENCRYPTABLE?
+                            //CVE-1 JUST DROPPED?!?!?!?
                             getConnection().getMessageHandler().handleDebug("An error occurred while encrypting message data for " + user.getConnection().getRemoteAddress());
                             user.getConnection().close("An error occurred while encrypting message data");
                         }
