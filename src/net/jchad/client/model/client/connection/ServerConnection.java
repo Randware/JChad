@@ -5,7 +5,13 @@ import net.jchad.client.model.client.ViewCallback;
 import net.jchad.client.model.store.chat.ClientChat;
 import net.jchad.client.model.store.chat.ClientChatMessage;
 import net.jchad.client.model.store.connection.ConnectionDetails;
+import net.jchad.shared.networking.packets.InvalidPacketException;
+import net.jchad.shared.networking.packets.Packet;
 import net.jchad.shared.networking.packets.messages.ClientMessagePacket;
+import net.jchad.shared.networking.packets.messages.ServerMessagePacket;
+
+import java.io.IOException;
+import java.util.concurrent.Callable;
 
 import java.net.Socket;
 
@@ -18,7 +24,7 @@ import java.net.Socket;
  * TODO: Implement proper closing functionality
  * TODO: Maybe handle chats in here?
  */
-public class ServerConnection extends Thread {
+public class ServerConnection implements Callable<Void> {
     private Client client;
 
     private final ViewCallback viewCallback;
@@ -50,10 +56,30 @@ public class ServerConnection extends Thread {
     }
 
     /**
+     * This method executes the main code for the server connection.
+     *
+     * @throws ClosedConnectionException if the connection was closed for some reason.
+     */
+    @Override
+    public Void call() throws ClosedConnectionException, IOException, InvalidPacketException {
+        while(true) {
+            Packet packet = connectionReader.readPacket();
+
+            // check for possible packet types
+
+            if (packet instanceof ServerMessagePacket) {
+                // handle message packet here
+            }
+        }
+    }
+
+    /**
      * Stop any currently running processes and also close all streams.
      */
-    public void closeConnection() {
+    public void closeConnection() throws IOException {
         // Do everything that must be done in order to properly close the current connection
+        connectionWriter.close();
+        connectionReader.close();
     }
 
     /**
