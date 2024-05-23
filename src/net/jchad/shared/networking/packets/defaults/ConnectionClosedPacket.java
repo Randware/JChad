@@ -7,7 +7,4 @@ public class ConnectionClosedPacket extends DefaultPacket {
         super(PacketType.CONNECTION_CLOSED, reason);
     }
 
-    public ConnectionClosedPacket() {
-        this(null);
-    }
 }
