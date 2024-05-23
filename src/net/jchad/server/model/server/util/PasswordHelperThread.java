@@ -30,11 +30,11 @@ public class PasswordHelperThread extends HelperThread {
                 if (passwordPacket.getPassword().length() != 44) {
                     //You may wonder: Why 44?
                     // Simple answer: Every base64 encoded sha256 hash has to be 44 Base64 chars long
-                    writePacket(new PasswordFailedPacket("The provided password is not SHA-256 hashed and base64 encoded"));
+                    writePacket(new PasswordFailedPacket("The provided password is ether wrong or it is not SHA-256 hashed and base64 encoded"));
                     throw new InvalidPacketException("The provided password from %s was not SHA-256 hashed and Base64 encoded".formatted(getServerThread().getRemoteAddress()));
                 }
                 if (!passwordPacket.getPassword().equals(getServerThread().getServer().getServerPassword())) {
-                    writePacket(new PasswordFailedPacket("The provided password did not match the server's password."));
+                    writePacket(new PasswordFailedPacket("The provided password did not match the server password."));
                     throw new InvalidPacketException("The provided password from %s did not match the server's password".formatted(getServerThread().getRemoteAddress()));
                 } else {
                     getServerThread().getMessageHandler().handleDebug("%s authenticated successfully ".formatted(getServerThread().getRemoteAddress()));

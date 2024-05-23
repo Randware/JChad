@@ -20,4 +20,12 @@ public class UsernameServerPacket implements Packet {
         SUCCESS_USERNAME_SET,
         PROVIDE_USERNAME;
     }
+
+    public UsernameResponseType getUsername_response_type() {
+        return username_response_type;
+    }
+
+    public String getUsername_response_reason() {
+        return username_response_reason;
+    }
 }
