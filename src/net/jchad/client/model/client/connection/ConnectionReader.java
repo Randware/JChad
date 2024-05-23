@@ -2,6 +2,9 @@ package net.jchad.client.model.client.connection;
 
 import net.jchad.client.model.client.packets.PacketHandler;
 import net.jchad.server.model.server.ConnectionClosedException;
+import net.jchad.shared.networking.packets.InvalidPacketException;
+import net.jchad.shared.networking.packets.Packet;
+import net.jchad.shared.networking.packets.defaults.ConnectionClosedPacket;
 
 import java.io.*;
 import java.util.function.Consumer;
@@ -44,6 +47,21 @@ public class ConnectionReader extends Thread {
             return read;
         } else {
             throw new ClosedConnectionException("Connection was closed by the server");
+        }
+    }
+
+    public <T extends Packet> T readPacket() throws InvalidPacketException, IOException, ClosedConnectionException {
+        String read = read();
+        Packet packet = Packet.fromJSON(read);
+        if (packet != null && packet.isValid()) {
+            if (packet.getClass().equals(ConnectionClosedPacket.class)){
+                ConnectionClosedPacket closedPacket = (ConnectionClosedPacket) packet;
+                throw new ConnectionClosedException("Connection was closed by the server. Reason: " + closedPacket.getMessage());
+            } else {
+                return (T) packet;
+            }
+        } else {
+            throw new InvalidPacketException("The packet that was read is invalid");
         }
     }
 
