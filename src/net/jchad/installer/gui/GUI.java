@@ -266,7 +266,7 @@ public class GUI extends Application implements BarDisplay {
             if (findErrorCode.find()) {
                 //An error occurred with https error code
                 //To get the error code do: findErrorCode.group(1)
-                System.out.println(findErrorCode.group(1));
+                //System.out.println(findErrorCode.group(1));
                 Platform.runLater(() -> {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
                     alert.setTitle("Error Occured");
@@ -276,7 +276,7 @@ public class GUI extends Application implements BarDisplay {
 
             } else {
                 //An error occurred without any https error code:
-                System.out.println("An error occurred!");
+               // System.out.println("An error occurred!");
             }
 
         }
