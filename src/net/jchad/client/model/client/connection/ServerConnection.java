@@ -23,6 +23,8 @@ public class ServerConnection extends Thread {
 
     private final ConnectionDetails connectionDetails;
 
+    private final ServerInformation serverInformation;
+
     /**
      * The {@link ConnectionWriter} which will be used to send data to the server.
      */
@@ -33,12 +35,13 @@ public class ServerConnection extends Thread {
      */
     private ConnectionReader connectionReader;
 
-    public ServerConnection(Client client, ConnectionDetails connectionDetails, ConnectionWriter connectionWriter, ConnectionReader connectionReader) {
+    public ServerConnection(Client client, ConnectionDetails connectionDetails, ConnectionWriter connectionWriter, ConnectionReader connectionReader, ServerInformation serverInformation) {
         this.client = client;
         this.viewCallback = client.getViewCallback();
         this.connectionDetails = connectionDetails;
         this.connectionWriter = connectionWriter;
         this.connectionReader = connectionReader;
+        this.serverInformation = serverInformation;
     }
 
     /**
