@@ -51,10 +51,15 @@ public class MainHelperThread extends HelperThread {
                 //First check: Checks if the client sent a messagePacket
                 ClientMessagePacket clientMessage = getServerThread().getGson().fromJson(element, ClientMessagePacket.class);
                 if (clientMessage != null && clientMessage.isValid()) {
-                    if (getServerThread().getServer().getChatManager().chatExists(clientMessage.getChat())) {
+                    Chat targetChat = getServerThread().getServer().getChatManager().getChat(clientMessage.getChat());
+                    if (targetChat != null) {
+                        if (getServerThread().getUser().getJoinedChats().contains(clientMessage.getChat())) {
                             getServerThread().getUser().sendMessage(clientMessage);
-                        writePacket(new MessageStatusSuccessPacket());
-                        failedAttempts--;
+                            writePacket(new MessageStatusSuccessPacket());
+                            failedAttempts--;
+                        } else {
+                            writePacket(new MessageStatusFailedPacket("You have not joined the chat yet"));
+                        }
                     } else {
                         writePacket(new MessageStatusFailedPacket("The provided chat does not exist"));
                     }
