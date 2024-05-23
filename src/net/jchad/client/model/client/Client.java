@@ -167,6 +167,27 @@ public class Client {
     }
 
     /**
+     * Get all currently available chats from the client.
+     *
+     * @return an {@link ArrayList} of all currently available
+     * {@link ClientChat} instances.
+     */
+    public ArrayList<ClientChat> getChats() {
+        return new ArrayList<>(chats);
+    }
+
+    /**
+     * This will update the current chat configuration with the provided one.
+     *
+     * @param updatedChats the updated chat configuration.
+     */
+    public void updateChats(ArrayList<ClientChat> updatedChats) {
+        this.chats = updatedChats;
+
+        viewCallback.updateDisplay();
+    }
+
+    /**
      * This method returns the {@link ClientConfigManager} currently used by the client.
      *
      * @return the {@link ClientConfigManager} currently used by the client.
