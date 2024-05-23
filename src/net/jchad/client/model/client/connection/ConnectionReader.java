@@ -56,7 +56,7 @@ public class ConnectionReader extends Thread {
         if (packet != null && packet.isValid()) {
             if (packet.getClass().equals(ConnectionClosedPacket.class)){
                 ConnectionClosedPacket closedPacket = (ConnectionClosedPacket) packet;
-                throw new ConnectionClosedException("Connection was closed by the server. Reason: " + closedPacket.getMessage());
+                throw new ConnectionClosedException(closedPacket.getMessage());
             } else {
                 return (T) packet;
             }
