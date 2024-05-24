@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.StackedBarChart?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<HBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="421.0" prefWidth="764.0" style="-fx-background-color: EEEEEE; -fx-background-radius: 5;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <VBox prefHeight="400.0" prefWidth="142.0" style="-fx-background-color: A91D3A;">
+         <children>
+            <Pane opacity="0.0" prefHeight="20.0" prefWidth="142.0">
+               <opaqueInsets>
+                  <Insets bottom="1.0" />
+               </opaqueInsets>
+            </Pane>
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="JChad" textAlignment="CENTER" wrappingWidth="141.56099700927734">
+               <font>
+                  <Font name="JetBrains Mono Medium" size="21.0" />
+               </font>
+            </Text>
+            <Pane opacity="0.0" prefHeight="86.0" prefWidth="142.0">
+               <opaqueInsets>
+                  <Insets bottom="1.0" />
+               </opaqueInsets>
+            </Pane>
+            <HBox prefHeight="33.0" prefWidth="142.0">
+               <children>
+                  <AnchorPane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: C73659; -fx-background-radius: 10;">
+                     <children>
+                        <ImageView fitHeight="20.0" fitWidth="23.0" layoutX="6.0" layoutY="7.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@images/pie-chart.png" />
+                           </image></ImageView>
+                        <Text layoutX="30.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Analytics" wrappingWidth="64.13199996948242" />
+                     </children>
+                  </AnchorPane>
+               </children></HBox>
+            <Pane opacity="0.0" prefHeight="25.0" prefWidth="142.0">
+               <opaqueInsets>
+                  <Insets bottom="1.0" />
+               </opaqueInsets>
+            </Pane>
+            <HBox prefHeight="33.0" prefWidth="142.0">
+               <children>
+                  <AnchorPane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: C73659; -fx-background-radius: 10;">
+                     <children>
+                        <ImageView fitHeight="20.0" fitWidth="23.0" layoutX="6.0" layoutY="7.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@images/connect.png" />
+                           </image>
+                        </ImageView>
+                        <Text layoutX="33.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Connections" wrappingWidth="88.13199996948242" />
+                     </children>
+                  </AnchorPane>
+               </children>
+            </HBox>
+            <Pane layoutX="10.0" layoutY="178.0" opacity="0.0" prefHeight="25.0" prefWidth="142.0">
+               <opaqueInsets>
+                  <Insets bottom="1.0" />
+               </opaqueInsets>
+            </Pane>
+            <HBox prefHeight="33.0" prefWidth="142.0">
+               <children>
+                  <AnchorPane prefHeight="33.0" prefWidth="158.0" style="-fx-background-color: C73659; -fx-background-radius: 10;">
+                     <children>
+                        <ImageView fitHeight="20.0" fitWidth="23.0" layoutX="14.0" layoutY="7.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@images/command-line.png" />
+                           </image>
+                        </ImageView>
+                        <Text layoutX="39.0" layoutY="22.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Console" wrappingWidth="64.13199996948242" />
+                     </children>
+                  </AnchorPane>
+               </children>
+            </HBox>
+         </children></VBox>
+      <BorderPane prefHeight="421.0" prefWidth="622.0">
+         <top>
+            <AnchorPane prefHeight="0.0" prefWidth="0.0" style="-fx-background-color: EEEEEE;" BorderPane.alignment="CENTER">
+               <children>
+                  <HBox alignment="CENTER_RIGHT" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <Circle fill="#a91d3a" radius="10.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="2.0" />
+                        <Pane opacity="0.0" prefHeight="21.0" prefWidth="8.0" />
+                        <Circle fill="#f4ce14" radius="10.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="2.0" />
+                        <Pane opacity="0.0" prefHeight="21.0" prefWidth="8.0" />
+                        <Circle fill="#005b41" radius="10.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="2.0" />
+                     </children>
+                  </HBox>
+               </children>
+            </AnchorPane>
+         </top>
+
+         <center>
+            <AnchorPane prefHeight="400.0" prefWidth="505.0" style="-fx-background-color: EEEEEE;" BorderPane.alignment="CENTER">
+               <children>
+                  <LineChart layoutX="-6.0" layoutY="150.0" prefHeight="250.0" prefWidth="238.0" title="RAM usage in %">
+                    <xAxis>
+                      <CategoryAxis side="BOTTOM" />
+                    </xAxis>
+                    <yAxis>
+                      <NumberAxis side="LEFT" upperBound="99.0" />
+                    </yAxis>
+                  </LineChart>
+                  <HBox alignment="CENTER_LEFT" layoutX="6.0" layoutY="71.0" prefHeight="18.0" prefWidth="196.0" style="-fx-background-color: #151515; -fx-background-radius: 10;">
+                     <children>
+                        <Text fill="#eeeeee" strokeType="OUTSIDE" strokeWidth="0.0" text="SERVER UPTIME: " textAlignment="CENTER" wrappingWidth="145.48500061035156">
+                           <font>
+                              <Font name="Source Code Pro" size="13.0" />
+                           </font>
+                        </Text>
+                        <Text fill="#41b06e" strokeType="OUTSIDE" strokeWidth="0.0" text="N/A" wrappingWidth="58.10799789428711">
+                           <font>
+                              <Font name="System Bold" size="13.0" />
+                           </font>
+                        </Text>
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_LEFT" layoutX="6.0" layoutY="14.0" prefHeight="18.0" prefWidth="196.0" style="-fx-background-color: #151515; -fx-background-radius: 10;">
+                     <children>
+                        <Text fill="#eeeeee" strokeType="OUTSIDE" strokeWidth="0.0" text="SERVER STATUS: " textAlignment="CENTER" wrappingWidth="145.48500061035156">
+                           <font>
+                              <Font name="Source Code Pro" size="13.0" />
+                           </font>
+                        </Text>
+                        <StackPane prefHeight="150.0" prefWidth="200.0">
+                           <children>
+                              <Text fill="#41b06e" strokeType="OUTSIDE" strokeWidth="0.0" text="UP" wrappingWidth="58.10799789428711">
+                                 <font>
+                                    <Font name="System Bold" size="13.0" />
+                                 </font>
+                              </Text>
+                              <Text fill="#a91d3a" strokeType="OUTSIDE" strokeWidth="0.0" text="DOWN" wrappingWidth="67.10799789428711">
+                                 <font>
+                                    <Font name="System Bold" size="13.0" />
+                                 </font>
+                              </Text>
+                              <Pane prefHeight="18.0" prefWidth="391.0" />
+                           </children>
+                        </StackPane>
+                     </children>
+                  </HBox>
+                  <StackedBarChart layoutX="221.0" layoutY="150.0" prefHeight="250.0" prefWidth="265.0" title="Connected clients">
+                    <xAxis>
+                      <CategoryAxis side="BOTTOM" />
+                    </xAxis>
+                    <yAxis>
+                      <NumberAxis side="LEFT" upperBound="99.0" />
+                    </yAxis>
+                  </StackedBarChart>
+               </children>
+            </AnchorPane>
+         </center>
+      </BorderPane>
+   </children>
+</HBox>
