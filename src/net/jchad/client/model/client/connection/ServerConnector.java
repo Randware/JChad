@@ -180,7 +180,7 @@ public class ServerConnector implements Callable<ServerConnection> {
                             newServerInfosCasted.getUsername_validation_regex(),
                             newServerInfosCasted.getUsername_validation_description()
                     );
-                    ServerConnection connection = new ServerConnection(client, connectionDetails, connectionWriter, connectionReader, serverInformation, socket);
+                    ServerConnection connection = new ServerConnection(client, connectionDetails, connectionWriter, connectionReader, serverInformation, socket, keys);
                     streamsTransfered = true;
                     return connection;
 
@@ -315,7 +315,7 @@ public class ServerConnector implements Callable<ServerConnection> {
         } catch (ImpossibleConversionException | NoSuchPaddingException | IllegalBlockSizeException |
                  NoSuchAlgorithmException | BadPaddingException | InvalidAlgorithmParameterException |
                  InvalidKeyException e) {
-            throw new ClosedConnectionException("An unknown encryption related error while trying to send a Packet", e);
+            throw new ClosedConnectionException("An unknown encryption related error occurred while trying to send a Packet", e);
         }
     }
 
@@ -333,7 +333,7 @@ public class ServerConnector implements Callable<ServerConnection> {
         } catch (ImpossibleConversionException | NoSuchPaddingException | IllegalBlockSizeException |
                  NoSuchAlgorithmException | BadPaddingException | InvalidAlgorithmParameterException |
                  InvalidKeyException e) {
-            throw new ClosedConnectionException("An unknown encryption related error while trying to send a Packet", e);
+            throw new ClosedConnectionException("An unknown encryption error occurred while trying to send a Packet", e);
         }
     }
 
@@ -341,14 +341,18 @@ public class ServerConnector implements Callable<ServerConnection> {
     /**
      * Stop any currently ongoing connection process and eliminate this thread.
      */
-    public void shutdown() throws IOException {
+    public void shutdown() {
         synchronized (lock) {
             isRunning = false;
 
             if(!streamsTransfered) {
+                try {
                 socket.close();
                 connectionWriter.close();
                 connectionReader.close();
+            } catch (IOException e) {
+                client.getViewCallback().handleFatalError(new IOException("An error occurred while closing the connector to the server.", e));
+            }
             } else {
                 connectionWriter = null;
                 connectionReader = null;
