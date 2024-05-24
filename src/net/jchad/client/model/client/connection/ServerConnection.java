@@ -125,6 +125,7 @@ public class ServerConnection implements Callable<Void> {
 
             // check if there was a new message sent by someone, if yes add it to the client
             if(readPacket instanceof ServerMessagePacket packet) {
+
                 if (keys != null && serverInformation.encrypt_messages()) {
                     crypterManager.setAESkey(keys.getMessage_key());
                     crypterManager.setAESkey(keys.getMessage_initialization_vector());
