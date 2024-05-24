@@ -16,6 +16,8 @@ import java.util.ArrayList;
  * Responsible for displaying the client output in CLI mode.
  * This class is only really used in the development process and
  * for demonstration purposes.
+ *
+ * TODO: handle the first chat joining on connect
  */
 public class CLI implements ViewCallback {
     private ClientController client;

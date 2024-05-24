@@ -94,16 +94,15 @@ public class Client {
      * @param messageString the message string which should be sent.
      */
     public void sendMessageString(String messageString) {
-        if(currentConnection != null) {
+        if(currentConnection != null && currentChat != null) {
             try {
                 ClientChatMessage message = currentConnection.sendMessage(messageString, currentChat);
                 message.setOwn(true);
                 addMessage(currentChat, message);
             } catch (ClosedConnectionException e) {
+                viewCallback.handleFatalError(e);
                 currentConnection.closeConnection();
             }
-
-
         }
     }
 
@@ -152,6 +151,18 @@ public class Client {
      * @param chat the {@link ClientChat} that should be set as the current chat.
      */
     public void setCurrentChat(ClientChat chat) {
+        if(!chat.isJoined()) {
+
+            try {
+                currentConnection.joinChat(chat.getName());
+            } catch (ClosedConnectionException e) {
+                currentConnection.closeConnection();
+                return;
+            }
+
+            chat.setJoined(true);
+        }
+
         this.currentChat = chat;
 
         ArrayList<ClientChatMessage> messages = chat.getMessages();

@@ -14,6 +14,11 @@ public class ClientChat {
 
     private ArrayList<ClientChatMessage> messages;
 
+    /**
+     * This stores if the client has joined this chat already or not.
+     */
+    private boolean joined;
+
     public ClientChat(String name) {
         this(name, new ArrayList<>());
     }
@@ -33,5 +38,13 @@ public class ClientChat {
 
     public ArrayList<ClientChatMessage> getMessages() {
         return new ArrayList<>(messages);
+    }
+
+    public void setJoined(boolean joined) {
+        this.joined = joined;
+    }
+
+    public boolean isJoined() {
+        return joined;
     }
 }
