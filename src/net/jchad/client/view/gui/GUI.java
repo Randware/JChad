@@ -1,9 +1,14 @@
 package net.jchad.client.view.gui;
 
 import javafx.application.Application;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import net.jchad.client.controller.ClientController;
@@ -18,6 +23,8 @@ public class GUI extends Application implements ViewCallback {
     private ScrollPane scrollPane = new ScrollPane();
     private Label headerLabel = new Label();
     private Label contentLabel = new Label();
+    private Stage primaryStage; // Store the primary stage to access it later
+    private Scene scene;
 
     public static void main(String[] args) {
         new GUI().runGUI();
@@ -29,21 +36,20 @@ public class GUI extends Application implements ViewCallback {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        this.primaryStage = primaryStage; // Assign the primary stage to the class variable
         client = new ClientController(this);
 
         headerLabel.setText("Welcome Jchader!");
         contentLabel.setText("This is the best Chad-Platform out there");
 
-        // Combine labels or use a different layout strategy here
         Label combinedLabel = new Label(headerLabel.getText() + "\n" + contentLabel.getText());
 
         Menu connectionsMenu = new Menu("Connections");
 
         MenuItem connect = new MenuItem("add connection");
         MenuItem disconnect = new MenuItem("remove connection");
-        MenuItem currentConnection = new MenuItem("current connection");
 
-        connectionsMenu.getItems().addAll(connect, disconnect, currentConnection);
+        connectionsMenu.getItems().addAll(connect, disconnect);
 
         menuBar.getMenus().addAll(connectionsMenu);
 
@@ -54,15 +60,15 @@ public class GUI extends Application implements ViewCallback {
 
         BorderPane borderPane = new BorderPane();
 
-        //VBox scrollPaneVBox = new VBox();
-
         borderPane.setTop(menuBar);
-        borderPane.setBottom(scrollPane);//scrollPaneVBox
-        borderPane.setCenter(combinedLabel); // Use the combined label here
+        borderPane.setBottom(scrollPane);
+        borderPane.setCenter(combinedLabel);
 
-        Scene scene = new Scene(borderPane);
+        connect.setOnAction(e -> connect()); // Pass primaryStage to the connect method
+        disconnect.setOnAction(e -> client.disconnect());
 
-        // Calculate 50% of the screen size
+        this.scene = new Scene(borderPane);
+
         double screenWidth = Screen.getPrimary().getBounds().getWidth();
         double screenHeight = Screen.getPrimary().getBounds().getHeight();
         primaryStage.setWidth(screenWidth / 2);
@@ -76,6 +82,67 @@ public class GUI extends Application implements ViewCallback {
         handleFatalError(new RemoteException("This is a FatalError"));
         handleInfo("This is a Info");
         handleWarning("This is a Warning");
+    }
+
+    public void connect() { // Modified to accept primaryStage as a parameter
+        VBox vbox = new VBox(10);
+        Stage dialogStage = new Stage();
+
+        GridPane grid = new GridPane();
+        grid.setAlignment(Pos.CENTER);
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        Label hostLabel = new Label("Host:");
+        TextField hostField = new TextField();
+        Label portLabel = new Label("Port:");
+        TextField portField = new TextField();
+        Label nameLabel = new Label("Name:");
+        TextField nameField = new TextField();
+        Label passwordLabel = new Label("Password:");
+        PasswordField passwordField = new PasswordField();
+
+        Button cancelButton = new Button("Cancel");
+        /*cancelButton.setOnAction(e -> {
+            // Switch back to the original scene
+            primaryStage.setScene(scene); // You'll need to store the original scene somewhere
+            double screenWidth = Screen.getPrimary().getBounds().getWidth();
+            double screenHeight = Screen.getPrimary().getBounds().getHeight();
+            primaryStage.setWidth(screenWidth / 2);
+            primaryStage.setHeight(screenHeight / 2);
+        });*/
+        cancelButton.setOnAction(e -> dialogStage.close());
+
+        Button addButton = new Button("Add");
+        // addButton functionality goes here
+
+        HBox buttonContainer = new HBox(10);
+        buttonContainer.setAlignment(Pos.CENTER);
+        buttonContainer.getChildren().addAll(cancelButton, addButton);
+
+        grid.add(hostLabel, 0, 1);
+        grid.add(hostField, 1, 1);
+        grid.add(portLabel, 0, 2);
+        grid.add(portField, 1, 2);
+        grid.add(nameLabel, 0, 3);
+        grid.add(nameField, 1, 3);
+        grid.add(passwordLabel, 0, 4);
+        grid.add(passwordField, 1, 4);
+
+        /*vbox.getChildren().addAll(grid, buttonContainer);
+
+        Scene connectionScene = new Scene(vbox);
+        primaryStage.setScene(connectionScene); // Set the new scene
+        primaryStage.sizeToScene(); // Resize the window to fit the new scene*/
+
+        vbox.getChildren().addAll(grid, buttonContainer); // Add the HBox to the VBox instead of individual buttons
+
+        Scene dialogScene = new Scene(vbox); // Removed fixed width and height
+        dialogStage.setTitle("Connection Details");
+        dialogStage.setScene(dialogScene);
+        dialogStage.initModality(Modality.APPLICATION_MODAL);
+        dialogStage.sizeToScene(); // Automatically resize the window to fit its content
+        dialogStage.showAndWait();
     }
 
     @Override
