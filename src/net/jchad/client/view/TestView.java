@@ -14,7 +14,7 @@ public class TestView implements ViewCallback {
 
     private void run() {
         this.controller = new ClientController(this);
-        controller.connect(new ConnectionDetails("test", "127.0.0.1", 13814, "user", ""));
+        controller.connect(new ConnectionDetails("test", "127.0.0.1", 13814, "user", "test"));
     }
 
     @Override
