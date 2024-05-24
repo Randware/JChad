@@ -105,9 +105,13 @@ public class ServerConnection implements Callable<Void> {
                         packet.getUsername_validation_description()
                 );
 
-                client.updateChats(new ArrayList<>(Arrays.stream(packet.getAvailable_chats())
-                        .map(client::getChat)
-                        .collect(Collectors.toCollection(ArrayList::new))));
+                ArrayList<ClientChat> newChats = new ArrayList<>();
+
+                for(String chat : serverInformation.available_chats()) {
+                    newChats.add(new ClientChat(chat));
+                }
+
+                client.updateChats(newChats);
             }
 
             // check if there was a new message sent by someone, if yes add it to the client

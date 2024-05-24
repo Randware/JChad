@@ -4,6 +4,7 @@ import net.jchad.client.model.client.Client;
 import net.jchad.client.model.client.ViewCallback;
 import net.jchad.client.model.client.packets.PacketHandler;
 import net.jchad.client.model.client.packets.PacketMapper;
+import net.jchad.client.model.store.chat.ClientChat;
 import net.jchad.client.model.store.connection.ConnectionDetails;
 import net.jchad.server.model.server.ConnectionClosedException;
 import net.jchad.shared.cryptography.CrypterManager;
@@ -31,8 +32,11 @@ import java.net.Socket;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * This class is responsible for everything that needs to be done before the client
@@ -180,6 +184,13 @@ public class ServerConnector implements Callable<ServerConnection> {
                             newServerInfosCasted.getUsername_validation_regex(),
                             newServerInfosCasted.getUsername_validation_description()
                     );
+
+                    ArrayList<ClientChat> newChats = new ArrayList<>();
+                    for(String chat : serverInformation.available_chats()) {
+                        newChats.add(new ClientChat(chat));
+                    }
+                    client.updateChats(newChats);
+
                     ServerConnection connection = new ServerConnection(client, connectionDetails, connectionWriter, connectionReader, serverInformation, socket, keys);
                     streamsTransfered = true;
                     return connection;
@@ -365,7 +376,6 @@ public class ServerConnector implements Callable<ServerConnection> {
                 connectionWriter = null;
                 connectionReader = null;
             }
-            Thread.currentThread().interrupt();
         }
     }
 }
