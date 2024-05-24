@@ -85,7 +85,6 @@ public class ServerConnection implements Callable<Void> {
     public Void call() throws ClosedConnectionException, IOException, InvalidPacketException {
         while(true) {
             Packet readPacket = readPacket();
-            System.out.println(readPacket);
 
             // first check if the connection was closed by the server
             if(readPacket instanceof ConnectionClosedPacket packet) {
