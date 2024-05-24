@@ -74,7 +74,8 @@ public class MainHelperThread extends HelperThread {
                         throw new InvalidPacketException("The given chat does not exist");
                     }
                     getServerThread().useMessageKey();
-                    writePacket(new JoinChatResponsePacket(chat.getName(),chat.getServerMessages(getServerThread().getCrypterManager(), getServerThread().getMessageHandler())));
+                    writePacket(new JoinChatResponsePacket(chat.getName(),chat.getServerMessages((getServerThread().isEncryptMessages()) ? getServerThread().getCrypterManager() : null
+                            , getServerThread().getMessageHandler())));
                     getServerThread().getUser().addJoinedChats(joinChat.getChat_name());
                     failedAttempts--;
                     continue;

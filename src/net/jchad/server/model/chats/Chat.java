@@ -241,6 +241,11 @@ public class Chat {
             for (int x = messages.size() - messageCount; x < messages.size(); x++) {
                 ServerMessagePacket messagePacket = messages.get(x).toMessagePacket(name);
                 try {
+                    System.out.println(new ServerMessagePacket(
+                            crypterManager.decryptAES(messagePacket.getMessage()),
+                            messagePacket.getChat(),
+                            messagePacket.getUsername(),
+                            messagePacket.getTimestamp()).toJSON());
                     selectedMessages.add(new ServerMessagePacket(
                             crypterManager.decryptAES(messagePacket.getMessage()),
                             messagePacket.getChat(),
