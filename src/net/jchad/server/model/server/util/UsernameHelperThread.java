@@ -38,13 +38,13 @@ public class UsernameHelperThread extends HelperThread {
                     getServerThread().close("A NullPointerException occurred during the user arrangement");
                 }
             } catch (ConnectionExistsException e) {
-                getServerThread().getMessageHandler().handleDebug("The ServerThread has already been associated with a username. The connection gets terminated now ", e);
+                getServerThread().getMessageHandler().handleDebug("The ServerThread has already been associated with a username. The connection gets terminated now ");
                     getServerThread().close("The ServerThread has already been associated with a username");
 
             } catch (UsernameInvalidException e) {
                 int retriesLeft = getRetries() - fails;
                 getServerThread().getMessageHandler().handleDebug("The client entered an invalid username. The requested username from the client is "+ e.getInvalidUsername() +". The connection get terminated "
-                        + ((retriesLeft <= 0) ? "now": ("after " + retriesLeft + " more failed attempt(s)")), e);
+                        + ((retriesLeft <= 0) ? "now": ("after " + retriesLeft + " more failed attempt(s)")));
                 writePacket(new UsernameServerPacket(UsernameServerPacket.UsernameResponseType.ERROR_USERNAME_INVALID, usernameRegexDescription));
                 if (retriesLeft <= 0) {
                     getServerThread().close("Failed to choose a valid username");
@@ -52,7 +52,7 @@ public class UsernameHelperThread extends HelperThread {
             }  catch (UsernameTakenException e) {
                 int retriesLeft = getRetries() - fails;
                 getServerThread().getMessageHandler().handleDebug("The client tried to get an existing username. The connection get terminated "
-                        + ((retriesLeft <= 0) ? "now": ("after " + retriesLeft + " more failed attempt(s)")), e);
+                        + ((retriesLeft <= 0) ? "now": ("after " + retriesLeft + " more failed attempt(s)")));
                 writePacket(new UsernameServerPacket(UsernameServerPacket.UsernameResponseType.ERROR_USERNAME_TAKEN, "The username is already taken"));
                 if (retriesLeft <= 0) {
                     getServerThread().close("Failed to choose a non existing username");
