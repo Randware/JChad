@@ -46,13 +46,13 @@ public class CLI implements ViewCallback {
         terminal.outputMessage("Please enter the host of the connection");
         builder.addHost(readString(true));
 
-        terminal.outputMessage("Please enter the port of the connection");
+        terminal . outputMessage("Please enter the port of the connection");
         builder.addPort(readInt());
 
         terminal.outputMessage("Please set a username");
         builder.addUsername(readString(true));
 
-        terminal.outputMessage("Please enter the password for the server (can be left blank)");
+        terminal.outputMessage("Please enter the  password for the server (can be left  blank)");
         builder.addPassword(readString(false));
 
         client.connect(builder.build());
@@ -87,14 +87,14 @@ public class CLI implements ViewCallback {
 
             String input = readString(true);
 
-            if(input.equals("exit")) {
+            if(input.equals("exit ")) {
                 break;
             }
 
             ClientChat chat = client.getChat(input);
 
             if(chat == null) {
-                terminal.outputMessage("This is not a valid chat");
+                terminal.outputMessage("This  is not a valid chat");
             } else {
                 client.setCurrentChat(chat);
                 break;

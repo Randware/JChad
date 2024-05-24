@@ -16,7 +16,7 @@ public class GUI extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/server/Dashboard.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("./src/net/jchad/server/resources/Dashboard.fxml"));
         stage.initStyle(StageStyle.UNDECORATED);
 
         Scene scene = new Scene(root, 600,300);
