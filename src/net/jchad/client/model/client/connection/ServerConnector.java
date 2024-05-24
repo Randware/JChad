@@ -81,7 +81,7 @@ public class ServerConnector implements Callable<ServerConnection> {
         this.isRunning = false;
         this.connectionDetails = connectionDetails;
         streamsTransfered = false;
-        crypterManager.setKeyPair(4096);
+
     }
 
     /**
@@ -160,9 +160,9 @@ public class ServerConnector implements Callable<ServerConnection> {
                 throw new InvalidPacketException("The received packet from the server was not recognised");
             }
             Packet nextPacket = connectionReader.readPacket();
-            encryption(nextPacket);
-            password();
-            username();
+            boolean success = encryption(nextPacket);
+            password((success) ? null : nextPacket);
+            username(nextPacket);
 
             Packet hopefullySuccess = readPacket();
             Packet newServerInfos = readPacket();
@@ -205,15 +205,17 @@ public class ServerConnector implements Callable<ServerConnection> {
 
     }
 
-    private void username() throws ClosedConnectionException, IOException, InvalidPacketException {
-        while (true) {
-            Packet nextPacket = readPacket();
-            if (nextPacket == null) throw new ConnectionClosedException("The connection to the server was lost during the username process");
-            if (nextPacket.getClass().equals(ConnectionClosedPacket.class)) {
-                throw new ClosedConnectionException(((ConnectionClosedPacket) nextPacket).getMessage());
+    private <T extends Packet> void username(T packet) throws ClosedConnectionException, IOException, InvalidPacketException {
+        for (int i = 0; true; i++) {
+            if (packet == null || i > 0) {
+                packet = readPacket();
             }
-            if (nextPacket.getClass().equals(UsernameServerPacket.class)) {
-                UsernameServerPacket usernameServerPacket = (UsernameServerPacket) nextPacket;
+            if (packet == null) throw new ConnectionClosedException("The connection to the server was lost during the username process");
+            if (packet.getClass().equals(ConnectionClosedPacket.class)) {
+                throw new ClosedConnectionException(((ConnectionClosedPacket) packet).getMessage());
+            }
+            if (packet.getClass().equals(UsernameServerPacket.class)) {
+                UsernameServerPacket usernameServerPacket = (UsernameServerPacket) packet;
                 if (usernameServerPacket.getUsername_response_type().equals(UsernameServerPacket.UsernameResponseType.PROVIDE_USERNAME)) {
                     writePacket(new UsernameClientPacket(connectionDetails.getUsername()));
                 } else {
@@ -232,14 +234,16 @@ public class ServerConnector implements Callable<ServerConnection> {
         }
     }
 
-    private void password() throws ClosedConnectionException, IOException, InvalidPacketException {
+    private <T extends Packet> void password(T packet) throws ClosedConnectionException, IOException, InvalidPacketException {
         while (true) {
-            Packet nextPacket = readPacket();
-            if (nextPacket == null) throw new ConnectionClosedException("The connection to the server was lost during the password authentication process");
-            if (nextPacket.getClass().equals(ConnectionClosedPacket.class)) {
-                throw new ClosedConnectionException(((ConnectionClosedPacket) nextPacket).getMessage());
+            if (packet == null) {
+                packet = readPacket();
             }
-            if (nextPacket.getClass().equals(PasswordRequestPacket.class)) {
+            if (packet == null) throw new ConnectionClosedException("The connection to the server was lost during the password authentication process");
+            if (packet.getClass().equals(ConnectionClosedPacket.class)) {
+                throw new ClosedConnectionException(((ConnectionClosedPacket) packet).getMessage());
+            }
+            if (packet.getClass().equals(PasswordRequestPacket.class)) {
                 writePacket(new PasswordResponsePacket(CrypterManager.hash(connectionDetails.getPassword())));
                 Packet nextNextPacket = readPacket(); //I just want to get over this project. I don't have enough energy to think of creative variable names.
                 if (nextNextPacket == null) throw new ConnectionClosedException("The connection to the server was lost during the password authentication process");
@@ -264,6 +268,9 @@ public class ServerConnector implements Callable<ServerConnection> {
      */
     private boolean encryption(Packet packet) {
         if (packet.getClass().equals(KeyExchangeStartPacket.class)) {
+
+            crypterManager.setKeyPair(4096);
+
              connectionWriter.sendPacket(new RSAkeyPacket(crypterManager.getPublicKey()));
             try {
                 String keys = connectionReader.read();

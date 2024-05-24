@@ -273,13 +273,13 @@ public class CrypterManager {
 
     /**
      * Sets the AES secret key
+     * You can set the key to null
      * @param secretKey the new secret key
-     * @return returns false if the given secret key was null
-     *         (if the key is null a random new one gets assigned instead of the provided key)
+     *
      */
-    public boolean setAESkey(SecretKey secretKey) {
+    public void setAESkey(SecretKey secretKey) {
         this.secretKey = secretKey;
-        return initAESKey();
+
     }
 
     /**
@@ -344,14 +344,13 @@ public class CrypterManager {
     }
 
     /**
-     * sets the key pair to the provided one
+     * Sets the key pair to the provided one.
+     * May be null
      * @param keyPair the new key pair
-     * @return This returns false if there were some issues with the provided key pair
-     *         that got resolved by filling out the keyPair/privateKey/publicKey field
+     *
      */
-    public boolean setKeyPair(KeyPair keyPair) {
+    public void setKeyPair(KeyPair keyPair) {
         this.keyPair = keyPair;
-        return !initKeyPair();
     }
 
     /**
