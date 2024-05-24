@@ -232,9 +232,18 @@ public class ServerConnector implements Callable<ServerConnection> {
                 } else {
                     UsernameServerPacket.UsernameResponseType responseType = usernameServerPacket.getUsername_response_type();
                     switch (responseType) {
-                        case ERROR_USERNAME_TAKEN -> connectionDetails.setUsername(client.getViewCallback().displayPrompt("Enter a username", "The requested username is already taken. Pleases enter a new one: "));
-                        case ERROR_USERNAME_INVALID -> connectionDetails.setUsername(client.getViewCallback().displayPrompt("Enter a username", "The requested username is invalid make sure to follow these rules: " + serverInformation.username_validation_description()));
-                        case ERROR_USERNAME_INAPROPRIATE -> connectionDetails.setUsername(client.getViewCallback().displayPrompt("Enter a username", "The requested username is inappropriate. Please enter a new one: "));
+                        case ERROR_USERNAME_TAKEN -> {
+                            connectionDetails.setUsername(client.getViewCallback().displayPrompt("Enter a username", "The requested username is already taken. Pleases enter a new one: "));
+                            writePacket(new UsernameClientPacket(connectionDetails.getUsername()));
+                        }
+                        case ERROR_USERNAME_INVALID -> {
+                            connectionDetails.setUsername(client.getViewCallback().displayPrompt("Enter a username", "The requested username is invalid make sure to follow these rules: " + serverInformation.username_validation_description()));
+                            writePacket(new UsernameClientPacket(connectionDetails.getUsername()));
+                        }
+                        case ERROR_USERNAME_INAPROPRIATE -> {
+                            connectionDetails.setUsername(client.getViewCallback().displayPrompt("Enter a username", "The requested username is inappropriate. Please enter a new one: "));
+                            writePacket(new UsernameClientPacket(connectionDetails.getUsername()));
+                        }
                         default -> {
                             return;
                         }

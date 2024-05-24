@@ -196,10 +196,11 @@ public class User {
         //Encrypts message content if necessary
 
         if (connection.isEncryptMessages() && connection.getMessageAESkey() != null) {
+            connection.useMessageKey();
                 try {
                     messagePacket =
                             new ServerMessagePacket(
-                                    connection.getCrypterManager().encryptAES(messagePacket.getMessage()),
+                                    connection.getCrypterManager().decryptAES(messagePacket.getMessage()),
                                     messagePacket.getChat(),
                                     messagePacket.getUsername(),
                                     messagePacket.getTimestamp()

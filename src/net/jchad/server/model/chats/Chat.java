@@ -10,11 +10,19 @@ import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import net.jchad.server.model.error.MessageHandler;
 import net.jchad.server.model.server.Server;
+import net.jchad.shared.cryptography.CrypterManager;
+import net.jchad.shared.cryptography.ImpossibleConversionException;
 import net.jchad.shared.networking.packets.messages.ServerMessagePacket;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -216,7 +224,7 @@ public class Chat {
      *
      * @return all messages from this chat according to the configuration of this chat converted into {@link ServerMessagePacket}
      */
-    public List<ServerMessagePacket> getServerMessages() {
+    public List<ServerMessagePacket> getServerMessages(CrypterManager crypterManager, MessageHandler messageHandler) {
 
         if (!config.isLoadChatHistory()) return new ArrayList<>();
 
@@ -224,8 +232,27 @@ public class Chat {
 
         int messageCount = (int) Math.min(config.getLoadChatHistoryMessageCount(), messages.size());
 
-        for (int x = messages.size() - messageCount; x < messages.size(); x++) {
-            selectedMessages.add(messages.get(x).toMessagePacket(name));
+        if (crypterManager == null) {
+            for (int x = messages.size() - messageCount; x < messages.size(); x++) {
+                selectedMessages.add(messages.get(x).toMessagePacket(name));
+            }
+        } else {
+            //If chat message content needs to get encrypted before returning
+            for (int x = messages.size() - messageCount; x < messages.size(); x++) {
+                ServerMessagePacket messagePacket = messages.get(x).toMessagePacket(name);
+                try {
+                    selectedMessages.add(new ServerMessagePacket(
+                            crypterManager.decryptAES(messagePacket.getMessage()),
+                            messagePacket.getChat(),
+                            messagePacket.getUsername(),
+                            messagePacket.getTimestamp()
+                    ));
+                } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException |
+                         NoSuchAlgorithmException | BadPaddingException | InvalidKeyException |
+                         ImpossibleConversionException e) {
+                    messageHandler.handleDebug("An error occurred while encrypting the content of a saved chat massage in " + name + " with the ID " + messages.get(x).getId());
+                }
+            }
         }
         return selectedMessages;
     }
