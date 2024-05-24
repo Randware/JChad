@@ -17,6 +17,7 @@ module net.jchad {
     requires jdk.unsupported;
     requires javafx.web;
     requires org.controlsfx.controls;
+    requires java.rmi;
 
 
     opens net.jchad.client to javafx.fxml;
