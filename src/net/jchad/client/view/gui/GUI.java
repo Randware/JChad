@@ -19,16 +19,18 @@ public class GUI extends Application implements ViewCallback {
     }
 
     private void runGUI() {
-        client = new ClientController(this);
-
         Application.launch();
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        client = new ClientController(this);
+
         primaryStage.setTitle("JChad Client");
         primaryStage.setScene(new Scene(new Label("Hello World")));
         primaryStage.show();
+
+        System.out.println(displayPrompt("test", "test message"));
 
     }
 
@@ -63,7 +65,17 @@ public class GUI extends Application implements ViewCallback {
 
         inputPrompt.showAndWait();
 
-        return inputPrompt.getInput();
+        String input = inputPrompt.getInput();
+
+        if(input != null && !input.isEmpty()) {
+            return input;
+        } else {
+            // disconnect the currently running connection or connection process,
+            // since the user didn't provide the required information.
+            client.disconnect();
+
+            return null;
+        }
     }
 
     @Override
