@@ -159,10 +159,10 @@ public class ServerConnector implements Callable<ServerConnection> {
             } else {
                 throw new InvalidPacketException("The received packet from the server was not recognised");
             }
-            Packet nextPacket = connectionReader.readPacket();
-            boolean success = encryption(nextPacket);
-            password((success) ? null : nextPacket);
-            username(nextPacket);
+            Packet nextPacket1 = connectionReader.readPacket();
+            boolean success = encryption(nextPacket1);
+            Packet nextPacket2 = password((success) ? null : nextPacket1);
+            username(nextPacket2);
 
             Packet hopefullySuccess = readPacket();
             Packet newServerInfos = readPacket();
@@ -234,7 +234,7 @@ public class ServerConnector implements Callable<ServerConnection> {
         }
     }
 
-    private <T extends Packet> void password(T packet) throws ClosedConnectionException, IOException, InvalidPacketException {
+    private <T extends Packet> Packet password(T packet) throws ClosedConnectionException, IOException, InvalidPacketException {
         while (true) {
             if (packet == null) {
                 packet = readPacket();
@@ -248,14 +248,14 @@ public class ServerConnector implements Callable<ServerConnection> {
                 Packet nextNextPacket = readPacket(); //I just want to get over this project. I don't have enough energy to think of creative variable names.
                 if (nextNextPacket == null) throw new ConnectionClosedException("The connection to the server was lost during the password authentication process");
                 if (nextNextPacket.getClass().equals(PasswordSuccessPacket.class)) {
-                    return;
+                    return null;
                 }
                 if (nextNextPacket.getClass().equals(PasswordFailedPacket.class)) {
                     connectionDetails.setPassword(client.getViewCallback().displayPrompt("Password", "The provided password was wrong. Please enter the correct one: "));
                 }
 
             } else {
-                break;
+                return packet;
             }
         }
 
