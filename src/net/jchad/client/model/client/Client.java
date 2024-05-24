@@ -68,13 +68,13 @@ public class Client {
      * if there is an ongoing connection process.
      */
     public void disconnect() {
-
             if(currentConnection != null) {
                 currentConnection.closeConnection();
             }
 
-            serverConnector.shutdown();
-
+            if(serverConnector != null) {
+                serverConnector.shutdown();
+            }
 
         currentConnection = null;
     }
