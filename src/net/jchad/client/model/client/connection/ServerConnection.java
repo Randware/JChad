@@ -5,6 +5,7 @@ import net.jchad.client.model.client.ViewCallback;
 import net.jchad.client.model.store.chat.ClientChat;
 import net.jchad.client.model.store.chat.ClientChatMessage;
 import net.jchad.client.model.store.connection.ConnectionDetails;
+import net.jchad.server.model.server.ConnectionClosedException;
 import net.jchad.shared.cryptography.CrypterManager;
 import net.jchad.shared.cryptography.ImpossibleConversionException;
 import net.jchad.shared.networking.packets.InvalidPacketException;
@@ -111,13 +112,31 @@ public class ServerConnection implements Callable<Void> {
 
             // check if there was a new message sent by someone, if yes add it to the client
             if(readPacket instanceof ServerMessagePacket packet) {
-                client.addMessage(client.getChat(packet.getChat()),
-                        new ClientChatMessage(
-                                packet.getChat(),
-                                packet.getMessage(),
-                                packet.getUsername(),
-                                packet.getTimestamp()
-                        ));
+                if (keys != null && serverInformation.encrypt_messages()) {
+                    crypterManager.setAESkey(keys.getMessage_key());
+                    crypterManager.setAESkey(keys.getMessage_initialization_vector());
+                    try {
+                        client.addMessage(client.getChat(packet.getChat()),
+                                new ClientChatMessage(
+                                        packet.getChat(),
+                                        crypterManager.encryptAES(packet.getMessage()),
+                                        packet.getUsername(),
+                                        packet.getTimestamp()
+                                ));
+                    } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException |
+                             NoSuchAlgorithmException | BadPaddingException | InvalidKeyException |
+                             ImpossibleConversionException e) {
+                     throw new ConnectionClosedException("An encryption related error occurred while trying to encrypt a message.", e);
+                    }
+                } else {
+                    client.addMessage(client.getChat(packet.getChat()),
+                            new ClientChatMessage(
+                                    packet.getChat(),
+                                    packet.getMessage(),
+                                    packet.getUsername(),
+                                    packet.getTimestamp()
+                            ));
+                }
             }
 
             // this packet will be sent by the server if the client sent an invalid message
