@@ -151,9 +151,21 @@ public class ServerConnection implements Callable<Void> {
      */
     public ClientChatMessage sendMessage(String messageContent, ClientChat chat) throws ClosedConnectionException {
         ClientChatMessage message = new ClientChatMessage(chat.getName(), messageContent, connectionDetails.getUsername(), System.currentTimeMillis());
+        if (serverInformation.encrypt_messages() && keys != null) {
+            try {
 
-        writePacket(new ClientMessagePacket(messageContent, chat.getName()));
-
+                crypterManager.setAESkey(keys.getMessage_key());
+                crypterManager.setBase64IV(keys.getMessage_initialization_vector());
+                ClientMessagePacket encryptedMessage =
+                        new ClientMessagePacket(crypterManager.encryptAES(messageContent), chat.getName());
+                writePacket(encryptedMessage);
+            } catch (ImpossibleConversionException | InvalidAlgorithmParameterException | NoSuchPaddingException |
+                     IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
+                client.getViewCallback().handleFatalError(new Exception("Message could not be encrypted", e));
+            }
+        } else {
+            writePacket(new ClientMessagePacket(messageContent, chat.getName()));
+        }
         return message;
     }
 
