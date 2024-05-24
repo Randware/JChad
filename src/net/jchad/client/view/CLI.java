@@ -144,6 +144,7 @@ public class CLI implements ViewCallback {
     public void handleFatalError(Exception e) {
         terminal.outputMessage("[Fatal error] " + e.getMessage());
         terminal.outputMessage("Disconnected from the current connection");
+        e.printStackTrace();
         isConnected = false;
         connectScreen();
     }

@@ -22,11 +22,18 @@ public class InfoCommand extends BaseCommand {
 
         StringBuilder str = new StringBuilder("Displaying server information\n");
 
-        str.append("Server version → %s\n".formatted(server.getVersion()));
-        str.append("Uptime → %s\n".formatted(uptime));
-        str.append("RAM usage → %s MB /%s MB\n".formatted(usedMemory, maxMemory));
-        str.append("Port → %s\n".formatted(server.getConfig().getServerSettings().getPort()));
-        str.append("Connected → %s".formatted(server.getMainSocket().getServerThreadSet().size())); //Set does not get higher than 20. Why?
+        if(server.isRunning()) {
+            str.append("Server version → %s\n".formatted(server.getVersion()));
+            str.append("Uptime → %s\n".formatted(uptime));
+            str.append("RAM usage → %s MB / %s MB\n".formatted(usedMemory, maxMemory));
+            str.append("Port → %s\n".formatted(server.getConfig().getServerSettings().getPort()));
+            str.append("Connected → %s".formatted(server.getMainSocket().getServerThreadSet().size()));
+        } else {
+            str.append("Server version → %s\n".formatted(server.getVersion()));
+            str.append("Port → %s\n".formatted(server.getConfig().getServerSettings().getPort()));
+        }
+
+
 
         server.getMessageHandler().handleInfo(str.toString());
     }
