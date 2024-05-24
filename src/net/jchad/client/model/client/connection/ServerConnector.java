@@ -49,7 +49,7 @@ public class ServerConnector implements Callable<ServerConnection> {
     private ViewCallback viewCallback;
     private ServerInformation serverInformation;
     private final CrypterManager crypterManager = new CrypterManager();
-    private AESencryptionKeysPacket keys = new AESencryptionKeysPacket("", "", "" ,"");
+    private AESencryptionKeysPacket keys = null;
 
 
 
@@ -305,10 +305,9 @@ public class ServerConnector implements Callable<ServerConnection> {
 
 
         try {
-            if (keys != null) {
+            if (keys != null && serverInformation.encrypt_communications()) {
                 crypterManager.setAESkey(keys.getCommunication_key());
                 crypterManager.setBase64IV(keys.getCommunication_initialization_vector());
-
                 return Packet.fromJSON(crypterManager.decryptAES(connectionReader.read()));
 
             } else {
@@ -323,7 +322,7 @@ public class ServerConnector implements Callable<ServerConnection> {
 
     private <T extends Packet> void writePacket(T packet) throws ClosedConnectionException {
         try {
-            if (keys != null) {
+            if (keys != null && serverInformation.encrypt_communications()) {
                 crypterManager.setAESkey(keys.getCommunication_key());
                 crypterManager.setBase64IV(keys.getCommunication_initialization_vector());
 

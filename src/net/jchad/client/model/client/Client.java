@@ -49,14 +49,16 @@ public class Client {
      *                          used to establish a {@link ServerConnection}.
      */
     public void connect(ConnectionDetails connectionDetails) {
-        
+
         serverConnector = new ServerConnector(this, connectionDetails);
         try {
             if(currentConnection != null ) {
                 currentConnection.closeConnection();
             }
+
             Future<ServerConnection> future = executorService.submit(serverConnector);
             currentConnection = future.get();
+
             serverConnector.shutdown();
         } catch (Exception e) {
             viewCallback.handleFatalError(e);
