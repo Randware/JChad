@@ -29,9 +29,6 @@ public class GUI extends Application implements ViewCallback {
         primaryStage.setTitle("JChad Client");
         primaryStage.setScene(new Scene(new Label("Hello World")));
         primaryStage.show();
-
-        System.out.println(displayPrompt("test", "test message"));
-
     }
 
     @Override

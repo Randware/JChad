@@ -70,6 +70,15 @@ public class InputPrompt extends Alert {
         messageLabel.setStyle("-fx-font-size: " + scaledFontSize + "px");
 
         inputField.setStyle("-fx-font-size: " + scaledFontSize + "px");
+
+        // Scale buttons
+        Button okButton = (Button) getDialogPane().lookupButton(ButtonType.OK);
+        okButton.setStyle("-fx-font-size: " + scaledFontSize + "px; -fx-pref-width: " + (75 * scaleFactor) + "px;");
+
+        Button cancelButton = (Button) getDialogPane().lookupButton(ButtonType.CANCEL);
+        if (cancelButton != null) {
+            cancelButton.setStyle("-fx-font-size: " + scaledFontSize + "px; -fx-pref-width: " + (75 * scaleFactor) + "px;");
+        }
     }
 
     /**
