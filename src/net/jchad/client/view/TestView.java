@@ -1,9 +1,11 @@
 package net.jchad.client.view;
-
+//;D
+import javafx.scene.control.Alert;
 import net.jchad.client.controller.ClientController;
 import net.jchad.client.model.client.ViewCallback;
 import net.jchad.client.model.store.chat.ClientChatMessage;
 import net.jchad.client.model.store.connection.ConnectionDetails;
+import net.jchad.client.view.gui.InputPrompt;
 
 public class TestView implements ViewCallback {
     private ClientController controller;
@@ -14,7 +16,9 @@ public class TestView implements ViewCallback {
 
     private void run() {
         this.controller = new ClientController(this);
+
         controller.connect(new ConnectionDetails("test", "127.0.0.1", 13814, "user", "test"));
+        System.out.println("Successfully connected");
     }
 
     @Override
@@ -43,7 +47,21 @@ public class TestView implements ViewCallback {
 
     @Override
     public String displayPrompt(String promptTitle, String promptMessage) {
-        return "";
+        InputPrompt inputPrompt = new InputPrompt(Alert.AlertType.CONFIRMATION, promptTitle, promptMessage);
+
+        inputPrompt.showAndWait();
+
+        String input = inputPrompt.getInput();
+
+        if(input != null && !input.isEmpty()) {
+            return input;
+        } else {
+            // disconnect the currently running connection or connection process,
+            // since the user didn't provide the required information.
+            controller.disconnect();
+
+            return null;
+        }
     }
 
     @Override
