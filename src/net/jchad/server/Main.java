@@ -1,8 +1,8 @@
 package net.jchad.server;
 
 
-import net.jchad.client.view.CLI;
-import net.jchad.client.view.gui.GUI;
+import net.jchad.server.view.CLI;
+import net.jchad.server.view.GUI;
 
 public class Main {
     private static final boolean cliMode = true;
