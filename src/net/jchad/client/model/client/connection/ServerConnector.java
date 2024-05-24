@@ -247,9 +247,11 @@ public class ServerConnector implements Callable<ServerConnection> {
                     return;
                 }
                 if (nextNextPacket.getClass().equals(PasswordFailedPacket.class)) {
-                    client.getViewCallback().displayPrompt("Password", "The provided password was wrong. Please enter the correct one: ");
+                    connectionDetails.setPassword(client.getViewCallback().displayPrompt("Password", "The provided password was wrong. Please enter the correct one: "));
                 }
-                throw new ConnectionClosedException("An unknown error occurred during the password authentication process");
+
+            } else {
+                break;
             }
         }
 
