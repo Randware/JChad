@@ -8,13 +8,10 @@ import net.jchad.client.model.client.connection.ServerConnector;
 import net.jchad.client.model.store.chat.ClientChat;
 import net.jchad.client.model.store.chat.ClientChatMessage;
 import net.jchad.client.model.store.connection.ConnectionDetails;
-import net.jchad.shared.cryptography.CrypterManager;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.Future;
 
 /**
@@ -196,8 +193,6 @@ public class Client {
      * {@link ClientChat} instances.
      */
     public ArrayList<ClientChat> getChats() {
-        System.out.println(chats);
-
         return new ArrayList<>(chats);
     }
 

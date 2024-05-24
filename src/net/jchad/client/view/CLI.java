@@ -18,6 +18,7 @@ import java.util.ArrayList;
  * for demonstration purposes.
  *
  * TODO: handle the first chat joining on connect
+ * TODO: interrupt the terminal reading process when fatal error occurs
  */
 public class CLI implements ViewCallback {
     private ClientController client;
