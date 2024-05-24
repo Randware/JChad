@@ -255,7 +255,7 @@ public class Chat {
                 } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException |
                          NoSuchAlgorithmException | BadPaddingException | InvalidKeyException |
                          ImpossibleConversionException e) {
-                    messageHandler.handleDebug("An error occurred while encrypting the content of a saved chat massage in " + name + " with the ID " + messages.get(x).getId());
+                    messageHandler.handleDebug("An error occurred while encrypting the content of a saved chat massage in " + name + " with the ID " + messages.get(x).getId(), e);
                 }
             }
         }
