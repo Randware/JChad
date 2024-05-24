@@ -63,6 +63,7 @@ public class Client {
             currentConnection = future.get();
 
             serverConnector.shutdown();
+            executorService.submit(currentConnection);
         } catch (Exception e) {
             viewCallback.handleFatalError(e);
         }
