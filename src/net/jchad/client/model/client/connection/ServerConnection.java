@@ -180,7 +180,7 @@ public class ServerConnection implements Callable<Void> {
 
     public  <T extends Packet> void writePacket(T packet) throws ClosedConnectionException {
         try {
-            if (keys != null) {
+            if (keys != null && serverInformation.encrypt_communications()) {
                 crypterManager.setAESkey(keys.getCommunication_key());
                 crypterManager.setBase64IV(keys.getCommunication_initialization_vector());
 
@@ -199,7 +199,7 @@ public class ServerConnection implements Callable<Void> {
     public  <T extends Packet> T readPacket() throws IOException, ClosedConnectionException, InvalidPacketException {
 
         try {
-            if (keys != null) {
+            if (keys != null && serverInformation.encrypt_communications()) {
                 crypterManager.setAESkey(keys.getCommunication_key());
                 crypterManager.setBase64IV(keys.getCommunication_initialization_vector());
 
