@@ -5,6 +5,8 @@ import net.jchad.client.model.client.ViewCallback;
 import net.jchad.client.model.store.chat.ClientChat;
 import net.jchad.client.model.store.chat.ClientChatMessage;
 import net.jchad.client.model.store.connection.ConnectionDetails;
+import net.jchad.server.model.chats.ChatMessage;
+import net.jchad.server.model.server.ConnectionClosedException;
 import net.jchad.shared.cryptography.CrypterManager;
 import net.jchad.shared.cryptography.ImpossibleConversionException;
 import net.jchad.shared.networking.packets.InvalidPacketException;
@@ -12,9 +14,7 @@ import net.jchad.shared.networking.packets.Packet;
 import net.jchad.shared.networking.packets.defaults.ConnectionClosedPacket;
 import net.jchad.shared.networking.packets.defaults.ServerInformationResponsePacket;
 import net.jchad.shared.networking.packets.encryption.AESencryptionKeysPacket;
-import net.jchad.shared.networking.packets.messages.ClientMessagePacket;
-import net.jchad.shared.networking.packets.messages.MessageStatusFailedPacket;
-import net.jchad.shared.networking.packets.messages.ServerMessagePacket;
+import net.jchad.shared.networking.packets.messages.*;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -104,25 +104,62 @@ public class ServerConnection implements Callable<Void> {
                         packet.getUsername_validation_description()
                 );
 
-                client.updateChats(new ArrayList<>(Arrays.stream(packet.getAvailable_chats())
-                        .map(client::getChat)
-                        .collect(Collectors.toCollection(ArrayList::new))));
+                ArrayList<ClientChat> newChats = new ArrayList<>();
+
+                for(String chat : serverInformation.available_chats()) {
+                    newChats.add(new ClientChat(chat));
+                }
+
+                client.updateChats(newChats);
+            }
+
+            // Check if the server sent a response to a chat join request, if yes add the previous messages to this chat
+            if(readPacket instanceof JoinChatResponsePacket packet) {
+                for(ServerMessagePacket message : packet.getPrevious_messages()) {
+                    client.addMessage(client.getChat(packet.getChat_name()), new ClientChatMessage(message.getChat(),
+                            message.getMessage(),
+                            message.getUsername(),
+                            message.getTimestamp()));
+                }
             }
 
             // check if there was a new message sent by someone, if yes add it to the client
             if(readPacket instanceof ServerMessagePacket packet) {
-                client.addMessage(client.getChat(packet.getChat()),
-                        new ClientChatMessage(
-                                packet.getChat(),
-                                packet.getMessage(),
-                                packet.getUsername(),
-                                packet.getTimestamp()
-                        ));
+                if (keys != null && serverInformation.encrypt_messages()) {
+                    crypterManager.setAESkey(keys.getMessage_key());
+                    crypterManager.setAESkey(keys.getMessage_initialization_vector());
+                    try {
+                        client.addMessage(client.getChat(packet.getChat()),
+                                new ClientChatMessage(
+                                        packet.getChat(),
+                                        crypterManager.encryptAES(packet.getMessage()),
+                                        packet.getUsername(),
+                                        packet.getTimestamp()
+                                ));
+                    } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException |
+                             NoSuchAlgorithmException | BadPaddingException | InvalidKeyException |
+                             ImpossibleConversionException e) {
+                     throw new ConnectionClosedException("An encryption related error occurred while trying to encrypt a message.", e);
+                    }
+                } else {
+                    client.addMessage(client.getChat(packet.getChat()),
+                            new ClientChatMessage(
+                                    packet.getChat(),
+                                    packet.getMessage(),
+                                    packet.getUsername(),
+                                    packet.getTimestamp()
+                            ));
+                }
             }
 
             // this packet will be sent by the server if the client sent an invalid message
             if(readPacket instanceof MessageStatusFailedPacket packet) {
                 viewCallback.handleWarning("Server failed receiving message packet: " + packet.getReason());
+            }
+
+            // this packet will be sent by the server if the client sent a valid message
+            if(readPacket instanceof MessageStatusSuccessPacket packet) {
+                viewCallback.handleInfo("Message was received by server");
             }
         }
     }
@@ -167,6 +204,16 @@ public class ServerConnection implements Callable<Void> {
             writePacket(new ClientMessagePacket(messageContent, chat.getName()));
         }
         return message;
+    }
+
+    public void joinChat(String chatName) throws ClosedConnectionException {
+        if(chatName == null) {
+            return;
+        }
+
+        JoinChatRequestPacket packet = new JoinChatRequestPacket(chatName);
+
+        writePacket(packet);
     }
 
     /**

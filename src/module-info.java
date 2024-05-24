@@ -19,7 +19,8 @@ module net.jchad {
     requires org.controlsfx.controls;
     requires java.rmi;
 
-
+    exports net.jchad.client.view;
+    opens net.jchad.server.view.dashboard;
     opens net.jchad.client to javafx.fxml;
     opens net.jchad.shared.networking.packets to com.google.gson;
     opens net.jchad.shared.networking.ip to com.google.gson;
