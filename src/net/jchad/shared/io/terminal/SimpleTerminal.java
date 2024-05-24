@@ -1,4 +1,4 @@
-package net.jchad.server.view.cli.terminal;
+package net.jchad.shared.io.terminal;
 
 import sun.misc.Signal;
 
@@ -45,6 +45,19 @@ public class SimpleTerminal extends Terminal {
         });
 
         inputReader.start();
+    }
+
+    @Override
+    public String read() throws UserExitedException {
+        try {
+            Signal.handle(new Signal("INT"), signal -> {
+                throw new RuntimeException();
+            });
+
+            return scanner.nextLine().trim();
+        } catch (RuntimeException e) {
+            throw new UserExitedException();
+        }
     }
 
     @Override
