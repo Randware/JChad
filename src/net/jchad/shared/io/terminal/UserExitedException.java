@@ -1,4 +1,4 @@
-package net.jchad.server.view.cli.terminal;
+package net.jchad.shared.io.terminal;
 
 public class UserExitedException extends Exception {
 }

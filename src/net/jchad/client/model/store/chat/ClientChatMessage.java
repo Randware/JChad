@@ -45,5 +45,19 @@ public class ClientChatMessage {
         this.own = own;
     }
 
+    public String getChat() {
+        return chat;
+    }
 
+    public String getContent() {
+        return content;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
 }

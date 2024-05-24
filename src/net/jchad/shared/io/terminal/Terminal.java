@@ -1,4 +1,4 @@
-package net.jchad.server.view.cli.terminal;
+package net.jchad.shared.io.terminal;
 
 import java.io.IOException;
 import java.util.function.Consumer;
@@ -35,6 +35,13 @@ public abstract class Terminal {
      * @param exitHandler this method will be called if the user interrupts the CLI (using CTRL + C)
      */
     public abstract void initInputReading(Consumer<String> inputHandler, Runnable exitHandler);
+
+    /**
+     * This method only read a single user input.
+     *
+     * @return the read {@link String}
+     */
+    public abstract String read() throws UserExitedException;
 
     /**
      * Close a terminal instance.
