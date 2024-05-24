@@ -82,6 +82,17 @@ public class ClientController {
     }
 
     /**
+     * Get the {@link ClientChat} from a chat name. Returns null if no chat with this name
+     * was found.
+     *
+     * @param chatName the chat name string from which to get the {@link ClientChat}
+     * @return the {@link ClientChat}, null if no chat with this name was found.
+     */
+    public ClientChat getChat(String chatName) {
+        return client.getChat(chatName);
+    }
+
+    /**
      * Returns all {@link ClientChatMessage} instances from this specific chat.
      * <br>
      * <br>

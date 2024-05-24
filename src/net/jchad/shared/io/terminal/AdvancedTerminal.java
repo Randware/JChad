@@ -1,4 +1,4 @@
-package net.jchad.server.view.cli.terminal;
+package net.jchad.shared.io.terminal;
 
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
@@ -56,6 +56,15 @@ public class AdvancedTerminal extends Terminal {
             } else {
                 clearPreviousLine();
             }
+        }
+    }
+
+    @Override
+    public String read() throws UserExitedException {
+        try {
+            return reader.readLine("> ").trim();
+        } catch (UserInterruptException e) {
+            throw new UserExitedException();
         }
     }
 

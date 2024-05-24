@@ -1,10 +1,10 @@
-package net.jchad.server.view.cli;
+package net.jchad.server.view;
 
 import net.jchad.server.controller.ServerController;
 import net.jchad.server.model.error.MessageHandler;
-import net.jchad.server.view.cli.terminal.AdvancedTerminal;
-import net.jchad.server.view.cli.terminal.SimpleTerminal;
-import net.jchad.server.view.cli.terminal.Terminal;
+import net.jchad.shared.io.terminal.AdvancedTerminal;
+import net.jchad.shared.io.terminal.SimpleTerminal;
+import net.jchad.shared.io.terminal.Terminal;
 import net.jchad.shared.common.Util;
 
 import java.io.IOException;

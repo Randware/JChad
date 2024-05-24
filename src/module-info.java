@@ -16,7 +16,7 @@ module net.jchad {
     requires org.fxmisc.richtext;
     requires jdk.unsupported;
     requires javafx.web;
-
+    requires org.controlsfx.controls;
 
 
     opens net.jchad.client to javafx.fxml;
