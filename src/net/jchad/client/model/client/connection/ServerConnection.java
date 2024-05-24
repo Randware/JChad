@@ -89,8 +89,6 @@ public class ServerConnection implements Callable<Void> {
 
             // first check if the connection was closed by the server
             if(readPacket instanceof ConnectionClosedPacket packet) {
-                client.disconnect();
-
                 throw new ClosedConnectionException(packet.getMessage());
             }
 
