@@ -26,7 +26,7 @@ public class ConnectionWriter extends Thread {
      * @param packet the {@link Packet} which will be serialized and encrypted and sent to the server.
      */
     public void sendPacket(Packet packet) {
-        out.println(packet);
+        out.println(packet.toJSON());
     }
 
     public void send(String data) {
