@@ -169,9 +169,6 @@ public class ServerThread implements Runnable{
                     User.removeUser(this);
                 }
 
-                if (scanner != null) {
-                    scanner.close();
-                }
                 if (socket != null) {
                     socket.close();
                 };

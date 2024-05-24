@@ -80,7 +80,12 @@ public final class MainSocket implements Runnable{
     public void shutdown(String message) {
         running = false;
         messageHandler.handleDebug("Closing all connections before shutting the MainSocket down");
-        serverThreadSet.forEach(thread -> thread.close(message, false));
+        for (ServerThread element : serverThreadSet) {
+            messageHandler.handleDebug("Trying to close connection with " + element.getRemoteAddress());
+            element.close(message, false);
+            messageHandler.handleDebug("Connection closed successfully with " + element.getRemoteAddress() + " !");
+        }
+
         executor.shutdownNow();
         closeServerSocket();
 
