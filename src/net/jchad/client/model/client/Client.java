@@ -8,12 +8,10 @@ import net.jchad.client.model.client.connection.ServerConnector;
 import net.jchad.client.model.store.chat.ClientChat;
 import net.jchad.client.model.store.chat.ClientChatMessage;
 import net.jchad.client.model.store.connection.ConnectionDetails;
-import net.jchad.shared.cryptography.CrypterManager;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.Future;
 
 /**
@@ -26,7 +24,7 @@ public class Client {
     private final ViewCallback viewCallback;
     private final ClientConfigManager configManager;
     private ServerConnector serverConnector = null;
-    private final ExecutorService executorService = Executors.newFixedThreadPool(2);
+    private final ExecutorService executorService;
     private ServerConnection currentConnection;
     private ArrayList<ClientChat> chats;
 
@@ -39,8 +37,9 @@ public class Client {
 
     public Client(ViewCallback viewCallback) {
         this.viewCallback = viewCallback;
+        executorService = Executors.newFixedThreadPool(2);
         this.configManager = new ClientConfigManager(viewCallback);
-
+        this.chats = new ArrayList<>();
     }
 
     /**
@@ -57,12 +56,13 @@ public class Client {
             if(currentConnection != null ) {
                 currentConnection.closeConnection();
             }
-            CrypterManager crypterManager = new CrypterManager();
 
             Future<ServerConnection> future = executorService.submit(serverConnector);
             currentConnection = future.get();
 
             serverConnector.shutdown();
+
+            executorService.submit(currentConnection);
         } catch (Exception e) {
             viewCallback.handleFatalError(e);
         }
@@ -91,16 +91,15 @@ public class Client {
      * @param messageString the message string which should be sent.
      */
     public void sendMessageString(String messageString) {
-        if(currentConnection != null) {
+        if(currentConnection != null && currentChat != null) {
             try {
                 ClientChatMessage message = currentConnection.sendMessage(messageString, currentChat);
                 message.setOwn(true);
                 addMessage(currentChat, message);
             } catch (ClosedConnectionException e) {
+                viewCallback.handleFatalError(e);
                 currentConnection.closeConnection();
             }
-
-
         }
     }
 
@@ -149,6 +148,18 @@ public class Client {
      * @param chat the {@link ClientChat} that should be set as the current chat.
      */
     public void setCurrentChat(ClientChat chat) {
+        if(!chat.isJoined()) {
+
+            try {
+                currentConnection.joinChat(chat.getName());
+            } catch (ClosedConnectionException e) {
+                currentConnection.closeConnection();
+                return;
+            }
+
+            chat.setJoined(true);
+        }
+
         this.currentChat = chat;
 
         ArrayList<ClientChatMessage> messages = chat.getMessages();

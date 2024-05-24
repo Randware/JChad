@@ -10,10 +10,18 @@ public class JoinChatResponsePacket implements Packet {
 
     private final PacketType packet_type = PacketType.JOIN_CHAT_RESPONSE;
     private final String chat_name;
-    public final List<ServerMessagePacket> previous_messages;
+    private final List<ServerMessagePacket> previous_messages;
     
     public JoinChatResponsePacket(String chat_name, List<ServerMessagePacket> previous_messages) {
         this.chat_name = chat_name;
         this.previous_messages = previous_messages;
+    }
+
+    public String getChat_name() {
+        return chat_name;
+    }
+
+    public List<ServerMessagePacket> getPrevious_messages() {
+        return previous_messages;
     }
 }

@@ -36,7 +36,7 @@ public class MainHelperThread extends HelperThread {
      * </o>
      */
     public void  start() {
-        getServerThread().getMessageHandler().handleDebug("%s finished the initialization steps. The MainHelperThread gets started ".formatted(getServerThread().getRemoteAddress()));
+        getServerThread().getMessageHandler().handleDebug("%s finished the initialization steps. The MainHelperThread gets started".formatted(getServerThread().getRemoteAddress()));
         writePacket(new ConnectionEstablishedPacket());
         writePacket(ServerInformationResponsePacket.getCurrentServerInfo(getServerThread().getServer()));
         int retries = getRetries();
@@ -73,7 +73,9 @@ public class MainHelperThread extends HelperThread {
                     if (chat == null) {
                         throw new InvalidPacketException("The given chat does not exist");
                     }
-                    writePacket(new JoinChatResponsePacket(chat.getName(),chat.getServerMessages()));
+                    getServerThread().useMessageKey();
+                    writePacket(new JoinChatResponsePacket(chat.getName(),chat.getServerMessages((getServerThread().isEncryptMessages()) ? getServerThread().getCrypterManager() : null
+                            , getServerThread().getMessageHandler())));
                     getServerThread().getUser().addJoinedChats(joinChat.getChat_name());
                     failedAttempts--;
                     continue;
@@ -98,7 +100,7 @@ public class MainHelperThread extends HelperThread {
                     throw new InvalidPacketException("The packet that the client sent was not recognized");
             }  catch (JsonSyntaxException | InvalidPacketException e) {
                 if (failedAttempts >= retries) {
-                    getServerThread().getMessageHandler().handleDebug("%s sent to many invalid packets. The connection get terminated now!".formatted(getServerThread().getRemoteAddress()));
+                    getServerThread().getMessageHandler().handleDebug("%s sent to many invalid packets. The connection gets terminated now!".formatted(getServerThread().getRemoteAddress()));
                     getServerThread().close("The client exceeded the invalid packets limit. " +
                             e.getMessage());
                     break;

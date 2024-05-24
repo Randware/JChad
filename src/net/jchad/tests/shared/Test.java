@@ -25,8 +25,9 @@ public class Test {
     public static void main(String[] args) throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, ImpossibleConversionException, InvalidAlgorithmParameterException, ClosedConnectionException, IOException, InvalidPacketException {
 
 
-        CrypterManager crypterManager = new CrypterManager();
-        crypterManager.setKeyPair(4096);
+        System.out.println(new UsernameClientPacket("Dari_OS").toJSON());
+        System.out.println(new ClientMessagePacket("Hello world", "test").toJSON());
+        System.out.println(new JoinChatRequestPacket("test").toJSON());
 
         /*System.out.println(new PasswordResponsePacket(CrypterManager.hash("test")).toJSON());
         System.out.println(new UsernameClientPacket("Dari_OS").toJSON());

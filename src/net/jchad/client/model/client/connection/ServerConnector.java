@@ -4,6 +4,7 @@ import net.jchad.client.model.client.Client;
 import net.jchad.client.model.client.ViewCallback;
 import net.jchad.client.model.client.packets.PacketHandler;
 import net.jchad.client.model.client.packets.PacketMapper;
+import net.jchad.client.model.store.chat.ClientChat;
 import net.jchad.client.model.store.connection.ConnectionDetails;
 import net.jchad.server.model.server.ConnectionClosedException;
 import net.jchad.shared.cryptography.CrypterManager;
@@ -31,8 +32,11 @@ import java.net.Socket;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * This class is responsible for everything that needs to be done before the client
@@ -159,10 +163,10 @@ public class ServerConnector implements Callable<ServerConnection> {
             } else {
                 throw new InvalidPacketException("The received packet from the server was not recognised");
             }
-            Packet nextPacket = connectionReader.readPacket();
-            boolean success = encryption(nextPacket);
-            password((success) ? null : nextPacket);
-            username(nextPacket);
+            Packet nextPacket1 = connectionReader.readPacket();
+            boolean success = encryption(nextPacket1);
+            Packet nextPacket2 = password((success) ? null : nextPacket1);
+            username(nextPacket2);
 
             Packet hopefullySuccess = readPacket();
             Packet newServerInfos = readPacket();
@@ -180,6 +184,13 @@ public class ServerConnector implements Callable<ServerConnection> {
                             newServerInfosCasted.getUsername_validation_regex(),
                             newServerInfosCasted.getUsername_validation_description()
                     );
+
+                    ArrayList<ClientChat> newChats = new ArrayList<>();
+                    for(String chat : serverInformation.available_chats()) {
+                        newChats.add(new ClientChat(chat));
+                    }
+                    client.updateChats(newChats);
+
                     ServerConnection connection = new ServerConnection(client, connectionDetails, connectionWriter, connectionReader, serverInformation, socket, keys);
                     streamsTransfered = true;
                     return connection;
@@ -221,9 +232,18 @@ public class ServerConnector implements Callable<ServerConnection> {
                 } else {
                     UsernameServerPacket.UsernameResponseType responseType = usernameServerPacket.getUsername_response_type();
                     switch (responseType) {
-                        case ERROR_USERNAME_TAKEN -> connectionDetails.setUsername(client.getViewCallback().displayPrompt("Enter a username", "The requested username is already taken. Pleases enter a new one: "));
-                        case ERROR_USERNAME_INVALID -> connectionDetails.setUsername(client.getViewCallback().displayPrompt("Enter a username", "The requested username is invalid make sure to follow these rules: " + serverInformation.username_validation_description()));
-                        case ERROR_USERNAME_INAPROPRIATE -> connectionDetails.setUsername(client.getViewCallback().displayPrompt("Enter a username", "The requested username is inappropriate. Please enter a new one: "));
+                        case ERROR_USERNAME_TAKEN -> {
+                            connectionDetails.setUsername(client.getViewCallback().displayPrompt("Enter a username", "The requested username is already taken. Pleases enter a new one: "));
+                            writePacket(new UsernameClientPacket(connectionDetails.getUsername()));
+                        }
+                        case ERROR_USERNAME_INVALID -> {
+                            connectionDetails.setUsername(client.getViewCallback().displayPrompt("Enter a username", "The requested username is invalid make sure to follow these rules: " + serverInformation.username_validation_description()));
+                            writePacket(new UsernameClientPacket(connectionDetails.getUsername()));
+                        }
+                        case ERROR_USERNAME_INAPROPRIATE -> {
+                            connectionDetails.setUsername(client.getViewCallback().displayPrompt("Enter a username", "The requested username is inappropriate. Please enter a new one: "));
+                            writePacket(new UsernameClientPacket(connectionDetails.getUsername()));
+                        }
                         default -> {
                             return;
                         }
@@ -234,7 +254,7 @@ public class ServerConnector implements Callable<ServerConnection> {
         }
     }
 
-    private <T extends Packet> void password(T packet) throws ClosedConnectionException, IOException, InvalidPacketException {
+    private <T extends Packet> Packet password(T packet) throws ClosedConnectionException, IOException, InvalidPacketException {
         while (true) {
             if (packet == null) {
                 packet = readPacket();
@@ -248,14 +268,14 @@ public class ServerConnector implements Callable<ServerConnection> {
                 Packet nextNextPacket = readPacket(); //I just want to get over this project. I don't have enough energy to think of creative variable names.
                 if (nextNextPacket == null) throw new ConnectionClosedException("The connection to the server was lost during the password authentication process");
                 if (nextNextPacket.getClass().equals(PasswordSuccessPacket.class)) {
-                    return;
+                    return null;
                 }
                 if (nextNextPacket.getClass().equals(PasswordFailedPacket.class)) {
                     connectionDetails.setPassword(client.getViewCallback().displayPrompt("Password", "The provided password was wrong. Please enter the correct one: "));
                 }
 
             } else {
-                break;
+                return packet;
             }
         }
 
@@ -365,7 +385,6 @@ public class ServerConnector implements Callable<ServerConnection> {
                 connectionWriter = null;
                 connectionReader = null;
             }
-            Thread.currentThread().interrupt();
         }
     }
 }
