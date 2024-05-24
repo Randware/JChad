@@ -2,6 +2,7 @@ package net.jchad.client.model.client;
 
 import net.jchad.client.controller.ClientController;
 import net.jchad.client.model.client.config.ClientConfigManager;
+import net.jchad.client.model.client.connection.ClosedConnectionException;
 import net.jchad.client.model.client.connection.ServerConnection;
 import net.jchad.client.model.client.connection.ServerConnector;
 import net.jchad.client.model.store.chat.ClientChat;
@@ -67,15 +68,13 @@ public class Client {
      * if there is an ongoing connection process.
      */
     public void disconnect() {
-        try {
+
             if(currentConnection != null) {
                 currentConnection.closeConnection();
             }
 
             serverConnector.shutdown();
-        } catch (Exception e) {
-            viewCallback.handleFatalError(e);
-        }
+
 
         currentConnection = null;
     }
@@ -88,10 +87,15 @@ public class Client {
      */
     public void sendMessageString(String messageString) {
         if(currentConnection != null) {
-            ClientChatMessage message = currentConnection.sendMessage(messageString, currentChat);
-            message.setOwn(true);
+            try {
+                ClientChatMessage message = currentConnection.sendMessage(messageString, currentChat);
+                message.setOwn(true);
+                addMessage(currentChat, message);
+            } catch (ClosedConnectionException e) {
+                currentConnection.closeConnection();
+            }
 
-            addMessage(currentChat, message);
+
         }
     }
 

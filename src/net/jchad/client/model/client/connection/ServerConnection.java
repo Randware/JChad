@@ -5,15 +5,24 @@ import net.jchad.client.model.client.ViewCallback;
 import net.jchad.client.model.store.chat.ClientChat;
 import net.jchad.client.model.store.chat.ClientChatMessage;
 import net.jchad.client.model.store.connection.ConnectionDetails;
+import net.jchad.shared.cryptography.CrypterManager;
+import net.jchad.shared.cryptography.ImpossibleConversionException;
 import net.jchad.shared.networking.packets.InvalidPacketException;
 import net.jchad.shared.networking.packets.Packet;
 import net.jchad.shared.networking.packets.defaults.ConnectionClosedPacket;
 import net.jchad.shared.networking.packets.defaults.ServerInformationResponsePacket;
+import net.jchad.shared.networking.packets.encryption.AESencryptionKeysPacket;
 import net.jchad.shared.networking.packets.messages.ClientMessagePacket;
 import net.jchad.shared.networking.packets.messages.MessageStatusFailedPacket;
 import net.jchad.shared.networking.packets.messages.ServerMessagePacket;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
@@ -35,11 +44,15 @@ public class ServerConnection implements Callable<Void> {
 
     private final ViewCallback viewCallback;
 
+    private final AESencryptionKeysPacket keys;
+
     private final ConnectionDetails connectionDetails;
 
     private ServerInformation serverInformation;
 
     private final Socket socket;
+
+    private final CrypterManager crypterManager = new CrypterManager();
 
     /**
      * The {@link ConnectionWriter} which will be used to send data to the server.
@@ -51,7 +64,8 @@ public class ServerConnection implements Callable<Void> {
      */
     private ConnectionReader connectionReader;
 
-    public ServerConnection(Client client, ConnectionDetails connectionDetails, ConnectionWriter connectionWriter, ConnectionReader connectionReader, ServerInformation serverInformation, Socket socket) {
+    public ServerConnection(Client client, ConnectionDetails connectionDetails, ConnectionWriter connectionWriter,
+                            ConnectionReader connectionReader, ServerInformation serverInformation, Socket socket,AESencryptionKeysPacket keys ) {
         this.client = client;
         this.viewCallback = client.getViewCallback();
         this.connectionDetails = connectionDetails;
@@ -59,6 +73,7 @@ public class ServerConnection implements Callable<Void> {
         this.connectionReader = connectionReader;
         this.serverInformation = serverInformation;
         this.socket = socket;
+        this.keys = keys;
     }
 
     /**
@@ -69,7 +84,7 @@ public class ServerConnection implements Callable<Void> {
     @Override
     public Void call() throws ClosedConnectionException, IOException, InvalidPacketException {
         while(true) {
-            Packet readPacket = connectionReader.readPacket();
+            Packet readPacket = readPacket();
 
             // first check if the connection was closed by the server
             if(readPacket instanceof ConnectionClosedPacket packet) {
@@ -115,11 +130,15 @@ public class ServerConnection implements Callable<Void> {
     /**
      * Stop any currently running processes and also close all streams.
      */
-    public void closeConnection() throws IOException {
+    public void closeConnection() {
         // Do everything that must be done in order to properly close the current connection
-        connectionWriter.close();
-        connectionReader.close();
-        socket.close();
+        try {
+            connectionWriter.close();
+            connectionReader.close();
+            socket.close();
+        } catch (IOException e) {
+            client.getViewCallback().handleFatalError(new IOException("An error occurred while closing the connection to the server.", e));
+        }
     }
 
     /**
@@ -130,10 +149,10 @@ public class ServerConnection implements Callable<Void> {
      * @param chat the {@link ClientChat} this message was sent in.
      * @return the converted and sent {@link ClientChatMessage}
      */
-    public ClientChatMessage sendMessage(String messageContent, ClientChat chat) {
+    public ClientChatMessage sendMessage(String messageContent, ClientChat chat) throws ClosedConnectionException {
         ClientChatMessage message = new ClientChatMessage(chat.getName(), messageContent, connectionDetails.getUsername(), System.currentTimeMillis());
 
-        connectionWriter.sendPacket(new ClientMessagePacket(messageContent, chat.getName()));
+        writePacket(new ClientMessagePacket(messageContent, chat.getName()));
 
         return message;
     }
@@ -145,5 +164,42 @@ public class ServerConnection implements Callable<Void> {
      */
     public ServerInformation getServerInformation() {
         return serverInformation;
+    }
+
+    public  <T extends Packet> void writePacket(T packet) throws ClosedConnectionException {
+        try {
+            if (keys != null) {
+                crypterManager.setAESkey(keys.getCommunication_key());
+                crypterManager.setBase64IV(keys.getCommunication_initialization_vector());
+
+                connectionWriter.send(crypterManager.encryptAES(packet.toJSON()));
+
+            } else {
+                connectionWriter.sendPacket(packet);
+            }
+        } catch (ImpossibleConversionException | NoSuchPaddingException | IllegalBlockSizeException |
+                 NoSuchAlgorithmException | BadPaddingException | InvalidAlgorithmParameterException |
+                 InvalidKeyException e) {
+            throw new ClosedConnectionException("An unknown encryption related error occurred while trying to send a Packet", e);
+        }
+    }
+
+    public  <T extends Packet> T readPacket() throws IOException, ClosedConnectionException, InvalidPacketException {
+
+        try {
+            if (keys != null) {
+                crypterManager.setAESkey(keys.getCommunication_key());
+                crypterManager.setBase64IV(keys.getCommunication_initialization_vector());
+
+                return Packet.fromJSON(crypterManager.decryptAES(connectionReader.read()));
+
+            } else {
+                return connectionReader.readPacket();
+            }
+        } catch (ImpossibleConversionException | NoSuchPaddingException | IllegalBlockSizeException |
+                 NoSuchAlgorithmException | BadPaddingException | InvalidAlgorithmParameterException |
+                 InvalidKeyException e) {
+            throw new ClosedConnectionException("An unknown encryption related error occurred while trying to send a Packet", e);
+        }
     }
 }
