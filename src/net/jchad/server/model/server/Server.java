@@ -81,7 +81,7 @@ public class Server implements ConfigObserver {
         messageHandler.handleInfo("Updated server configuration");
         mainSocket.getServerThreadSet().forEach(serverThread -> {
             if ( serverThread.getUser() != null && serverThread.getUser().isReadyToReceiveMessages()) {
-                serverThread.write(ServerInformationResponsePacket.getCurrentServerInfo(this).toJSON());
+                serverThread.write(Server.getCurrentServerInfo(this).toJSON());
             }
         });
     }
@@ -120,5 +120,16 @@ public class Server implements ConfigObserver {
 
     public String getServerPassword() {
         return serverPassword;
+    }
+
+    public static ServerInformationResponsePacket getCurrentServerInfo(Server server) {
+        return new ServerInformationResponsePacket(server.getVersion(),
+                server.getConfig().getServerSettings().isEncryptCommunications(),
+                server.getConfig().getServerSettings().isEncryptMessages(),
+                server.getChats().stream().map(Chat::getName).toArray(String[]::new),
+                server.getConfig().getServerSettings().isRequiresPassword(),
+                server.getConfig().getServerSettings().isWhitelist(),
+                server.getConfig().getInternalSettings().getUsernameRegex(),
+                server.getConfig().getInternalSettings().getUsernameRegexDescription());
     }
 }

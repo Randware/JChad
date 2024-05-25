@@ -5,8 +5,6 @@ import net.jchad.client.model.client.ViewCallback;
 import net.jchad.client.model.store.chat.ClientChat;
 import net.jchad.client.model.store.chat.ClientChatMessage;
 import net.jchad.client.model.store.connection.ConnectionDetails;
-import net.jchad.server.model.chats.ChatMessage;
-import net.jchad.server.model.server.ConnectionClosedException;
 import net.jchad.shared.cryptography.CrypterManager;
 import net.jchad.shared.cryptography.ImpossibleConversionException;
 import net.jchad.shared.networking.packets.InvalidPacketException;
@@ -120,7 +118,7 @@ public class ServerConnection implements Callable<Void> {
                     try {
                         crypterManager.setBase64IV(keys.getMessage_initialization_vector());
                     } catch (ImpossibleConversionException e) {
-                        throw new ConnectionClosedException("An error occurred while trying to decode the message_iv from base64 to an byte array");
+                        throw new ClosedConnectionException("An error occurred while trying to decode the message_iv from base64 to an byte array");
                     }
                     for(ServerMessagePacket message : packet.getPrevious_messages()) {
                         try {
@@ -163,7 +161,7 @@ public class ServerConnection implements Callable<Void> {
                     } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException |
                              NoSuchAlgorithmException | BadPaddingException | InvalidKeyException |
                              ImpossibleConversionException e) {
-                     throw new ConnectionClosedException("An encryption related error occurred while trying to encrypt a message.", e);
+                     throw new ClosedConnectionException("An encryption related error occurred while trying to encrypt a message.", e);
                     }
                 } else {
                     client.addMessage(client.getChat(packet.getChat()),

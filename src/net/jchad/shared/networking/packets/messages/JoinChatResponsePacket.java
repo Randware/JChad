@@ -1,6 +1,5 @@
 package net.jchad.shared.networking.packets.messages;
 
-import net.jchad.server.model.chats.ChatMessage;
 import net.jchad.shared.networking.packets.Packet;
 import net.jchad.shared.networking.packets.PacketType;
 

@@ -2,15 +2,12 @@ package net.jchad.tests.shared;
 
 import net.jchad.client.model.client.connection.ClosedConnectionException;
 import net.jchad.server.model.server.ConnectionClosedException;
-import net.jchad.shared.cryptography.CrypterManager;
 import net.jchad.shared.cryptography.ImpossibleConversionException;
 import net.jchad.shared.networking.packets.InvalidPacketException;
 import net.jchad.shared.networking.packets.Packet;
 import net.jchad.shared.networking.packets.defaults.ConnectionClosedPacket;
-import net.jchad.shared.networking.packets.encryption.RSAkeyPacket;
 import net.jchad.shared.networking.packets.messages.ClientMessagePacket;
 import net.jchad.shared.networking.packets.messages.JoinChatRequestPacket;
-import net.jchad.shared.networking.packets.password.PasswordResponsePacket;
 import net.jchad.shared.networking.packets.username.UsernameClientPacket;
 
 import javax.crypto.BadPaddingException;
