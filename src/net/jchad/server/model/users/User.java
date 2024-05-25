@@ -206,6 +206,7 @@ public class User {
                                     messagePacket.getTimestamp()
 
                             );
+
                 } catch (InvalidAlgorithmParameterException | NoSuchPaddingException|  NoSuchAlgorithmException | BadPaddingException | InvalidKeyException | IllegalBlockSizeException e) {
                     connection.getMessageHandler().handleDebug("An unknown error occurred while trying to decrypt the content of the received from %s".formatted(connection.getRemoteAddress()), e);
                     connection.write(new InvalidPacket(PacketType.CLIENT_MESSAGE, "The content of the client message could not be decrypted: " + e.getMessage()).toJSON());
@@ -245,10 +246,11 @@ public class User {
                                     messagePacket.getUsername(),
                                     messagePacket.getTimestamp()
                             );
+                            user.getConnection().write(encryptedMessagePacket.toJSON());
                         } catch (Exception e) {
                             //UHH SCARY!!! MAY CLOSE ALL CONNECTIONS IF THE CLIENT SENDS A STRING THAT IS NOT ENCRYPTABLE?
                             //CVE-1 JUST DROPPED?!?!?!?
-                            getConnection().getMessageHandler().handleDebug("An error occurred while encrypting message data for " + user.getConnection().getRemoteAddress());
+                            getConnection().getMessageHandler().handleDebug("An error occurred while encrypting message data for " + user.getConnection().getRemoteAddress(), e);
                             user.getConnection().close("An error occurred while encrypting message data");
                         }
                     } else {
