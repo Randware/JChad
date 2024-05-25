@@ -1,5 +1,10 @@
 package net.jchad.client.model.store.chat;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+
 // TODO: Figure out how to differentiate the chat messages that are received by the server and which are sent by the client
 //          (See Client class sendMessageString() method)
 public class ClientChatMessage {
@@ -59,5 +64,9 @@ public class ClientChatMessage {
 
     public long getTimestamp() {
         return timestamp;
+    }
+
+    public LocalDateTime getPrettyTimestamp() {
+        return Instant.ofEpochMilli(timestamp).atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
 }

@@ -114,6 +114,16 @@ public class ClientConfigManager {
     }
 
     /**
+     * Checks if a connection with the specified name already exists.
+     *
+     * @param connectionName the name of the connection to check for
+     * @return true if one already exists, false if not
+     */
+    public boolean connectionExists(String connectionName) {
+        return config.getStoredConnections().stream().anyMatch(connection -> connection.getConnectionName().equalsIgnoreCase(connectionName));
+    }
+
+    /**
      * Returns all currently saved {@link ClientConfig} instances.
      *
      * @return an {@link ArrayList} containing all currently saved

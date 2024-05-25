@@ -178,11 +178,6 @@ public class ServerConnection implements Callable<Void> {
             if(readPacket instanceof MessageStatusFailedPacket packet) {
                 viewCallback.handleWarning("Server failed receiving message packet: " + packet.getReason());
             }
-
-            // this packet will be sent by the server if the client sent a valid message
-            if(readPacket instanceof MessageStatusSuccessPacket packet) {
-                viewCallback.handleInfo("Message was received by server");
-            }
         }
     }
 
