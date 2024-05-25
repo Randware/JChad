@@ -195,6 +195,9 @@ public class User {
         if (!messagePacket.isValid()) {return 0;}
         //Encrypts message content if necessary
 
+
+
+
         if (connection.isEncryptMessages() && connection.getMessageAESkey() != null) {
             connection.useMessageKey();
                 try {
@@ -222,6 +225,16 @@ public class User {
 
         //Sends messages to all users
         Chat chat = connection.getServer().getChatManager().getChat(messagePacket.getChat());
+
+        if (chat.getConfig().isAnonymous() || connection.getConfig().getServerSettings().isStrictlyAnonymous()) {
+            messagePacket = new ServerMessagePacket(
+                    messagePacket.getMessage(),
+                    messagePacket.getChat(),
+                    connection.getConfig().getInternalSettings().getAnonymousUserName(),
+                    messagePacket.getTimestamp()
+            );
+        }
+
         ChatMessage chatMessage = ChatMessage.fromMessagePacket(messagePacket, connection.getRemoteAddress());
         if (chat == null) {
             connection.getMessageHandler().handleDebug("%s tried to send a message to a chat that does not exist".formatted(getConnection().getRemoteAddress()));
