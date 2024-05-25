@@ -32,4 +32,6 @@ ServerController {
     public Config getServerConfig() {
         return server.getConfig();
     }
+
+    public Server getServer(){return server;}
 }
