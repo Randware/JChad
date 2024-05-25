@@ -77,6 +77,7 @@ public class MainHelperThread extends HelperThread {
                     writePacket(new JoinChatResponsePacket(chat.getName(),chat.getServerMessages((getServerThread().isEncryptMessages()) ? getServerThread().getCrypterManager() : null
                             , getServerThread().getMessageHandler())));
                     getServerThread().getUser().addJoinedChats(joinChat.getChat_name());
+                    getServerThread().getMessageHandler().handleDebug("User " + getServerThread().getRemoteAddress() + " joined " + joinChat.getChat_name());
                     failedAttempts--;
                     continue;
                 }

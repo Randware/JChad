@@ -115,28 +115,51 @@ public class ServerConnection implements Callable<Void> {
 
             // Check if the server sent a response to a chat join request, if yes add the previous messages to this chat
             if(readPacket instanceof JoinChatResponsePacket packet) {
-                for(ServerMessagePacket message : packet.getPrevious_messages()) {
-                    client.addMessage(client.getChat(packet.getChat_name()), new ClientChatMessage(message.getChat(),
-                            message.getMessage(),
-                            message.getUsername(),
-                            message.getTimestamp()));
+                if (keys != null && serverInformation.encrypt_messages()) {
+                    crypterManager.setAESkey(keys.getMessage_key());
+                    try {
+                        crypterManager.setBase64IV(keys.getMessage_initialization_vector());
+                    } catch (ImpossibleConversionException e) {
+                        throw new ConnectionClosedException("An error occurred while trying to decode the message_iv from base64 to an byte array");
+                    }
+                    for(ServerMessagePacket message : packet.getPrevious_messages()) {
+                        try {
+                            client.addMessage(client.getChat(packet.getChat_name()), new ClientChatMessage(message.getChat(),
+                                    crypterManager.decryptAES(message.getMessage()),
+                                    message.getUsername(),
+                                    message.getTimestamp()));
+                        } catch (InvalidAlgorithmParameterException | NoSuchPaddingException |
+                                 IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException |
+                                 InvalidKeyException | ImpossibleConversionException e) {
+                            viewCallback.handleError(new Exception("An error occurred while decrypting previous messages. Message gets skipped. Original Message:" + message.toJSON()));
+                        }
+                    }
+                } else {
+                    for(ServerMessagePacket message : packet.getPrevious_messages()) {
+                        client.addMessage(client.getChat(packet.getChat_name()), new ClientChatMessage(message.getChat(),
+                                message.getMessage(),
+                                message.getUsername(),
+                                message.getTimestamp()));
+                    }
                 }
             }
+
 
             // check if there was a new message sent by someone, if yes add it to the client
             if(readPacket instanceof ServerMessagePacket packet) {
 
                 if (keys != null && serverInformation.encrypt_messages()) {
-                    crypterManager.setAESkey(keys.getMessage_key());
-                    crypterManager.setAESkey(keys.getMessage_initialization_vector());
                     try {
+                        crypterManager.setAESkey(keys.getMessage_key());
+                        crypterManager.setBase64IV(keys.getMessage_initialization_vector());
                         client.addMessage(client.getChat(packet.getChat()),
                                 new ClientChatMessage(
                                         packet.getChat(),
-                                        crypterManager.encryptAES(packet.getMessage()),
+                                        crypterManager.decryptAES(packet.getMessage()),
                                         packet.getUsername(),
                                         packet.getTimestamp()
                                 ));
+
                     } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException |
                              NoSuchAlgorithmException | BadPaddingException | InvalidKeyException |
                              ImpossibleConversionException e) {
