@@ -2,16 +2,12 @@ package net.jchad.client.model.client.connection;
 
 import net.jchad.client.model.client.Client;
 import net.jchad.client.model.client.ViewCallback;
-import net.jchad.client.model.client.packets.PacketHandler;
-import net.jchad.client.model.client.packets.PacketMapper;
 import net.jchad.client.model.store.chat.ClientChat;
 import net.jchad.client.model.store.connection.ConnectionDetails;
-import net.jchad.server.model.server.ConnectionClosedException;
 import net.jchad.shared.cryptography.CrypterManager;
 import net.jchad.shared.cryptography.ImpossibleConversionException;
 import net.jchad.shared.networking.packets.InvalidPacketException;
 import net.jchad.shared.networking.packets.Packet;
-import net.jchad.shared.networking.packets.PacketType;
 import net.jchad.shared.networking.packets.defaults.*;
 import net.jchad.shared.networking.packets.encryption.AESencryptionKeysPacket;
 import net.jchad.shared.networking.packets.encryption.KeyExchangeStartPacket;
@@ -33,10 +29,8 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.concurrent.Callable;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
+
 
 /**
  * This class is responsible for everything that needs to be done before the client
@@ -199,13 +193,13 @@ public class ServerConnector implements Callable<ServerConnection> {
 
 
             } else {
-                throw new ConnectionClosedException("The connection could NOT be established");
+                throw new ClosedConnectionException("The connection could NOT be established");
             }
 
 
         } catch (InvalidPacketException e) {
             throw new ClosedConnectionException("The server packet is invalid", e);
-        } catch (ConnectionClosedException e) {
+        } catch (ClosedConnectionException e) {
             throw new ClosedConnectionException(e.getMessage(), e);
         } catch (IOException e) {
             throw new ClosedConnectionException("An IOException occurred while trying to read data", e);
@@ -221,7 +215,7 @@ public class ServerConnector implements Callable<ServerConnection> {
             if (packet == null || i > 0) {
                 packet = readPacket();
             }
-            if (packet == null) throw new ConnectionClosedException("The connection to the server was lost during the username process");
+            if (packet == null) throw new ClosedConnectionException("The connection to the server was lost during the username process");
             if (packet.getClass().equals(ConnectionClosedPacket.class)) {
                 throw new ClosedConnectionException(((ConnectionClosedPacket) packet).getMessage());
             }
@@ -259,14 +253,14 @@ public class ServerConnector implements Callable<ServerConnection> {
             if (packet == null) {
                 packet = readPacket();
             }
-            if (packet == null) throw new ConnectionClosedException("The connection to the server was lost during the password authentication process");
+            if (packet == null) throw new ClosedConnectionException("The connection to the server was lost during the password authentication process");
             if (packet.getClass().equals(ConnectionClosedPacket.class)) {
                 throw new ClosedConnectionException(((ConnectionClosedPacket) packet).getMessage());
             }
             if (packet.getClass().equals(PasswordRequestPacket.class)) {
                 writePacket(new PasswordResponsePacket(CrypterManager.hash(connectionDetails.getPassword())));
                 Packet nextNextPacket = readPacket(); //I just want to get over this project. I don't have enough energy to think of creative variable names.
-                if (nextNextPacket == null) throw new ConnectionClosedException("The connection to the server was lost during the password authentication process");
+                if (nextNextPacket == null) throw new ClosedConnectionException("The connection to the server was lost during the password authentication process");
                 if (nextNextPacket.getClass().equals(PasswordSuccessPacket.class)) {
                     return null;
                 }
@@ -286,7 +280,7 @@ public class ServerConnector implements Callable<ServerConnection> {
      * @param packet the next packet that was received by the server
      * @return if the keys got exchanged
      */
-    private boolean encryption(Packet packet) {
+    private boolean encryption(Packet packet) throws ClosedConnectionException {
         if (packet.getClass().equals(KeyExchangeStartPacket.class)) {
 
             crypterManager.setKeyPair(4096);
@@ -305,21 +299,21 @@ public class ServerConnector implements Callable<ServerConnection> {
                         throw new InvalidPacketException((keysPacket != null && keysPacket.getClass().equals(RSAkeyErrorPacket.class)) ? ((RSAkeyErrorPacket) keysPacket).getError_message() : "");
                     }
                 } else {
-                    throw new ConnectionClosedException("An error occurred during the key exchange process");
+                    throw new ClosedConnectionException("An error occurred during the key exchange process");
                 }
             } catch (IOException e) {
-                throw new ConnectionClosedException("An IOException occurred during the key exchange process", e);
+                throw new ClosedConnectionException("An IOException occurred during the key exchange process", e);
             } catch (ClosedConnectionException e) {
-                throw new ConnectionClosedException("The server closed the connection during the key exchange process", e);
+                throw new ClosedConnectionException("The server closed the connection during the key exchange process", e);
             } catch (ImpossibleConversionException e) {
-                throw new ConnectionClosedException("The server side encrypted encryption keys are not correctly encrypted during the key exchange process", e);
+                throw new ClosedConnectionException("The server side encrypted encryption keys are not correctly encrypted during the key exchange process", e);
             } catch (NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException |
                      BadPaddingException e) {
-                throw new ConnectionClosedException("An unknown error during the key exchange process", e);
+                throw new ClosedConnectionException("An unknown error during the key exchange process", e);
             } catch (InvalidKeyException e) {
-                throw new ConnectionClosedException("The server encrypted the keys incorrect during the key exchange process", e);
+                throw new ClosedConnectionException("The server encrypted the keys incorrect during the key exchange process", e);
             } catch (InvalidPacketException e) {
-                throw new ConnectionClosedException("The server sent wrong or invalid packets during the key exchange process", e);
+                throw new ClosedConnectionException("The server sent wrong or invalid packets during the key exchange process", e);
             }
         } else {
             return false;

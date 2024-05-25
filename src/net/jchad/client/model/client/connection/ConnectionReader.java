@@ -1,7 +1,6 @@
 package net.jchad.client.model.client.connection;
 
-import net.jchad.client.model.client.packets.PacketHandler;
-import net.jchad.server.model.server.ConnectionClosedException;
+
 import net.jchad.shared.networking.packets.InvalidPacketException;
 import net.jchad.shared.networking.packets.Packet;
 import net.jchad.shared.networking.packets.defaults.ConnectionClosedPacket;
@@ -56,7 +55,7 @@ public class ConnectionReader extends Thread {
         if (packet != null && packet.isValid()) {
             if (packet.getClass().equals(ConnectionClosedPacket.class)){
                 ConnectionClosedPacket closedPacket = (ConnectionClosedPacket) packet;
-                throw new ConnectionClosedException(closedPacket.getMessage());
+                throw new ClosedConnectionException(closedPacket.getMessage());
             } else {
                 return (T) packet;
             }

@@ -1,7 +1,4 @@
 package net.jchad.shared.networking.packets.defaults;
-
-import net.jchad.server.model.chats.Chat;
-import net.jchad.server.model.server.Server;
 import net.jchad.shared.networking.packets.Packet;
 import net.jchad.shared.networking.packets.PacketType;
 
@@ -19,7 +16,7 @@ public class ServerInformationResponsePacket implements Packet {
     private final String username_validation_regex;
     private final String username_validation_description;
 
-    protected ServerInformationResponsePacket(double server_version, boolean encrypt_communications, boolean encrypt_messages, String[] available_chats, boolean requires_password, boolean strictly_anonymous, String username_validation_regex, String username_validation_description) {
+    public ServerInformationResponsePacket(double server_version, boolean encrypt_communications, boolean encrypt_messages, String[] available_chats, boolean requires_password, boolean strictly_anonymous, String username_validation_regex, String username_validation_description) {
         this.server_version = server_version;
         this.encrypt_communications = encrypt_communications;
         this.encrypt_messages = encrypt_messages;
@@ -45,16 +42,7 @@ public class ServerInformationResponsePacket implements Packet {
                 '}';
     }
 
-    public static ServerInformationResponsePacket getCurrentServerInfo(Server server) {
-        return new ServerInformationResponsePacket(server.getVersion(),
-                server.getConfig().getServerSettings().isEncryptCommunications(),
-                     server.getConfig().getServerSettings().isEncryptMessages(),
-                        server.getChats().stream().map(Chat::getName).toArray(String[]::new),
-                     server.getConfig().getServerSettings().isRequiresPassword(),
-                                      server.getConfig().getServerSettings().isWhitelist(),
-               server.getConfig().getInternalSettings().getUsernameRegex(),
-           server.getConfig().getInternalSettings().getUsernameRegexDescription());
-    }
+
 
     public double getServer_version() {
         return server_version;

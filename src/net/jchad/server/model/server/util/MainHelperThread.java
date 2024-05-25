@@ -3,6 +3,7 @@ package net.jchad.server.model.server.util;
 import com.google.gson.JsonSyntaxException;
 import net.jchad.server.model.chats.Chat;
 import net.jchad.server.model.server.ConnectionClosedException;
+import net.jchad.server.model.server.Server;
 import net.jchad.server.model.server.ServerThread;
 import net.jchad.shared.networking.packets.InvalidPacket;
 import net.jchad.shared.networking.packets.InvalidPacketException;
@@ -38,7 +39,7 @@ public class MainHelperThread extends HelperThread {
     public void  start() {
         getServerThread().getMessageHandler().handleDebug("%s finished the initialization steps. The MainHelperThread gets started".formatted(getServerThread().getRemoteAddress()));
         writePacket(new ConnectionEstablishedPacket());
-        writePacket(ServerInformationResponsePacket.getCurrentServerInfo(getServerThread().getServer()));
+        writePacket(Server.getCurrentServerInfo(getServerThread().getServer()));
         int retries = getRetries();
         for (int failedAttempts = 0; retries >= failedAttempts; failedAttempts++) {
             try {
@@ -92,7 +93,7 @@ public class MainHelperThread extends HelperThread {
                 //Fourth check: Checks if the client asks for the server information.
                 ServerInformationRequestPacket informationPacket = getServerThread().getGson().fromJson(element, ServerInformationRequestPacket.class);
                 if (informationPacket != null && informationPacket.isValid()) {
-                    writePacket(ServerInformationResponsePacket.getCurrentServerInfo(getServerThread().getServer()));
+                    writePacket(Server.getCurrentServerInfo(getServerThread().getServer()));
                     failedAttempts--;
                     continue;
                 }
