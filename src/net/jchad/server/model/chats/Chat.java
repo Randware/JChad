@@ -26,14 +26,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * TODO: Implement a way for accessing the messages, which adheres to the "loadChatHistory" and "loadChatHistoryMessageCount" values
- * TODO: Make chat gathering Thread safe
- * DONE: Fix serialization error for IPAddress with GSON
- * - Simply turn IPAddress into a String
- * DONE: Implement config loading and saving
- * DONE: Make the storage location for the ChatConfig retrievable from the outside, necessary for config validation
- */
 public class Chat {
     private Gson gson;
     private ObjectMapper mapper;

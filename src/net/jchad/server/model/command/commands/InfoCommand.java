@@ -33,8 +33,6 @@ public class InfoCommand extends BaseCommand {
             str.append("Port → %s\n".formatted(server.getConfig().getServerSettings().getPort()));
         }
 
-
-
         server.getMessageHandler().handleInfo(str.toString());
     }
 }

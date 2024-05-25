@@ -18,6 +18,7 @@ module net.jchad {
     requires javafx.web;
     requires org.controlsfx.controls;
     requires java.rmi;
+    requires org.fusesource.jansi;
 
     exports net.jchad.client.view;
     opens net.jchad.client to javafx.fxml;
