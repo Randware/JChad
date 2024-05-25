@@ -14,6 +14,8 @@ import javafx.stage.Stage;
 import net.jchad.client.controller.ClientController;
 import net.jchad.client.model.client.ViewCallback;
 import net.jchad.client.model.store.chat.ClientChatMessage;
+import net.jchad.client.model.store.connection.ConnectionDetails;
+import net.jchad.client.model.store.connection.ConnectionDetailsBuilder;
 
 import java.rmi.RemoteException;
 
@@ -25,6 +27,7 @@ public class GUI extends Application implements ViewCallback {
     private Label contentLabel = new Label();
     private Stage primaryStage; // Store the primary stage to access it later
     private Scene scene;
+    private ConnectionDetailsBuilder connectionDetailsBuilder;
 
     public static void main(String[] args) {
         new GUI().runGUI();
@@ -82,9 +85,10 @@ public class GUI extends Application implements ViewCallback {
         handleFatalError(new RemoteException("This is a FatalError"));
         handleInfo("This is a Info");
         handleWarning("This is a Warning");
+        displayPrompt("Benkötestetgerne","Franz ist auch dabei");
     }
 
-    public void connect() { // Modified to accept primaryStage as a parameter
+    public void connect() {
         VBox vbox = new VBox(10);
         Stage dialogStage = new Stage();
 
@@ -101,6 +105,8 @@ public class GUI extends Application implements ViewCallback {
         TextField nameField = new TextField();
         Label passwordLabel = new Label("Password:");
         PasswordField passwordField = new PasswordField();
+        Label usernameLabel = new Label("Username:");
+        TextField usernameField = new TextField();
 
         Button cancelButton = new Button("Cancel");
         /*cancelButton.setOnAction(e -> {
@@ -111,10 +117,11 @@ public class GUI extends Application implements ViewCallback {
             primaryStage.setWidth(screenWidth / 2);
             primaryStage.setHeight(screenHeight / 2);
         });*/
-        cancelButton.setOnAction(e -> dialogStage.close());
 
         Button addButton = new Button("Add");
-        // addButton functionality goes here
+
+        addButton.setOnAction(e -> newConnection(hostField.getText(), portField.getText(), nameField.getText(), passwordField.getText(), usernameField.getText()));
+        cancelButton.setOnAction(e -> dialogStage.close());
 
         HBox buttonContainer = new HBox(10);
         buttonContainer.setAlignment(Pos.CENTER);
@@ -128,6 +135,8 @@ public class GUI extends Application implements ViewCallback {
         grid.add(nameField, 1, 3);
         grid.add(passwordLabel, 0, 4);
         grid.add(passwordField, 1, 4);
+        grid.add(usernameLabel, 0, 5);
+        grid.add(usernameField, 1, 5);
 
         /*vbox.getChildren().addAll(grid, buttonContainer);
 
@@ -144,6 +153,18 @@ public class GUI extends Application implements ViewCallback {
         dialogStage.sizeToScene(); // Automatically resize the window to fit its content
         dialogStage.showAndWait();
     }
+
+    private void newConnection(String Host, String Port, String ConnectionName, String Password, String Username) {
+        connectionDetailsBuilder = new ConnectionDetailsBuilder();
+        connectionDetailsBuilder.addConnectionName(ConnectionName);
+        connectionDetailsBuilder.addHost(Host);
+        connectionDetailsBuilder.addPassword(Password);
+        connectionDetailsBuilder.addPort(Integer.parseInt(Port));
+        connectionDetailsBuilder.addUsername(Username);
+        client.connect(connectionDetailsBuilder.build());
+        handleInfo("Successfully connected to " + ConnectionName);
+    }
+
 
     @Override
     public void handleFatalError(Exception e) {
