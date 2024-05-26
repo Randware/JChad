@@ -210,6 +210,7 @@ public class CLI implements ViewCallback {
             if (userInput.equals("/chats")) {
                 chatsScreen(false);
             } else if (userInput.equals("/exit")) {
+                disconnectScreen();
                 break;
             } else {
                 emptyLine();
