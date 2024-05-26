@@ -7,7 +7,7 @@ A free and open-source, cross-platform chatting platform where you can host serv
 - A **_client_** for connecting to a JChad server
 - An **_installer_** which can be used to install the newest server or client software
 
-Each of these components can bei either run in graphical user interface or just in the command-line.
+Each of these components can be either run through a graphical user interface or just on the command-line.
 Simply use the `-cl` argument on start.
 
 > [!NOTE]
@@ -19,8 +19,8 @@ Simply use the `-cl` argument on start.
 - Password protected servers.
 - A whitelist and blacklist feature.
 - Multiple chats per server with their own configuration.
-- Anonymous chat functionality, where neither the username or IP address of clients will be stored.
-- A kick command, live configuration updating, impressive performance and more!
+- Anonymous chat functionality, where neither the username nor IP address of clients will be stored.
+- A kick command, live configuration updating, impressive performance, and more!
 
 ## Installation
 #### Keep in mind, that JChad is written in Java. That means you need to have a Java runtime installed on your machine.
@@ -55,9 +55,9 @@ The "server-settings.yml" file stores general server settings, which you are lik
 
 The "internal-settings.yml" file stores values the server uses internally to operate. 
 You don't have to change those, as they are sensible by default, but you can. But be careful,
-some values could make the server act in unexpectad ways.
+some values could make the server act in unexpected ways.
 
-Additionally, if you enable the "whitelist" or "blacklist" feature in the "server-settings.yml" file, the server will generate seperate "whitelisted-ips.yml" and "blacklisted-ips.yml" files. You can put IP addresses in those, to either white- or blacklist them.
+Additionally, if you enable the "whitelist" or "blacklist" feature in the "server-settings.yml" file, the server will generate separate "whitelisted-ips.yml" and "blacklisted-ips.yml" files. You can put IP addresses in those, to either whitelist or blacklist them.
 
 #### The "chats" folder stores the chats of a server.
 
@@ -67,7 +67,7 @@ As soon as the server loads a chat from its folder, it will create 2 files insid
 - The "config.yml" file
 - The "messages.json" file
 
-The "config.yml" file stores the configuration for this specific chat. It can also be modifed during runtime.
+The "config.yml" file stores the configuration for this specific chat. It can also be modified during runtime.
 
 The "messages.json" file stores messages and their related data sent by clients. 
 **_It is not recommended to modify this file, unless you know what you are doing!_**
@@ -75,7 +75,7 @@ The "messages.json" file stores messages and their related data sent by clients.
 ### TODO: Create table with all configuration values
 
 ## About JChad
-JChad was developed under Randware organization and licensed under the [MIT license](https://choosealicense.com/licenses/mit/).
+JChad was developed by the Randware organisation and licensed under the [MIT license](https://choosealicense.com/licenses/mit/).
 
 Feel free to contribute to this project with your own code, or by reporting bugs and issues on our GitHub [Issues](https://github.com/Randware/JChad/issues) page.
 
