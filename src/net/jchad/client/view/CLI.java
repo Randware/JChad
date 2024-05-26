@@ -350,6 +350,7 @@ public class CLI implements ViewCallback {
                                 .format(DateTimeFormatter.ofPattern("dd.M. - HH:mm"))
                 )).reset().toString()
         );
+        emptyLine();
     }
 
     @Override
