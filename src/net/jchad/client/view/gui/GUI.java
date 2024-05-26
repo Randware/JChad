@@ -85,7 +85,7 @@ public class GUI extends Application implements ViewCallback {
         handleFatalError(new RemoteException("This is a FatalError"));
         handleInfo("This is a Info");
         handleWarning("This is a Warning");
-        displayPrompt("Benkötestetgerne","Franz ist auch dabei");
+        displayPrompt("Test","Test");
     }
 
     public void connect() {
