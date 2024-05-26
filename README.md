@@ -28,7 +28,7 @@ Simply use the `-cl` argument on start.
 The JChad installer makes it easy to install the desired components on your machine!
 It supports both a graphical and cli installation. 
 
-Simple head to the [releases](https://github.com/Randware/JChad/releases) page to get it. You can also get the other components as standalone .jar files from there, if desired.
+Simply head to the [releases](https://github.com/Randware/JChad/releases) page to get it. You can also get the other components as standalone .jar files from there, if desired.
 
 To run in GUI mode, simply double click the .jar file. To run in GUI mode, use the `-cl` launch argument:
 
