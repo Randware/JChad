@@ -1,9 +1,13 @@
 package net.jchad.client.view.gui;
 
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -13,11 +17,14 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import net.jchad.client.controller.ClientController;
 import net.jchad.client.model.client.ViewCallback;
+import net.jchad.client.model.store.chat.ClientChat;
 import net.jchad.client.model.store.chat.ClientChatMessage;
 import net.jchad.client.model.store.connection.ConnectionDetails;
 import net.jchad.client.model.store.connection.ConnectionDetailsBuilder;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 public class GUI extends Application implements ViewCallback {
     private ClientController client;
@@ -108,6 +115,14 @@ public class GUI extends Application implements ViewCallback {
         Label usernameLabel = new Label("Username:");
         TextField usernameField = new TextField();
 
+        portField.addEventFilter(KeyEvent.KEY_TYPED, e -> {
+            char ar[] = e.getCharacter().toCharArray();
+            boolean b = ar[0] >= 48 && ar[0] <= 57; // ASCII values for digits 0-9
+            if (!b) {
+                e.consume(); // Ignore event, don't type anything
+            }
+        });
+
         Button cancelButton = new Button("Cancel");
         /*cancelButton.setOnAction(e -> {
             // Switch back to the original scene
@@ -155,6 +170,31 @@ public class GUI extends Application implements ViewCallback {
     }
 
     private void newConnection(String Host, String Port, String ConnectionName, String Password, String Username) {
+        if (Host == null || Host.isEmpty()) {
+            handleWarning("Host cannot be empty");
+            return;
+        }
+
+        if (Port == null || Port.isEmpty()) {
+            handleWarning("Port cannot be empty");
+            return;
+        }
+
+        if (ConnectionName == null || ConnectionName.isEmpty()) {
+            handleWarning("ConnectionName cannot be empty");
+            return;
+        }
+
+        if (Password == null || Password.isEmpty()) {
+            handleWarning("Password cannot be empty");
+            return;
+        }
+
+        if (Username == null || Username.isEmpty()) {
+            handleWarning("Username cannot be empty");
+            return;
+        }
+
         connectionDetailsBuilder = new ConnectionDetailsBuilder();
         connectionDetailsBuilder.addConnectionName(ConnectionName);
         connectionDetailsBuilder.addHost(Host);
@@ -162,7 +202,83 @@ public class GUI extends Application implements ViewCallback {
         connectionDetailsBuilder.addPort(Integer.parseInt(Port));
         connectionDetailsBuilder.addUsername(Username);
         client.connect(connectionDetailsBuilder.build());
-        handleInfo("Successfully connected to " + ConnectionName);
+        changeToChat();
+        handleInfo("Successfully connected to: " + ConnectionName);
+    }
+
+    public void changeToChat() {
+        // Create a new layout for the chat view
+        BorderPane chatLayout = new BorderPane();
+
+        // Reuse the existing menu bar
+        chatLayout.setTop(menuBar);
+
+        // Assuming you have a TextArea for displaying chat messages
+        TextArea chatArea = new TextArea();
+        chatArea.setEditable(false); // Make the chat area read-only
+        chatLayout.setCenter(chatArea);
+
+        // Create a new scene with the chat layout
+        Scene chatScene = new Scene(chatLayout, scene.getWidth(), scene.getHeight());
+
+        // Apply the scene to the primary stage
+        primaryStage.setScene(chatScene);
+
+        showChatSelectionWindow();
+    }
+
+    private void showChatSelectionWindow() {
+        // Create a new stage for the chat selection window
+        Stage dialogStage = new Stage();
+        dialogStage.setTitle("Select Chat");
+
+        // Initialize the dialog stage
+        dialogStage.initModality(Modality.APPLICATION_MODAL);
+        dialogStage.initOwner(primaryStage);
+
+        // Fetch available chats
+        ArrayList<ClientChat> chats = client.getChats();
+
+        // Create a ListView to display the chats
+        ListView<String> chatListView = new ListView<>();
+        ObservableList<String> chatNames = FXCollections.observableArrayList(chats.stream()
+                .map(ClientChat::getName)
+                .collect(Collectors.toList()));
+        chatListView.setItems(chatNames);
+
+        // Buttons for Select and Cancel actions
+        Button selectButton = new Button("Select");
+        Button cancelButton = new Button("Cancel");
+
+        // Action for Select button
+        selectButton.setOnAction(event -> {
+            String selectedChat = chatListView.getSelectionModel().getSelectedItem();
+            if (selectedChat!= null) {
+                // Handle the selected chat here
+                System.out.println("Selected Chat: " + selectedChat);
+                dialogStage.close();
+            }
+        });
+
+        // Action for Cancel button
+        cancelButton.setOnAction(event -> dialogStage.close());
+
+        // Layout for the buttons
+        HBox buttonContainer = new HBox(10);
+        buttonContainer.setAlignment(Pos.CENTER_RIGHT);
+        buttonContainer.getChildren().addAll(selectButton, cancelButton);
+
+        // Main layout for the dialog
+        VBox dialogLayout = new VBox(20);
+        dialogLayout.getChildren().addAll(chatListView, buttonContainer);
+        dialogLayout.setPadding(new Insets(10));
+
+        // Scene for the dialog
+        Scene dialogScene = new Scene(dialogLayout, 300, 200);
+
+        // Set the scene on the dialog stage
+        dialogStage.setScene(dialogScene);
+        dialogStage.showAndWait();
     }
 
 
