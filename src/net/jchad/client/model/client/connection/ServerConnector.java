@@ -369,9 +369,11 @@ public class ServerConnector implements Callable<ServerConnection> {
 
             if(!streamsTransfered) {
                 try {
-                socket.close();
-                connectionWriter.close();
-                connectionReader.close();
+                if (socket != null) {
+                    socket.close();
+                    connectionWriter.close();
+                    connectionReader.close();
+                }
             } catch (IOException e) {
                 client.getViewCallback().handleFatalError(new IOException("An error occurred while closing the connector to the server.", e));
             }

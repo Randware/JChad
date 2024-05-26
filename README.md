@@ -6,4 +6,4 @@ A free and open-source, cross-platform chatting platform where you can host serv
 > Visit [our Docker repository](https://hub.docker.com/r/randware/jchad) for step-by-step installation instructions.
 
 > [!NOTE]
-> This project is currently being developed and is not usable as of right now. The releases can be downloaded for a preview, but none of them are in a finished state.
+> This project is very new, so expect some bugs and issues. Make sure to report them to us, so we can fix them.
