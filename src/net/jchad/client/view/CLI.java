@@ -186,11 +186,12 @@ public class CLI implements ViewCallback {
     }
 
     private void disconnectScreen() {
-        client.disconnect();
         isConnected = false;
+        client.disconnect();
 
         emptyLine();
         terminal.outputMessage(ansi().fg(RED).boldOff().a("Disconnected from the current connection").reset().toString());
+        mainScreen();
     }
 
     private void chattingScreen() {
@@ -264,6 +265,7 @@ public class CLI implements ViewCallback {
         terminal.outputMessage(ansi().fg(RED).a("Exiting the client").reset().toString());
         emptyLine();
 
+        isConnected = false;
         client.disconnect();
         terminal.close();
 
@@ -312,10 +314,7 @@ public class CLI implements ViewCallback {
     @Override
     public void handleFatalError(Exception e) {
         terminal.outputMessage(ansi().fg(RED).boldOff().a("[Fatal Error] ").reset() + e.getMessage());
-
         disconnectScreen();
-
-        isConnected = false;
     }
 
     @Override

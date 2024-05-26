@@ -60,7 +60,7 @@ public class AdvancedTerminal extends Terminal {
     }
 
     @Override
-    public String read() throws UserExitedException {
+    public synchronized String read() throws UserExitedException {
         try {
             return reader.readLine("> ").trim();
         } catch (UserInterruptException e) {
