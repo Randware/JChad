@@ -7,7 +7,7 @@ import java.util.Arrays;
 public class ServerInformationResponsePacket implements Packet {
     private final PacketType packet_type = PacketType.SERVER_INFORMATION_RESPONSE;
 
-    private final double server_version;
+    private final String server_version;
     private final boolean encrypt_communications;
     private final boolean encrypt_messages;
     private final String[] available_chats;
@@ -16,7 +16,7 @@ public class ServerInformationResponsePacket implements Packet {
     private final String username_validation_regex;
     private final String username_validation_description;
 
-    public ServerInformationResponsePacket(double server_version, boolean encrypt_communications, boolean encrypt_messages, String[] available_chats, boolean requires_password, boolean strictly_anonymous, String username_validation_regex, String username_validation_description) {
+    public ServerInformationResponsePacket(String server_version, boolean encrypt_communications, boolean encrypt_messages, String[] available_chats, boolean requires_password, boolean strictly_anonymous, String username_validation_regex, String username_validation_description) {
         this.server_version = server_version;
         this.encrypt_communications = encrypt_communications;
         this.encrypt_messages = encrypt_messages;
@@ -44,7 +44,7 @@ public class ServerInformationResponsePacket implements Packet {
 
 
 
-    public double getServer_version() {
+    public String getServer_version() {
         return server_version;
     }
 
