@@ -150,7 +150,11 @@ public class GUI extends Application implements MessageHandler {
         Platform.runLater(() -> {
             int length = logArea.getLength();
             logArea.appendText(text);
-            logArea.setStyle(length, length + text.length(), style);
+            // Recalculate length after appending text
+            int newLength = logArea.getLength();
+            if (newLength > length) {
+                logArea.setStyle(length, newLength, style);
+            }
             logArea.requestFollowCaret();
         });
     }
