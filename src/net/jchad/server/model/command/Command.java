@@ -1,7 +1,7 @@
 package net.jchad.server.model.command;
 
 import net.jchad.server.model.command.commands.*;
-import net.jchad.server.model.command.commands.about.AboutCommand;
+import net.jchad.server.model.command.commands.about.VersionCommand;
 import net.jchad.server.model.server.Server;
 
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ public enum Command {
     HELP("help", new HelpCommand(), "help", "Show the help dialog"),
     INFO("info", new InfoCommand(), "info", "Show information about the running server instance"),
     GITHUB("github", new GitHubCommand(), "github", "Get the link for the official JChad github repository"),
-    ABOUT("about", new AboutCommand(), "about", "Shows info for the current server installation");
+    VERSION("version", new VersionCommand(), "version | version -current", "Shows infos for the current server installation");
     /**
      * This value represents the command string, which should be associated with the command.
      * For example, the help command should be callable with the "help" command. Crazy, right?

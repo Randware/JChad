@@ -1,19 +1,14 @@
 package net.jchad.server.model.command.commands.about;
 
-import com.google.gson.Gson;
 import net.jchad.server.model.command.commands.BaseCommand;
 import net.jchad.server.model.server.Server;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.concurrent.*;
 
-public class AboutCommand extends BaseCommand {
+public class VersionCommand extends BaseCommand {
     private static final URL repoURL;
     static {
         try {
@@ -26,8 +21,12 @@ public class AboutCommand extends BaseCommand {
     @Override
     public void execute(Server server, ArrayList<String> args) {
 
-        Thread apiRequest = new Thread(new AboutAPIcall(repoURL, server.getMessageHandler(), server.getVersion()));
-        apiRequest.start();
+        if (args == null) {
+            Thread apiRequest = new Thread(new VersionThread(repoURL, server.getMessageHandler(), server.getVersion()));
+            apiRequest.start();
+        } else if (args.contains("-c") || args.contains("-current")) {
+            server.getMessageHandler().handleInfo("The server is running JChad version: " + server.getVersion());
+        }
 
     }
 

@@ -2,7 +2,6 @@ package net.jchad.server.model.command.commands.about;
 
 import com.google.gson.Gson;
 import net.jchad.server.model.error.MessageHandler;
-import net.jchad.server.model.server.Server;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -12,18 +11,21 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class AboutAPIcall implements Runnable{
+public class VersionThread implements Runnable{
     private final URL url;
     private final MessageHandler messageHandler;
     private final String version;
     private Release[] releases = null;
 
-    public AboutAPIcall(URL url, MessageHandler messageHandler, String version) {
+    public VersionThread(URL url, MessageHandler messageHandler, String version) {
         this.url = url;
         this.messageHandler = messageHandler;
         this.version = version;
     }
 
+    /**
+     * Calls all methods to retrieve the needed information
+     */
     @Override
     public void run() {
         releases = getRepositoryReleases();
@@ -36,7 +38,10 @@ public class AboutAPIcall implements Runnable{
     }
 
 
-
+    /**
+     * Checks if the current version iis the newest one
+     * @return
+     */
     public String compareCurrentVersion() {
         StringBuilder versionInfo = new StringBuilder();
         boolean versionFound = false;
@@ -59,6 +64,10 @@ public class AboutAPIcall implements Runnable{
         return versionInfo.toString();
     }
 
+    /**
+     * Displays information about the running version
+     * @return
+     */
     public String getCurrentVersion() {
         StringBuilder currentVersion = new StringBuilder();
         Release currentRelease = null;
@@ -108,6 +117,10 @@ public class AboutAPIcall implements Runnable{
        }
     }
 
+    /**
+     * Calls the github api to retrieve all releases
+     * @return
+     */
     private Release[] getRepositoryReleases() {
         try {
             //Opens  the connection to read the github json response
