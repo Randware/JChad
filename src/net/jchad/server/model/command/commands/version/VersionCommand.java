@@ -1,4 +1,4 @@
-package net.jchad.server.model.command.commands.about;
+package net.jchad.server.model.command.commands.version;
 
 import net.jchad.server.model.command.commands.BaseCommand;
 import net.jchad.server.model.server.Server;

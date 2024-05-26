@@ -162,6 +162,7 @@ public class ServerThread implements Runnable{
      */
     public void close(String reason, boolean throwException) {
         if (!socket.isClosed()) {
+            System.out.println(new ConnectionClosedPacket(reason).toJSON());
             write(new ConnectionClosedPacket(reason).toJSON());//Sends the client a notification that the connection gets closed
             try {
                 mainSocket.getServerThreadSet(false).remove(this);

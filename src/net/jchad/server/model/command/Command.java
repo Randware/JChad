@@ -1,7 +1,7 @@
 package net.jchad.server.model.command;
 
 import net.jchad.server.model.command.commands.*;
-import net.jchad.server.model.command.commands.about.VersionCommand;
+import net.jchad.server.model.command.commands.version.VersionCommand;
 import net.jchad.server.model.server.Server;
 
 import java.util.ArrayList;

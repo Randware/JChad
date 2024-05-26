@@ -1,4 +1,4 @@
-package net.jchad.server.model.command.commands.about;
+package net.jchad.server.model.command.commands.version;
 
 public class Asset {
     private String url;
