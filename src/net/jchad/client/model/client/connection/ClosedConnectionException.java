@@ -1,6 +1,6 @@
 package net.jchad.client.model.client.connection;
 
-public class ClosedConnectionException extends Exception {
+public class ClosedConnectionException extends RuntimeException {
     public ClosedConnectionException(String message, Throwable cause) {
         super(message, cause);
     }

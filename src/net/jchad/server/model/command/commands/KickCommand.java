@@ -14,7 +14,7 @@ public class KickCommand extends BaseCommand {
     public void execute(Server server, ArrayList<String> args) {
         if(args != null && !args.isEmpty()) {
             server.getMainSocket().getServerThreadSet().forEach(serverThread -> {
-                if(args.contains(serverThread.getRemoteAddress()) || args.getFirst().equals("all")) {
+                if(args.contains(serverThread.getRemoteAddress().split(":")[0]) || args.getFirst().equals("all")) {
                     serverThread.close("You were kicked from the server.", false);
                 }
             });

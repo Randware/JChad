@@ -1,4 +1,4 @@
-package net.jchad.server.model.command.commands.about;
+package net.jchad.server.model.command.commands.version;
 
 import com.google.gson.Gson;
 import net.jchad.server.model.error.MessageHandler;

@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
  * TODO: Implement proper closing functionality
  * TODO: Maybe handle chats in here?
  */
-public class ServerConnection implements Callable<Void> {
+public class ServerConnection implements Runnable {
     private Client client;
 
     private final ViewCallback viewCallback;
@@ -80,104 +80,116 @@ public class ServerConnection implements Callable<Void> {
      * @throws ClosedConnectionException if the connection was closed for some reason.
      */
     @Override
-    public Void call() throws ClosedConnectionException, IOException, InvalidPacketException {
-        while(true) {
-            Packet readPacket = readPacket();
-
-            // first check if the connection was closed by the server
-            if(readPacket instanceof ConnectionClosedPacket packet) {
-                throw new ClosedConnectionException(packet.getMessage());
-            }
-
-            // check if the server sent new information about its configuration
-            if(readPacket instanceof ServerInformationResponsePacket packet) {
-                this.serverInformation = new ServerInformation(
-                        packet.getServer_version(),
-                        packet.isEncrypt_communications(),
-                        packet.isEncrypt_messages(),
-                        packet.getAvailable_chats(),
-                        packet.isRequires_password(),
-                        packet.isStrictly_anonymous(),
-                        packet.getUsername_validation_regex(),
-                        packet.getUsername_validation_description()
-                );
-
-                ArrayList<ClientChat> newChats = new ArrayList<>();
-
-                for(String chat : serverInformation.available_chats()) {
-                    newChats.add(new ClientChat(chat));
+    public void run() {
+        try {
+            while (true) {
+                Packet readPacket = null;
+                try {
+                    readPacket = readPacket();
+                } catch (IOException e) {
+                    throw new ClosedConnectionException("An IOException occurred while reading the server data", e);
+                } catch (InvalidPacketException e) {
+                    throw new ClosedConnectionException("The server sent an invalid packet", e);
                 }
 
-                client.updateChats(newChats);
-            }
+                // first check if the connection was closed by the server
+                if (readPacket instanceof ConnectionClosedPacket packet) {
+                    throw new ClosedConnectionException(packet.getMessage());
+                }
 
-            // Check if the server sent a response to a chat join request, if yes add the previous messages to this chat
-            if(readPacket instanceof JoinChatResponsePacket packet) {
-                if (keys != null && serverInformation.encrypt_messages()) {
-                    crypterManager.setAESkey(keys.getMessage_key());
-                    try {
-                        crypterManager.setBase64IV(keys.getMessage_initialization_vector());
-                    } catch (ImpossibleConversionException e) {
-                        throw new ClosedConnectionException("An error occurred while trying to decode the message_iv from base64 to an byte array");
+                // check if the server sent new information about its configuration
+                if (readPacket instanceof ServerInformationResponsePacket packet) {
+                    this.serverInformation = new ServerInformation(
+                            packet.getServer_version(),
+                            packet.isEncrypt_communications(),
+                            packet.isEncrypt_messages(),
+                            packet.getAvailable_chats(),
+                            packet.isRequires_password(),
+                            packet.isStrictly_anonymous(),
+                            packet.getUsername_validation_regex(),
+                            packet.getUsername_validation_description()
+                    );
+
+                    ArrayList<ClientChat> newChats = new ArrayList<>();
+
+                    for (String chat : serverInformation.available_chats()) {
+                        newChats.add(new ClientChat(chat));
                     }
-                    for(ServerMessagePacket message : packet.getPrevious_messages()) {
+
+                    client.updateChats(newChats);
+                }
+
+                // Check if the server sent a response to a chat join request, if yes add the previous messages to this chat
+                if (readPacket instanceof JoinChatResponsePacket packet) {
+                    if (keys != null && serverInformation.encrypt_messages()) {
+                        crypterManager.setAESkey(keys.getMessage_key());
                         try {
+                            crypterManager.setBase64IV(keys.getMessage_initialization_vector());
+                        } catch (ImpossibleConversionException e) {
+                            throw new ClosedConnectionException("An error occurred while trying to decode the message_iv from base64 to an byte array");
+                        }
+                        for (ServerMessagePacket message : packet.getPrevious_messages()) {
+                            try {
+                                client.addMessage(client.getChat(packet.getChat_name()), new ClientChatMessage(message.getChat(),
+                                        crypterManager.decryptAES(message.getMessage()),
+                                        message.getUsername(),
+                                        message.getTimestamp()));
+                            } catch (InvalidAlgorithmParameterException | NoSuchPaddingException |
+                                     IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException |
+                                     InvalidKeyException | ImpossibleConversionException e) {
+                                viewCallback.handleError(new Exception("An error occurred while decrypting previous messages. Message gets skipped. Original Message:" + message.toJSON()));
+                            }
+                        }
+                    } else {
+                        for (ServerMessagePacket message : packet.getPrevious_messages()) {
                             client.addMessage(client.getChat(packet.getChat_name()), new ClientChatMessage(message.getChat(),
-                                    crypterManager.decryptAES(message.getMessage()),
+                                    message.getMessage(),
                                     message.getUsername(),
                                     message.getTimestamp()));
-                        } catch (InvalidAlgorithmParameterException | NoSuchPaddingException |
-                                 IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException |
-                                 InvalidKeyException | ImpossibleConversionException e) {
-                            viewCallback.handleError(new Exception("An error occurred while decrypting previous messages. Message gets skipped. Original Message:" + message.toJSON()));
                         }
                     }
-                } else {
-                    for(ServerMessagePacket message : packet.getPrevious_messages()) {
-                        client.addMessage(client.getChat(packet.getChat_name()), new ClientChatMessage(message.getChat(),
-                                message.getMessage(),
-                                message.getUsername(),
-                                message.getTimestamp()));
-                    }
                 }
-            }
 
 
-            // check if there was a new message sent by someone, if yes add it to the client
-            if(readPacket instanceof ServerMessagePacket packet) {
+                // check if there was a new message sent by someone, if yes add it to the client
+                if (readPacket instanceof ServerMessagePacket packet) {
 
-                if (keys != null && serverInformation.encrypt_messages()) {
-                    try {
-                        crypterManager.setAESkey(keys.getMessage_key());
-                        crypterManager.setBase64IV(keys.getMessage_initialization_vector());
+                    if (keys != null && serverInformation.encrypt_messages()) {
+                        try {
+                            crypterManager.setAESkey(keys.getMessage_key());
+                            crypterManager.setBase64IV(keys.getMessage_initialization_vector());
+                            client.addMessage(client.getChat(packet.getChat()),
+                                    new ClientChatMessage(
+                                            packet.getChat(),
+                                            crypterManager.decryptAES(packet.getMessage()),
+                                            packet.getUsername(),
+                                            packet.getTimestamp()
+                                    ));
+
+                        } catch (InvalidAlgorithmParameterException | NoSuchPaddingException |
+                                 IllegalBlockSizeException |
+                                 NoSuchAlgorithmException | BadPaddingException | InvalidKeyException |
+                                 ImpossibleConversionException e) {
+                            throw new ClosedConnectionException("An encryption related error occurred while trying to encrypt a message.", e);
+                        }
+                    } else {
                         client.addMessage(client.getChat(packet.getChat()),
                                 new ClientChatMessage(
                                         packet.getChat(),
-                                        crypterManager.decryptAES(packet.getMessage()),
+                                        packet.getMessage(),
                                         packet.getUsername(),
                                         packet.getTimestamp()
                                 ));
-
-                    } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException |
-                             NoSuchAlgorithmException | BadPaddingException | InvalidKeyException |
-                             ImpossibleConversionException e) {
-                     throw new ClosedConnectionException("An encryption related error occurred while trying to encrypt a message.", e);
                     }
-                } else {
-                    client.addMessage(client.getChat(packet.getChat()),
-                            new ClientChatMessage(
-                                    packet.getChat(),
-                                    packet.getMessage(),
-                                    packet.getUsername(),
-                                    packet.getTimestamp()
-                            ));
+                }
+
+                // this packet will be sent by the server if the client sent an invalid message
+                if (readPacket instanceof MessageStatusFailedPacket packet) {
+                    viewCallback.handleWarning("Server failed receiving message packet: " + packet.getReason());
                 }
             }
-
-            // this packet will be sent by the server if the client sent an invalid message
-            if(readPacket instanceof MessageStatusFailedPacket packet) {
-                viewCallback.handleWarning("Server failed receiving message packet: " + packet.getReason());
-            }
+        } catch (Exception e) {
+            viewCallback.handleFatalError(e);
         }
     }
 
@@ -278,4 +290,6 @@ public class ServerConnection implements Callable<Void> {
             throw new ClosedConnectionException("An unknown encryption related error occurred while trying to send a Packet", e);
         }
     }
+
+
 }

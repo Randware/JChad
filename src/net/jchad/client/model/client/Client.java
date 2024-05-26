@@ -10,6 +10,7 @@ import net.jchad.client.model.store.chat.ClientChatMessage;
 import net.jchad.client.model.store.connection.ConnectionDetails;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -62,7 +63,7 @@ public class Client {
 
             serverConnector.shutdown();
 
-            executorService.submit(currentConnection);
+            new Thread(currentConnection).start();
         } catch (Exception e) {
             viewCallback.handleFatalError(e);
         }

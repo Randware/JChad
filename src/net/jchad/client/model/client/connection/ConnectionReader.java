@@ -51,7 +51,9 @@ public class ConnectionReader extends Thread {
 
     public <T extends Packet> T readPacket() throws InvalidPacketException, IOException, ClosedConnectionException {
         String read = read();
+
         Packet packet = Packet.fromJSON(read);
+
         if (packet != null && packet.isValid()) {
             if (packet.getClass().equals(ConnectionClosedPacket.class)){
                 ConnectionClosedPacket closedPacket = (ConnectionClosedPacket) packet;

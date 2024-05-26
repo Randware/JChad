@@ -2,6 +2,7 @@ package net.jchad.client.view;
 
 import net.jchad.client.controller.ClientController;
 import net.jchad.client.model.client.ViewCallback;
+import net.jchad.client.model.client.connection.ClosedConnectionException;
 import net.jchad.client.model.store.chat.ClientChat;
 import net.jchad.client.model.store.chat.ClientChatMessage;
 import net.jchad.client.model.store.connection.ConnectionDetails;
@@ -42,25 +43,26 @@ public class CLI implements ViewCallback {
 
     private void mainScreen() {
         while (true) {
-            emptyLine();
-            terminal.outputMessage(ansi().fg(RED).a("Welcome to JChad!").reset().toString());
-            emptyLine();
-
-            terminal.outputMessage("Select an operation");
-            emptyLine();
-            terminal.outputMessage("Connections:");
-            terminal.outputMessage("\"add\", \"view\", \"connect\"");
-            emptyLine();
-            terminal.outputMessage("Other:");
-            terminal.outputMessage("\"about\",\"exit\"");
-            emptyLine();
-
-            String input = readString(true);
-
-            if (!parseOperation(input)) {
                 emptyLine();
-                terminal.outputMessage("This is not an available option");
-            }
+                terminal.outputMessage(ansi().fg(RED).a("Welcome to JChad!").reset().toString());
+                emptyLine();
+
+                terminal.outputMessage("Select an operation");
+                emptyLine();
+                terminal.outputMessage("Connections:");
+                terminal.outputMessage("\"add\", \"view\", \"connect\"");
+                emptyLine();
+                terminal.outputMessage("Other:");
+                terminal.outputMessage("\"about\",\"exit\"");
+                emptyLine();
+
+                String input = readString(true);
+
+                if (!parseOperation(input)) {
+                    emptyLine();
+                    terminal.outputMessage("This is not an available option");
+                }
+
         }
     }
 
@@ -242,7 +244,6 @@ public class CLI implements ViewCallback {
                 if (firstSelect) {
                     disconnectScreen();
                 }
-
                 break;
             }
 
