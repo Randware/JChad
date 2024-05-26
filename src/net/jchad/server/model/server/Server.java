@@ -16,7 +16,7 @@ public class Server implements ConfigObserver {
     private final MessageHandler messageHandler;
     private ConfigManager configManager;
     private ChatManager chatManager;
-    private final double version = 1.00;
+    private final String version = "experimental-0.1";
     private String serverPassword; //A SHA256 string that represents the server password
     private long startTimestamp;
     private boolean running;
@@ -102,7 +102,7 @@ public class Server implements ConfigObserver {
         return messageHandler;
     }
 
-    public double getVersion() {
+    public String getVersion() {
         return version;
     }
 

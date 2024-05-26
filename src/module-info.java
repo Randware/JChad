@@ -20,6 +20,7 @@ module net.jchad {
     requires java.rmi;
     requires org.fusesource.jansi;
 
+    opens net.jchad.server.model.command.commands.about;
     exports net.jchad.client.view;
     opens net.jchad.client to javafx.fxml;
     opens net.jchad.shared.networking.packets to com.google.gson;
