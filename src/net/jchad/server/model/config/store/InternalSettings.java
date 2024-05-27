@@ -3,6 +3,9 @@ package net.jchad.server.model.config.store;
 import net.jchad.shared.files.PathWatcher;
 import net.jchad.shared.networking.packets.defaults.ServerInformationResponsePacket;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Stores internal settings the server uses to function.
  * These values have sensible defaults, but if the user wants to modify them, they can.
@@ -64,6 +67,18 @@ public class InternalSettings {
      */
     private String usernameRegexDescription = "The username is only allowed to have letters and one underscore in the middle of the name";
 
+    /**
+     * All usernames on this list are blocked for the user.
+     * The {@link net.jchad.server.model.users.User User} class throws an {@link net.jchad.server.model.users.UsernameBlockedException UsernameBlockedException}
+     * if the username is on this list
+     *
+     */
+    private List<String> blockedUsernames = new ArrayList<>(List.of("null", "admin", "server", "owner"));
+
+    /**
+     * This determines if the blocked usernames should also be checked based on their capitalization.
+     */
+    private boolean caseSensitive = false;
 
     /**
      * This defines which username should be used for storing anonymous messages.
@@ -91,7 +106,7 @@ public class InternalSettings {
      */
     public InternalSettings(int maxPathWatcherRestarts, int PathWatcherRestartCountResetMilliseconds,
                             long connectionRefreshIntervalMillis, int retriesOnInvalidPackets, int passwordAttempts,
-                            String usernameRegex, String usernameRegexDescription) {
+                            String usernameRegex, String usernameRegexDescription, List<String> blockedUsernames, boolean caseSensitive) {
         this.maxPathWatcherRestarts = maxPathWatcherRestarts;
         this.pathWatcherRestartCountResetMilliseconds = PathWatcherRestartCountResetMilliseconds;
         this.connectionRefreshIntervalMillis = connectionRefreshIntervalMillis;
@@ -99,6 +114,8 @@ public class InternalSettings {
         this.passwordAttempts = passwordAttempts;
         this.usernameRegex = usernameRegex;
         this.usernameRegexDescription = usernameRegexDescription;
+        this.blockedUsernames = blockedUsernames;
+        this.caseSensitive = caseSensitive;
     }
 
     /**
@@ -211,6 +228,22 @@ public class InternalSettings {
      */
     public void setUsernameRegexDescription(String usernameRegexDescription) {
         this.usernameRegexDescription = usernameRegexDescription;
+    }
+
+    public List<String> getBlockedUsernames() {
+        return blockedUsernames;
+    }
+
+    public void setBlockedUsernames(List<String> blockedUsernames) {
+        this.blockedUsernames = blockedUsernames;
+    }
+
+    public boolean isCaseSensitive() {
+        return caseSensitive;
+    }
+
+    public void setCaseSensitive(boolean caseSensitive) {
+        this.caseSensitive = caseSensitive;
     }
 
     public String getAnonymousUserName() {
