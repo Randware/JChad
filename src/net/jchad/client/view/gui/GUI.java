@@ -34,6 +34,7 @@ public class GUI extends Application implements ViewCallback {
     private Label contentLabel = new Label();
     private Stage primaryStage; // Store the primary stage to access it later
     private Scene scene;
+    private Stage dialogStage;
     private ConnectionDetailsBuilder connectionDetailsBuilder;
 
     public static void main(String[] args) {
@@ -97,7 +98,7 @@ public class GUI extends Application implements ViewCallback {
 
     public void connect() {
         VBox vbox = new VBox(10);
-        Stage dialogStage = new Stage();
+        dialogStage = new Stage();
 
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
@@ -185,11 +186,6 @@ public class GUI extends Application implements ViewCallback {
             return;
         }
 
-        if (Password == null || Password.isEmpty()) {
-            handleWarning("Password cannot be empty");
-            return;
-        }
-
         if (Username == null || Username.isEmpty()) {
             handleWarning("Username cannot be empty");
             return;
@@ -204,6 +200,7 @@ public class GUI extends Application implements ViewCallback {
         client.connect(connectionDetailsBuilder.build());
         changeToChat();
         handleInfo("Successfully connected to: " + ConnectionName);
+        dialogStage.close();
     }
 
     public void changeToChat() {
