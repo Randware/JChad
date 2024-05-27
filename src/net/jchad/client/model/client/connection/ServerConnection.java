@@ -18,6 +18,8 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -173,6 +175,7 @@ public class ServerConnection implements Runnable {
                             throw new ClosedConnectionException("An encryption related error occurred while trying to encrypt a message.", e);
                         }
                     } else {
+
                         client.addMessage(client.getChat(packet.getChat()),
                                 new ClientChatMessage(
                                         packet.getChat(),

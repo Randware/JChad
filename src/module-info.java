@@ -30,7 +30,6 @@ module net.jchad {
     exports net.jchad.installer.gui;
     exports net.jchad.installer.serializable to com.google.gson;
     opens net.jchad.client.model.client to javafx.fxml;
-    opens net.jchad.shared.common to com.fasterxml.jackson.databind;
     exports net.jchad.server.view to javafx.graphics;
     opens net.jchad.server.model.config.store to com.fasterxml.jackson.databind;
     opens net.jchad.server.model.chats to com.google.gson;
@@ -44,4 +43,5 @@ module net.jchad {
     opens net.jchad.client.model.store.connection to com.google.gson;
     opens net.jchad.client.model.client.testing to javafx.fxml;
     exports net.jchad.client.view.gui;
+    opens net.jchad.shared.common;
 }
