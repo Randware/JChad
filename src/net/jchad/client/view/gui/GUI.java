@@ -107,7 +107,12 @@ public class GUI extends Application implements ViewCallback {
         borderPane.setCenter(combinedLabel);
 
         connect.setOnAction(e -> connect()); // Pass primaryStage to the connect method
-        disconnect.setOnAction(e -> client.disconnect());
+        disconnect.setOnAction(e -> {
+            client.disconnect();
+            // Reset the BorderPane to its initial state
+            borderPane.setCenter(combinedLabel);
+            borderPane.setBottom(scrollPane);
+        });
         increaseFontSize.setOnAction(e -> changeFontSize(2));
         standardFontSize.setOnAction(e -> standardFontSizeMethod());
         decreaseFontSize.setOnAction(e -> changeFontSize(-2));
@@ -248,9 +253,36 @@ public class GUI extends Application implements ViewCallback {
         connectionDetailsBuilder.addPort(Integer.parseInt(Port));
         connectionDetailsBuilder.addUsername(Username);
         client.connect(connectionDetailsBuilder.build());
+        dialogStage.close();
         changeToChat();
         handleInfo("Successfully connected to: " + ConnectionName);
-        dialogStage.close();
+        savedConnection(connectionDetailsBuilder.build());
+
+    }
+
+    public void savedConnection(ConnectionDetails connectionDetails){
+        // Create a new VBox instance
+        VBox vbox = new VBox(10);
+
+        // Extract the relevant details from the connectionDetails object
+        String host = connectionDetails.getHost();
+        int port = connectionDetails.getPort();
+        String connectionName = connectionDetails.getConnectionName();
+        String password = connectionDetails.getPassword();
+        String username = connectionDetails.getUsername();
+
+        // Create labels for each detail
+        Label hostLabel = new Label("Host: " + host);
+        Label portLabel = new Label("Port: " + port);
+        Label connectionNameLabel = new Label("Connection Name: " + connectionName);
+        Label passwordLabel = new Label("Password: " + password);
+        Label usernameLabel = new Label("Username: " + username);
+
+        // Add the labels to the VBox
+        vbox.getChildren().addAll(hostLabel, portLabel, connectionNameLabel, passwordLabel, usernameLabel);
+
+        // Set the VBox as the content of the ScrollPane
+        scrollPane.setContent(vbox);
     }
 
     public void changeToChat() {
@@ -308,7 +340,10 @@ public class GUI extends Application implements ViewCallback {
         });
 
         // Action for Cancel button
-        cancelButton.setOnAction(event -> dialogStage.close());
+        cancelButton.setOnAction(event ->
+            dialogStage.close()
+
+        );
 
         // Layout for the buttons
         HBox buttonContainer = new HBox(10);
@@ -350,7 +385,6 @@ public class GUI extends Application implements ViewCallback {
         combinedLabel.setStyle("-fx-font-size: " + fontSize);
         scrollPane.setStyle("-fx-font-size: " + fontSize);
     }
-
 
     @Override
     public void handleFatalError(Exception e) {
