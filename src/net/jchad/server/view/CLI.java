@@ -9,9 +9,8 @@ import net.jchad.shared.common.Util;
 
 import java.io.IOException;
 
-/**
- * TODO: Implement user input reading
- */
+import static org.fusesource.jansi.Ansi.ansi;
+import static org.fusesource.jansi.Ansi.Color.*;
 
 // Responsible for displaying server output in CLI mode
 public class CLI implements MessageHandler {
@@ -50,25 +49,25 @@ public class CLI implements MessageHandler {
 
     @Override
     public void handleFatalError(Exception e) {
-        terminal.outputMessage("[FATAL ERROR] " + Util.stackTraceToString(e));
+        terminal.outputMessage(ansi().fg(RED).boldOff().a("[FATAL ERROR] ").reset()
+                + Util.stackTraceToString(e));
         terminal.close();
         server.stopServer();
     }
 
     @Override
     public void handleError(Exception e) {
-        terminal.outputMessage("[ERROR] " + e);
-        e.printStackTrace();
+        terminal.outputMessage(ansi().fg(RED).bold().a("[ERROR] ").reset().toString() + Util.stackTraceToString(e));
     }
 
     @Override
     public void handleWarning(String warning) {
-        terminal.outputMessage("[WARNING] " + warning);
+        terminal.outputMessage(ansi().fg(YELLOW).a("[WARNING] ").reset() + warning);
     }
 
     @Override
     public void handleInfo(String info) {
-        terminal.outputMessage("[INFO] " + info);
+        terminal.outputMessage(ansi().fg(CYAN).a("[INFO] ").reset() + info);
     }
 
     @Override
