@@ -98,8 +98,8 @@ public class User {
         }
 
         boolean usernameAllowed = true;
-        boolean caseSensitive = connection.getConfig().getInternalSettings().isCaseSensitive();
-        for (String blocked : connection.getConfig().getInternalSettings().getBlockedUsernames()) {
+        boolean caseSensitive = connection.getConfig().getServerSettings().isCaseSensitive();
+        for (String blocked : connection.getConfig().getServerSettings().getBlockedUsernames()) {
             if (caseSensitive) {
                 if (blocked.equals(username)) {
                     usernameAllowed = false;
