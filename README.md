@@ -30,7 +30,7 @@ It supports both a graphical and cli installation.
 
 Simply head to the [releases](https://github.com/Randware/JChad/releases) page to get it. You can also get the other components as standalone .jar files from there, if desired.
 
-To run in GUI mode, simply double click the .jar file. To run in GUI mode, use the `-cl` launch argument:
+To run in GUI mode, simply double click the .jar file. To run it in the terminal, use the `-cl` launch argument:
 
 `java -jar JChad-server.jar -cl`
 
