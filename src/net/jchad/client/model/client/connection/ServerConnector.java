@@ -214,6 +214,7 @@ public class ServerConnector implements Callable<ServerConnection> {
         for (int i = 0; true; i++) {
             if (packet == null || i > 0) {
                 packet = readPacket();
+
             }
             if (packet == null) throw new ClosedConnectionException("The connection to the server was lost during the username process");
             if (packet.getClass().equals(ConnectionClosedPacket.class)) {
@@ -234,8 +235,8 @@ public class ServerConnector implements Callable<ServerConnection> {
                             connectionDetails.setUsername(client.getViewCallback().displayPrompt("Enter a username", "The requested username is invalid make sure to follow these rules: " + serverInformation.username_validation_description()));
                             writePacket(new UsernameClientPacket(connectionDetails.getUsername()));
                         }
-                        case ERROR_USERNAME_INAPROPRIATE -> {
-                            connectionDetails.setUsername(client.getViewCallback().displayPrompt("Enter a username", "The requested username is inappropriate. Please enter a new one: "));
+                        case ERROR_USERNAME_BLOCKED -> {
+                            connectionDetails.setUsername(client.getViewCallback().displayPrompt("Enter a username", "The requested username is blacklisted. Please enter a new one: "));
                             writePacket(new UsernameClientPacket(connectionDetails.getUsername()));
                         }
                         default -> {

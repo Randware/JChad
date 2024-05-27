@@ -1,10 +1,7 @@
 package net.jchad.server.model.server.util;
 
 import net.jchad.server.model.server.ServerThread;
-import net.jchad.server.model.users.ConnectionExistsException;
-import net.jchad.server.model.users.User;
-import net.jchad.server.model.users.UsernameInvalidException;
-import net.jchad.server.model.users.UsernameTakenException;
+import net.jchad.server.model.users.*;
 import net.jchad.shared.networking.packets.PacketType;
 import net.jchad.shared.networking.packets.username.UsernameServerPacket;
 import net.jchad.shared.networking.packets.username.UsernameClientPacket;
@@ -56,6 +53,14 @@ public class UsernameHelperThread extends HelperThread {
                 writePacket(new UsernameServerPacket(UsernameServerPacket.UsernameResponseType.ERROR_USERNAME_TAKEN, "The username is already taken"));
                 if (retriesLeft <= 0) {
                     getServerThread().close("Failed to choose a non existing username");
+                }
+            } catch (UsernameBlockedException e) {
+                int retriesLeft = getRetries() - fails;
+                getServerThread().getMessageHandler().handleDebug("The client tried to get an blacklisted username. The connection get terminated "
+                        + ((retriesLeft <= 0) ? "now": ("after " + retriesLeft + " more failed attempt(s)")));
+                writePacket(new UsernameServerPacket(UsernameServerPacket.UsernameResponseType.ERROR_USERNAME_BLOCKED, "The username is blacklisted"));
+                if (retriesLeft <= 0) {
+                    getServerThread().close("Failed to choose a non blocked username");
                 }
             }
         }

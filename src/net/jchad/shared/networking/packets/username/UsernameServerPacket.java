@@ -15,7 +15,7 @@ public class UsernameServerPacket implements Packet {
 
     public enum UsernameResponseType {
         ERROR_USERNAME_TAKEN,
-        ERROR_USERNAME_INAPROPRIATE,
+        ERROR_USERNAME_BLOCKED,
         ERROR_USERNAME_INVALID,
         SUCCESS_USERNAME_SET,
         PROVIDE_USERNAME;

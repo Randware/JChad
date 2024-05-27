@@ -96,6 +96,27 @@ public class User {
         if (!username.matches(connection.getServer().getConfig().getInternalSettings().getUsernameRegex())) {
             throw new UsernameInvalidException(connection.getServer().getConfig().getInternalSettings().getUsernameRegexDescription() ,username);
         }
+
+        boolean usernameAllowed = true;
+        boolean caseSensitive = connection.getConfig().getInternalSettings().isCaseSensitive();
+        for (String blocked : connection.getConfig().getInternalSettings().getBlockedUsernames()) {
+            if (caseSensitive) {
+                if (blocked.equals(username)) {
+                    usernameAllowed = false;
+                    break;
+                }
+            } else {
+                if (blocked.equalsIgnoreCase(username)) {
+                    usernameAllowed = false;
+                    break;
+                }
+            }
+        }
+
+        if (!usernameAllowed) {
+            throw new UsernameBlockedException("The requested username is blacklisted");
+        }
+
         boolean usernameExists = false;
         Collection<User> checkWithUsers = users.values();
         for (User currentUser : checkWithUsers) {
