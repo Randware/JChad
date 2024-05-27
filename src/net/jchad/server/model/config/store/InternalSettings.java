@@ -67,18 +67,6 @@ public class InternalSettings {
      */
     private String usernameRegexDescription = "The username is only allowed to have letters and one underscore in the middle of the name";
 
-    /**
-     * All usernames on this list are blocked for the user.
-     * The {@link net.jchad.server.model.users.User User} class throws an {@link net.jchad.server.model.users.UsernameBlockedException UsernameBlockedException}
-     * if the username is on this list
-     *
-     */
-    private List<String> blockedUsernames = new ArrayList<>(List.of("null", "admin", "server", "owner"));
-
-    /**
-     * This determines if the blocked usernames should also be checked based on their capitalization.
-     */
-    private boolean caseSensitive = false;
 
     /**
      * This defines which username should be used for storing anonymous messages.
@@ -106,7 +94,7 @@ public class InternalSettings {
      */
     public InternalSettings(int maxPathWatcherRestarts, int PathWatcherRestartCountResetMilliseconds,
                             long connectionRefreshIntervalMillis, int retriesOnInvalidPackets, int passwordAttempts,
-                            String usernameRegex, String usernameRegexDescription, List<String> blockedUsernames, boolean caseSensitive) {
+                            String usernameRegex, String usernameRegexDescription) {
         this.maxPathWatcherRestarts = maxPathWatcherRestarts;
         this.pathWatcherRestartCountResetMilliseconds = PathWatcherRestartCountResetMilliseconds;
         this.connectionRefreshIntervalMillis = connectionRefreshIntervalMillis;
@@ -114,8 +102,7 @@ public class InternalSettings {
         this.passwordAttempts = passwordAttempts;
         this.usernameRegex = usernameRegex;
         this.usernameRegexDescription = usernameRegexDescription;
-        this.blockedUsernames = blockedUsernames;
-        this.caseSensitive = caseSensitive;
+
     }
 
     /**
@@ -230,21 +217,6 @@ public class InternalSettings {
         this.usernameRegexDescription = usernameRegexDescription;
     }
 
-    public List<String> getBlockedUsernames() {
-        return blockedUsernames;
-    }
-
-    public void setBlockedUsernames(List<String> blockedUsernames) {
-        this.blockedUsernames = blockedUsernames;
-    }
-
-    public boolean isCaseSensitive() {
-        return caseSensitive;
-    }
-
-    public void setCaseSensitive(boolean caseSensitive) {
-        this.caseSensitive = caseSensitive;
-    }
 
     public String getAnonymousUserName() {
         return anonymousUserName;
