@@ -2,8 +2,11 @@ package net.jchad.server.model.command.commands.version;
 
 import com.google.gson.Gson;
 import net.jchad.server.model.error.MessageHandler;
+import net.jchad.shared.common.ApiCalls;
+import net.jchad.shared.common.Release;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -28,13 +31,18 @@ public class VersionThread implements Runnable{
      */
     @Override
     public void run() {
-        releases = getRepositoryReleases();
-
-        messageHandler.handleInfo("""
+        try {
+            releases = ApiCalls.getRepositoryReleases(url);
+            messageHandler.handleInfo("""
                 %s
                 %s
                 %s
                 """.formatted(compareCurrentVersion(), getCurrentVersion(), getThanks()));
+        } catch (IOException e) {
+            messageHandler.handleError(new Exception("Error while trying to fetch GitHub information: " + e.getMessage()));
+        }
+
+
     }
 
 
@@ -117,28 +125,5 @@ public class VersionThread implements Runnable{
        }
     }
 
-    /**
-     * Calls the github api to retrieve all releases
-     * @return
-     */
-    private Release[] getRepositoryReleases() {
-        try {
-            //Opens  the connection to read the github json response
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Content-Type", "application/json");
 
-            //Reads the response
-            BufferedReader input = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            StringBuilder response = new StringBuilder();
-            String currentLine;
-            while ((currentLine = input.readLine()) != null) {
-                response.append(currentLine);
-            }
-            Gson gson = new Gson();
-            return gson.fromJson(response.toString(), Release[].class);
-        } catch (Exception e) {
-            return null;
-        }
-    }
 }
