@@ -5,8 +5,12 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -32,10 +36,19 @@ public class GUI extends Application implements ViewCallback {
     private ScrollPane scrollPane = new ScrollPane();
     private Label headerLabel = new Label();
     private Label contentLabel = new Label();
+    private Label combinedLabel = new Label();
     private Stage primaryStage; // Store the primary stage to access it later
     private Scene scene;
     private Stage dialogStage;
+    private double sizeValue;
+    private BorderPane borderPane = new BorderPane();
     private ConnectionDetailsBuilder connectionDetailsBuilder;
+    private final KeyCombination crtlMinus = new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN);
+    private final KeyCombination crtlPlus = new KeyCodeCombination(KeyCode.PLUS, KeyCombination.CONTROL_DOWN);
+    private final KeyCombination crtlR = new KeyCodeCombination(KeyCode.R, KeyCombination.CONTROL_DOWN);
+    Rectangle2D screenBounds = Screen.getPrimary().getBounds();
+    double screenWidth = screenBounds.getWidth();
+    double screenHeight = screenBounds.getHeight();
 
     public static void main(String[] args) {
         new GUI().runGUI();
@@ -53,7 +66,7 @@ public class GUI extends Application implements ViewCallback {
         headerLabel.setText("Welcome Jchader!");
         contentLabel.setText("This is the best Chad-Platform out there");
 
-        Label combinedLabel = new Label(headerLabel.getText() + "\n" + contentLabel.getText());
+        combinedLabel = new Label(headerLabel.getText() + "\n" + contentLabel.getText());
 
         Menu connectionsMenu = new Menu("Connections");
 
@@ -62,14 +75,32 @@ public class GUI extends Application implements ViewCallback {
 
         connectionsMenu.getItems().addAll(connect, disconnect);
 
-        menuBar.getMenus().addAll(connectionsMenu);
+        Menu settingsMenu = new Menu("Settings");
+
+        Menu fontsSubMenu = new Menu("Fonts");
+
+        MenuItem increaseFontSize = new MenuItem("increase Font size (ctrl & +)");
+        MenuItem standardFontSize = new MenuItem("standard Font size (crtl & R)");
+        MenuItem decreaseFontSize = new MenuItem("decrease Font size (crtl & -)");
+
+        fontsSubMenu.getItems().addAll(increaseFontSize, standardFontSize, decreaseFontSize);
+
+        settingsMenu.getItems().add(fontsSubMenu);
+
+        menuBar.getMenus().addAll(connectionsMenu, settingsMenu);
 
         scrollPane.setFitToHeight(true);
         scrollPane.setFitToWidth(true);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
 
-        BorderPane borderPane = new BorderPane();
+        double baseFontSize = screenWidth * 0.007;
+        double windowWidth = screenWidth * 0.5;
+        double windowHeight = screenHeight * 0.5;
+
+        this.sizeValue = baseFontSize;
+
+        borderPane = new BorderPane();
 
         borderPane.setTop(menuBar);
         borderPane.setBottom(scrollPane);
@@ -77,8 +108,26 @@ public class GUI extends Application implements ViewCallback {
 
         connect.setOnAction(e -> connect()); // Pass primaryStage to the connect method
         disconnect.setOnAction(e -> client.disconnect());
+        increaseFontSize.setOnAction(e -> changeFontSize(2));
+        standardFontSize.setOnAction(e -> standardFontSizeMethod());
+        decreaseFontSize.setOnAction(e -> changeFontSize(-2));
 
-        this.scene = new Scene(borderPane);
+        borderPane.requestFocus();
+
+        primaryStage.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (crtlPlus.match(event)) {
+                changeFontSize(2);
+                event.consume();
+            } else if (crtlMinus.match(event)) {
+                changeFontSize(-2);
+                event.consume();
+            } else if (crtlR.match(event)) {
+                standardFontSizeMethod();
+                event.consume();
+            }
+        });
+
+        this.scene = new Scene(borderPane, windowWidth, windowHeight);
 
         double screenWidth = Screen.getPrimary().getBounds().getWidth();
         double screenHeight = Screen.getPrimary().getBounds().getHeight();
@@ -88,6 +137,7 @@ public class GUI extends Application implements ViewCallback {
         primaryStage.setTitle("JChad Client");
         primaryStage.setScene(scene);
         primaryStage.show();
+        standardFontSizeMethod();
 
         handleError(new RuntimeException("This is an error"));
         handleFatalError(new RemoteException("This is a FatalError"));
@@ -276,6 +326,29 @@ public class GUI extends Application implements ViewCallback {
         // Set the scene on the dialog stage
         dialogStage.setScene(dialogScene);
         dialogStage.showAndWait();
+    }
+
+    private void changeFontSize(int size) {
+        this.sizeValue = sizeValue + size;
+        if (sizeValue < 0) {
+            this.sizeValue = 1;
+        } else if (sizeValue > 50) {
+            this.sizeValue = 50;
+        }
+        updateWindowFontSizeEverything(sizeValue);
+    }
+
+    private void standardFontSizeMethod() {
+        this.sizeValue = screenWidth * 0.01;
+        updateWindowFontSizeEverything(sizeValue);
+    }
+
+    public void updateWindowFontSizeEverything(double fontSize) {
+        menuBar.setStyle("-fx-font-size: " + fontSize);
+        headerLabel.setStyle("-fx-font-size: " + fontSize);
+        contentLabel.setStyle("-fx-font-size: " + fontSize);
+        combinedLabel.setStyle("-fx-font-size: " + fontSize);
+        scrollPane.setStyle("-fx-font-size: " + fontSize);
     }
 
 
