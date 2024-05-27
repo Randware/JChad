@@ -1,21 +1,16 @@
 package net.jchad.client.view.gui;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -36,19 +31,13 @@ public class GUI extends Application implements ViewCallback {
     private ScrollPane scrollPane = new ScrollPane();
     private Label headerLabel = new Label();
     private Label contentLabel = new Label();
-    private Label combinedLabel = new Label();
     private Stage primaryStage; // Store the primary stage to access it later
     private Scene scene;
-    private Stage dialogStage;
-    private double sizeValue;
-    private BorderPane borderPane = new BorderPane();
     private ConnectionDetailsBuilder connectionDetailsBuilder;
-    private final KeyCombination crtlMinus = new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN);
-    private final KeyCombination crtlPlus = new KeyCodeCombination(KeyCode.PLUS, KeyCombination.CONTROL_DOWN);
-    private final KeyCombination crtlR = new KeyCodeCombination(KeyCode.R, KeyCombination.CONTROL_DOWN);
-    Rectangle2D screenBounds = Screen.getPrimary().getBounds();
-    double screenWidth = screenBounds.getWidth();
-    double screenHeight = screenBounds.getHeight();
+    String selectedChat;
+
+    VBox messageBox = new VBox();
+    ClientChat chat;
 
     public static void main(String[] args) {
         new GUI().runGUI();
@@ -66,7 +55,7 @@ public class GUI extends Application implements ViewCallback {
         headerLabel.setText("Welcome Jchader!");
         contentLabel.setText("This is the best Chad-Platform out there");
 
-        combinedLabel = new Label(headerLabel.getText() + "\n" + contentLabel.getText());
+        Label combinedLabel = new Label(headerLabel.getText() + "\n" + contentLabel.getText());
 
         Menu connectionsMenu = new Menu("Connections");
 
@@ -75,32 +64,14 @@ public class GUI extends Application implements ViewCallback {
 
         connectionsMenu.getItems().addAll(connect, disconnect);
 
-        Menu settingsMenu = new Menu("Settings");
-
-        Menu fontsSubMenu = new Menu("Fonts");
-
-        MenuItem increaseFontSize = new MenuItem("increase Font size (ctrl & +)");
-        MenuItem standardFontSize = new MenuItem("standard Font size (crtl & R)");
-        MenuItem decreaseFontSize = new MenuItem("decrease Font size (crtl & -)");
-
-        fontsSubMenu.getItems().addAll(increaseFontSize, standardFontSize, decreaseFontSize);
-
-        settingsMenu.getItems().add(fontsSubMenu);
-
-        menuBar.getMenus().addAll(connectionsMenu, settingsMenu);
+        menuBar.getMenus().addAll(connectionsMenu);
 
         scrollPane.setFitToHeight(true);
         scrollPane.setFitToWidth(true);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
 
-        double baseFontSize = screenWidth * 0.007;
-        double windowWidth = screenWidth * 0.5;
-        double windowHeight = screenHeight * 0.5;
-
-        this.sizeValue = baseFontSize;
-
-        borderPane = new BorderPane();
+        BorderPane borderPane = new BorderPane();
 
         borderPane.setTop(menuBar);
         borderPane.setBottom(scrollPane);
@@ -108,26 +79,8 @@ public class GUI extends Application implements ViewCallback {
 
         connect.setOnAction(e -> connect()); // Pass primaryStage to the connect method
         disconnect.setOnAction(e -> client.disconnect());
-        increaseFontSize.setOnAction(e -> changeFontSize(2));
-        standardFontSize.setOnAction(e -> standardFontSizeMethod());
-        decreaseFontSize.setOnAction(e -> changeFontSize(-2));
 
-        borderPane.requestFocus();
-
-        primaryStage.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
-            if (crtlPlus.match(event)) {
-                changeFontSize(2);
-                event.consume();
-            } else if (crtlMinus.match(event)) {
-                changeFontSize(-2);
-                event.consume();
-            } else if (crtlR.match(event)) {
-                standardFontSizeMethod();
-                event.consume();
-            }
-        });
-
-        this.scene = new Scene(borderPane, windowWidth, windowHeight);
+        this.scene = new Scene(borderPane);
 
         double screenWidth = Screen.getPrimary().getBounds().getWidth();
         double screenHeight = Screen.getPrimary().getBounds().getHeight();
@@ -137,7 +90,6 @@ public class GUI extends Application implements ViewCallback {
         primaryStage.setTitle("JChad Client");
         primaryStage.setScene(scene);
         primaryStage.show();
-        standardFontSizeMethod();
 
         handleError(new RuntimeException("This is an error"));
         handleFatalError(new RemoteException("This is a FatalError"));
@@ -148,7 +100,7 @@ public class GUI extends Application implements ViewCallback {
 
     public void connect() {
         VBox vbox = new VBox(10);
-        dialogStage = new Stage();
+        Stage dialogStage = new Stage();
 
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
@@ -236,6 +188,7 @@ public class GUI extends Application implements ViewCallback {
             return;
         }
 
+
         if (Username == null || Username.isEmpty()) {
             handleWarning("Username cannot be empty");
             return;
@@ -250,25 +203,28 @@ public class GUI extends Application implements ViewCallback {
         client.connect(connectionDetailsBuilder.build());
         changeToChat();
         handleInfo("Successfully connected to: " + ConnectionName);
-        dialogStage.close();
     }
 
-    public void changeToChat() {
-        // Create a new layout for the chat view
-        BorderPane chatLayout = new BorderPane();
+    private void changeToChat() {
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(messageBox);
+        scrollPane.setFitToHeight(true);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
 
-        // Reuse the existing menu bar
+        TextField inputField = new TextField();
+        inputField.setPromptText("Enter message...");
+        HBox inputBox = new HBox(inputField);
+        HBox.setHgrow(inputField, Priority.ALWAYS);
+
+
+        BorderPane chatLayout = new BorderPane();
+        chatLayout.setBottom(inputBox);
+        chatLayout.setCenter(scrollPane);
         chatLayout.setTop(menuBar);
 
-        // Assuming you have a TextArea for displaying chat messages
-        TextArea chatArea = new TextArea();
-        chatArea.setEditable(false); // Make the chat area read-only
-        chatLayout.setCenter(chatArea);
-
-        // Create a new scene with the chat layout
         Scene chatScene = new Scene(chatLayout, scene.getWidth(), scene.getHeight());
-
-        // Apply the scene to the primary stage
         primaryStage.setScene(chatScene);
 
         showChatSelectionWindow();
@@ -298,13 +254,19 @@ public class GUI extends Application implements ViewCallback {
         Button cancelButton = new Button("Cancel");
 
         // Action for Select button
-        selectButton.setOnAction(event -> {
-            String selectedChat = chatListView.getSelectionModel().getSelectedItem();
-            if (selectedChat!= null) {
-                // Handle the selected chat here
-                System.out.println("Selected Chat: " + selectedChat);
-                dialogStage.close();
-            }
+        Platform.runLater(() -> {
+            selectButton.setOnAction(event -> {
+                selectedChat = chatListView.getSelectionModel().getSelectedItem();
+                if (selectedChat!= null) {
+                    // Handle the selected chat here
+                    System.out.println("Selected Chat: " + selectedChat);
+
+                    chat = client.getChat(selectedChat);
+                    client.setCurrentChat(chat);
+                    System.out.println(client.getChatMessages(chat));
+                    dialogStage.close();
+                }
+            });
         });
 
         // Action for Cancel button
@@ -328,43 +290,20 @@ public class GUI extends Application implements ViewCallback {
         dialogStage.showAndWait();
     }
 
-    private void changeFontSize(int size) {
-        this.sizeValue = sizeValue + size;
-        if (sizeValue < 0) {
-            this.sizeValue = 1;
-        } else if (sizeValue > 50) {
-            this.sizeValue = 50;
-        }
-        updateWindowFontSizeEverything(sizeValue);
-    }
-
-    private void standardFontSizeMethod() {
-        this.sizeValue = screenWidth * 0.01;
-        updateWindowFontSizeEverything(sizeValue);
-    }
-
-    public void updateWindowFontSizeEverything(double fontSize) {
-        menuBar.setStyle("-fx-font-size: " + fontSize);
-        headerLabel.setStyle("-fx-font-size: " + fontSize);
-        contentLabel.setStyle("-fx-font-size: " + fontSize);
-        combinedLabel.setStyle("-fx-font-size: " + fontSize);
-        scrollPane.setStyle("-fx-font-size: " + fontSize);
-    }
-
 
     @Override
     public void handleFatalError(Exception e) {
-        new ClientAlerts(Alert.AlertType.ERROR, "Fatal Error", e.toString());
+        Platform.runLater(() -> new ClientAlerts(Alert.AlertType.ERROR, "Fatal Error", e.toString()));
     }
 
     @Override
     public void handleError(Exception e) {
-        new ClientAlerts(Alert.AlertType.ERROR, "Error", e.toString());
+        Platform.runLater(() -> new ClientAlerts(Alert.AlertType.ERROR, "Error", e.toString()));
     }
 
     @Override
     public void handleWarning(String warning) {
-        new ClientAlerts(Alert.AlertType.WARNING, "Warning", warning);
+        Platform.runLater(() -> new ClientAlerts(Alert.AlertType.WARNING, "Warning", warning));
     }
 
     @Override
@@ -403,7 +342,8 @@ public class GUI extends Application implements ViewCallback {
 
     @Override
     public void displayOtherMessage(ClientChatMessage message) {
-
+        Text textMessage = new Text(message.getUsername() + " " + message.getPrettyTimestamp() + ": " + message.getContent());
+        messageBox.getChildren().add(textMessage);
     }
 
     @Override
