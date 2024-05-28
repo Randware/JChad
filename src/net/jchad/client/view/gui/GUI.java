@@ -8,6 +8,7 @@ import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -16,6 +17,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -42,6 +44,7 @@ public class GUI extends Application implements ViewCallback {
     private Stage dialogStage;
     private double sizeValue;
     private BorderPane borderPane = new BorderPane();
+    private TextArea chatArea = new TextArea();
     private ConnectionDetailsBuilder connectionDetailsBuilder;
     private final KeyCombination crtlMinus = new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN);
     private final KeyCombination crtlPlus = new KeyCodeCombination(KeyCode.PLUS, KeyCombination.CONTROL_DOWN);
@@ -134,20 +137,18 @@ public class GUI extends Application implements ViewCallback {
         primaryStage.setWidth(screenWidth / 2);
         primaryStage.setHeight(screenHeight / 2);
 
+        //primaryStage.getIcons().add(new Image("file:/Pfad/zum/Bild.png"));
+
         primaryStage.setTitle("JChad Client");
         primaryStage.setScene(scene);
         primaryStage.show();
         standardFontSizeMethod();
 
-        handleError(new RuntimeException("This is an error"));
-        handleFatalError(new RemoteException("This is a FatalError"));
-        handleInfo("This is a Info");
-        handleWarning("This is a Warning");
-        displayPrompt("Test","Test");
     }
 
     public void connect() {
         VBox vbox = new VBox(10);
+        vbox.setPadding(new Insets(10));
         dialogStage = new Stage();
 
         GridPane grid = new GridPane();
@@ -184,14 +185,16 @@ public class GUI extends Application implements ViewCallback {
             primaryStage.setHeight(screenHeight / 2);
         });*/
 
-        Button addButton = new Button("Add");
+        Button addButton = new Button("Connect");
+        Button saveButton = new Button("Add");
 
-        addButton.setOnAction(e -> newConnection(hostField.getText(), portField.getText(), nameField.getText(), passwordField.getText(), usernameField.getText()));
+        addButton.setOnAction(e -> newConnection(hostField.getText(), portField.getText(), nameField.getText(), passwordField.getText(), usernameField.getText(), true));
         cancelButton.setOnAction(e -> dialogStage.close());
+        saveButton.setOnAction(e -> newConnection(hostField.getText(), portField.getText(), nameField.getText(), passwordField.getText(), usernameField.getText(), false));
 
         HBox buttonContainer = new HBox(10);
         buttonContainer.setAlignment(Pos.CENTER);
-        buttonContainer.getChildren().addAll(cancelButton, addButton);
+        buttonContainer.getChildren().addAll(cancelButton, addButton, saveButton);
 
         grid.add(hostLabel, 0, 1);
         grid.add(hostField, 1, 1);
@@ -220,7 +223,7 @@ public class GUI extends Application implements ViewCallback {
         dialogStage.showAndWait();
     }
 
-    private void newConnection(String Host, String Port, String ConnectionName, String Password, String Username) {
+    private void newConnection(String Host, String Port, String ConnectionName, String Password, String Username, Boolean connect) {
         if (Host == null || Host.isEmpty()) {
             handleWarning("Host cannot be empty");
             return;
@@ -247,9 +250,16 @@ public class GUI extends Application implements ViewCallback {
         connectionDetailsBuilder.addPassword(Password);
         connectionDetailsBuilder.addPort(Integer.parseInt(Port));
         connectionDetailsBuilder.addUsername(Username);
-        client.connect(connectionDetailsBuilder.build());
-        changeToChat();
-        handleInfo("Successfully connected to: " + ConnectionName);
+
+        if (connect){
+            client.connect(connectionDetailsBuilder.build());
+            changeToChat();
+
+            handleInfo("Successfully connected to: " + ConnectionName);
+        }else {
+            client.configuration().addConnection(connectionDetailsBuilder.build());
+        }
+
         dialogStage.close();
     }
 
@@ -261,7 +271,6 @@ public class GUI extends Application implements ViewCallback {
         chatLayout.setTop(menuBar);
 
         // Assuming you have a TextArea for displaying chat messages
-        TextArea chatArea = new TextArea();
         chatArea.setEditable(false); // Make the chat area read-only
         chatLayout.setCenter(chatArea);
 
@@ -351,6 +360,40 @@ public class GUI extends Application implements ViewCallback {
         scrollPane.setStyle("-fx-font-size: " + fontSize);
     }
 
+    private void displaySavedConnections() {
+        ArrayList<ConnectionDetails> connections = client.configuration().getConnections();
+        VBox connectionsContainer = new VBox(10); // Container for all connection boxes
+        connectionsContainer.setPadding(new Insets(10)); // Padding around the container
+
+        for (ConnectionDetails connection : connections) {
+            VBox connectionBox = new VBox(5); // Individual connection box
+            connectionBox.setPadding(new Insets(10)); // Padding inside each box
+            connectionBox.setStyle("-fx-border-color: black;"); // Optional: adds a border around each box
+
+            // Create labels for each piece of connection information
+            Label hostLabel = new Label("Host: " + connection.getHost());
+            Label portLabel = new Label("Port: " + connection.getPort());
+            Label nameLabel = new Label("Name: " + connection.getConnectionName());
+            Label usernameLabel = new Label("Username: " + connection.getUsername());
+            Label passwordLabel = new Label("Password: " + connection.getPassword());
+
+            // Add text alignment for better visual appearance
+            hostLabel.setTextAlignment(TextAlignment.LEFT);
+            portLabel.setTextAlignment(TextAlignment.LEFT);
+            nameLabel.setTextAlignment(TextAlignment.LEFT);
+            usernameLabel.setTextAlignment(TextAlignment.LEFT);
+            passwordLabel.setTextAlignment(TextAlignment.LEFT);
+
+            // Add labels to the connection box
+            connectionBox.getChildren().addAll(hostLabel, portLabel, nameLabel, usernameLabel, passwordLabel);
+
+            // Add the connection box to the container
+            connectionsContainer.getChildren().add(connectionBox);
+        }
+
+        // Update the scroll pane content
+        scrollPane.setContent(connectionsContainer);
+    }
 
     @Override
     public void handleFatalError(Exception e) {
