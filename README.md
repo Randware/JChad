@@ -75,7 +75,7 @@ The "messages.json" file stores messages and their related data sent by clients.
 ### TODO: Create table with all configuration values
 
 ## About JChad
-JChad was developed by the Randware organisation and licensed under the [MIT license](https://choosealicense.com/licenses/mit/).
+JChad was developed by the Randware organization and licensed under the [MIT license](https://choosealicense.com/licenses/mit/).
 
 Feel free to contribute to this project with your own code, or by reporting bugs and issues on our GitHub [Issues](https://github.com/Randware/JChad/issues) page.
 
