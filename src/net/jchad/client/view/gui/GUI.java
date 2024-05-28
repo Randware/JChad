@@ -46,6 +46,7 @@ public class GUI extends Application implements ViewCallback {
     private BorderPane borderPane = new BorderPane();
     private TextArea chatArea = new TextArea();
     private ConnectionDetailsBuilder connectionDetailsBuilder;
+    private String selectedChat;
     private final KeyCombination crtlMinus = new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN);
     private final KeyCombination crtlPlus = new KeyCodeCombination(KeyCode.PLUS, KeyCombination.CONTROL_DOWN);
     private final KeyCombination crtlR = new KeyCodeCombination(KeyCode.R, KeyCombination.CONTROL_DOWN);
@@ -252,11 +253,13 @@ public class GUI extends Application implements ViewCallback {
         connectionDetailsBuilder.addUsername(Username);
 
         if (connect){
+            System.out.println("connect true");
             client.connect(connectionDetailsBuilder.build());
-            changeToChat();
+            showChatSelectionWindow();
 
-            handleInfo("Successfully connected to: " + ConnectionName);
+            handleInfo("Successfully connected to: " + selectedChat);
         }else {
+            System.out.println("connect false");
             client.configuration().addConnection(connectionDetailsBuilder.build());
         }
 
@@ -280,7 +283,7 @@ public class GUI extends Application implements ViewCallback {
         // Apply the scene to the primary stage
         primaryStage.setScene(chatScene);
 
-        showChatSelectionWindow();
+        System.out.println("changed to chat");
     }
 
     private void showChatSelectionWindow() {
@@ -308,9 +311,10 @@ public class GUI extends Application implements ViewCallback {
 
         // Action for Select button
         selectButton.setOnAction(event -> {
-            String selectedChat = chatListView.getSelectionModel().getSelectedItem();
+            selectedChat = chatListView.getSelectionModel().getSelectedItem();
             if (selectedChat!= null) {
                 // Handle the selected chat here
+                changeToChat();
                 System.out.println("Selected Chat: " + selectedChat);
                 dialogStage.close();
             }
