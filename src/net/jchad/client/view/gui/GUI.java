@@ -55,11 +55,7 @@ public class GUI extends Application implements ViewCallback {
     double screenHeight = screenBounds.getHeight();
 
     public static void main(String[] args) {
-        new GUI().runGUI();
-    }
-
-    private void runGUI() {
-        Application.launch();
+        Application.launch(args);
     }
 
     @Override
