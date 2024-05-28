@@ -9,14 +9,22 @@ import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
 
+/**
+ * This class ({@link ApiCalls}) provides functionality to make basic api calls to the GitHub api.
+ */
 public class ApiCalls {
     /**
-     * Calls the github api to retrieve all releases
-     * @return
+     * Calls the GitHub api to retrieve all releases.
+     * The releases get returned as an {@link Release Realease[]} array.
+     * The {@link Release} class stores many variables from the api response from GitHub.
+     * <b>This methode throws exceptions!<u>Make sure to handle them!</u></b>
+     *
+     * @throws IOException
+     * @return An array that represents the releases on the official GitHub page
      */
     public static Release[] getRepositoryReleases(URL url) throws IOException {
 
-            //Opens  the connection to read the github json response
+            //Opens the connection to read the github json response
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.setRequestProperty("Content-Type", "application/json");
