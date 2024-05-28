@@ -30,7 +30,7 @@ It supports both a graphical and cli installation.
 
 Simply head to the [releases](https://github.com/Randware/JChad/releases) page to get it. You can also get the other components as standalone .jar files from there, if desired.
 
-To run in GUI mode, simply double click the .jar file. To run in GUI mode, use the `-cl` launch argument:
+To run in GUI mode, simply double click the .jar file. To run it in the terminal, use the `-cl` launch argument:
 
 `java -jar JChad-server.jar -cl`
 
@@ -75,7 +75,7 @@ The "messages.json" file stores messages and their related data sent by clients.
 ### TODO: Create table with all configuration values
 
 ## About JChad
-JChad was developed by the Randware organisation and licensed under the [MIT license](https://choosealicense.com/licenses/mit/).
+JChad was developed by the Randware organization and licensed under the [MIT license](https://choosealicense.com/licenses/mit/).
 
 Feel free to contribute to this project with your own code, or by reporting bugs and issues on our GitHub [Issues](https://github.com/Randware/JChad/issues) page.
 
