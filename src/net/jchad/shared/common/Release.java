@@ -1,5 +1,10 @@
 package net.jchad.shared.common;
 
+
+/**
+ * This class represents a single release on GitHub as a POJO.
+ * It doesn't only have some variables from the api response
+ */
 public class Release {
     private String name;
     private String body;

@@ -6,6 +6,9 @@ import javax.crypto.*;
 import javax.crypto.spec.GCMParameterSpec;
 import java.security.*;
 
+/**
+ * This class provides basic functionality for encryption
+ */
 public class Crypter {
 
     /**

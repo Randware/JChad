@@ -81,6 +81,7 @@ public class User {
      * @throws ConnectionExistsException If the connection is already associated with a user
      */
     public User(String username, ServerThread connection,Set<String> joinedChats, boolean readyToReceiveMessages) {
+        //This section checks if any of the provided parameters are null
         if (username == null) {
             throw new NullPointerException("username can not be null");
         }
@@ -93,10 +94,12 @@ public class User {
             throw new NullPointerException("the joinedChats is not allowed to be null");
         }
 
+        //This checks if the requested username matches the regex that was set in the InternalConfig
         if (!username.matches(connection.getServer().getConfig().getInternalSettings().getUsernameRegex())) {
             throw new UsernameInvalidException(connection.getServer().getConfig().getInternalSettings().getUsernameRegexDescription() ,username);
         }
 
+        //This loops through the blocked usernames in the ServerSettings and if it is blocked the usernameAllowed variable will get set to false.
         boolean usernameAllowed = true;
         boolean caseSensitive = connection.getConfig().getServerSettings().isCaseSensitive();
         for (String blocked : connection.getConfig().getServerSettings().getBlockedUsernames()) {
@@ -113,10 +116,12 @@ public class User {
             }
         }
 
+        //This checks if the loop from above found the username in the blocked list
         if (!usernameAllowed) {
             throw new UsernameBlockedException("The requested username is blacklisted");
         }
 
+        //This checks if the username already exists.
         boolean usernameExists = false;
         Collection<User> checkWithUsers = users.values();
         for (User currentUser : checkWithUsers) {
@@ -130,6 +135,7 @@ public class User {
             throw new UsernameTakenException("The username: " + username + " is already taken.");
         }
 
+        //This should never happen, except if the class that uses this doesn'
         if (users.containsValue(connection)) {
             throw new ConnectionExistsException("The connection (" + connection.getInetAddress().toString() + ") has already been associated with a username");
         }
