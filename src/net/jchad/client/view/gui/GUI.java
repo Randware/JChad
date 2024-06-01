@@ -14,15 +14,11 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import javafx.scene.layout.ColumnConstraints;
 import net.jchad.client.controller.ClientController;
 import net.jchad.client.model.client.ViewCallback;
 import net.jchad.client.model.store.chat.ClientChat;
@@ -55,6 +51,8 @@ public class GUI extends Application implements ViewCallback {
     Rectangle2D screenBounds = Screen.getPrimary().getBounds();
     double screenWidth = screenBounds.getWidth();
     double screenHeight = screenBounds.getHeight();
+    TextArea chatDisplayArea = new TextArea();
+    TextField messageInputField = new TextField();
 
     public static void main(String[] args) {
         Application.launch(args);
@@ -266,15 +264,39 @@ public class GUI extends Application implements ViewCallback {
     }
 
     public void changeToChat() {
+        Button sendButton = new Button("Send");
+        sendButton.setPadding(new Insets(10));
         // Create a new layout for the chat view
         BorderPane chatLayout = new BorderPane();
 
         // Reuse the existing menu bar
         chatLayout.setTop(menuBar);
 
-        // Assuming you have a TextArea for displaying chat messages
-        chatArea.setEditable(false); // Make the chat area read-only
-        chatLayout.setCenter(chatArea);
+        // Create a TextArea for displaying chat messages
+        chatDisplayArea.setEditable(false); // Make the chat area read-only
+        chatDisplayArea.setWrapText(true); // Ensure text wraps within the TextArea
+
+        // Create a ScrollPane to hold the chat display area
+        ScrollPane chatScrollPane = new ScrollPane(chatDisplayArea);
+        chatScrollPane.setFitToWidth(true);
+        chatScrollPane.setFitToHeight(true);
+        chatScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+
+        // Create a TextField for typing messages
+        HBox bottom = new HBox();
+        bottom.getChildren().addAll(messageInputField, sendButton);
+        HBox.setHgrow(messageInputField, Priority.ALWAYS);
+        messageInputField.setPromptText("Type your message here...");
+        messageInputField.setPadding(new Insets(10));
+        ClientChat chat = client.getChat(selectedChat);
+        client.setCurrentChat(chat);
+        System.out.println("connected to: " + selectedChat);
+
+        // Add the ScrollPane to the center of the BorderPane
+        chatLayout.setCenter(chatScrollPane);
+
+        // Add the TextField to the bottom of the BorderPane
+        chatLayout.setBottom(bottom);
 
         // Create a new scene with the chat layout
         Scene chatScene = new Scene(chatLayout, scene.getWidth(), scene.getHeight());
@@ -282,8 +304,39 @@ public class GUI extends Application implements ViewCallback {
         // Apply the scene to the primary stage
         primaryStage.setScene(chatScene);
 
-        System.out.println("changed to chat");
+        messageInputField.setOnAction(event -> {
+            String message = messageInputField.getText();
+            if (!message.trim().isEmpty()) {
+                client.sendMessage(message);
+                messageInputField.clear();
+                chatDisplayArea.setScrollTop(Double.MAX_VALUE);
+            }
+        });
+
+        sendButton.setOnAction(event -> {
+            String message = messageInputField.getText();
+            if (!message.trim().isEmpty()) {
+                client.sendMessage(message);
+                messageInputField.clear();
+                chatDisplayArea.setScrollTop(Double.MAX_VALUE);
+            }
+        });
+
+
+
+        // Ensure the prompt text stays when the field is empty
+        messageInputField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.isEmpty()) {
+                messageInputField.setPromptText("Type your message here...");
+            }
+        });
+
+        // Set an action for the message input field to send a message when Enter is pressed
+
+
+        System.out.println("Changed to chat view");
     }
+
 
     private void disconnect(){}
 
@@ -357,7 +410,7 @@ public class GUI extends Application implements ViewCallback {
         updateWindowFontSizeEverything(sizeValue);
     }
 
-        public void updateWindowFontSizeEverything(double fontSize) {
+    public void updateWindowFontSizeEverything(double fontSize) {
         menuBar.setStyle("-fx-font-size: " + fontSize);
         headerLabel.setStyle("-fx-font-size: " + fontSize);
         contentLabel.setStyle("-fx-font-size: " + fontSize);
@@ -476,12 +529,12 @@ public class GUI extends Application implements ViewCallback {
 
     @Override
     public void displayOwnMessage(ClientChatMessage message) {
-
+        chatDisplayArea.appendText(message.getUsername() + " " + message.getPrettyTimestamp() + "\n" + message.getContent()+ "\n" + "\n");
     }
 
     @Override
     public void displayOtherMessage(ClientChatMessage message) {
-
+        chatDisplayArea.appendText(message.getUsername() + " " + message.getPrettyTimestamp() + "\n" + message.getContent()+ "\n" + "\n");
     }
 
     @Override
