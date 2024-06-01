@@ -1,6 +1,7 @@
 package net.jchad.client.view.gui;
 
 import javafx.application.Application;
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -21,6 +22,7 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.scene.layout.ColumnConstraints;
 import net.jchad.client.controller.ClientController;
 import net.jchad.client.model.client.ViewCallback;
 import net.jchad.client.model.store.chat.ClientChat;
@@ -130,8 +132,8 @@ public class GUI extends Application implements ViewCallback {
 
         double screenWidth = Screen.getPrimary().getBounds().getWidth();
         double screenHeight = Screen.getPrimary().getBounds().getHeight();
-        primaryStage.setWidth(screenWidth / 2);
-        primaryStage.setHeight(screenHeight / 2);
+        primaryStage.setWidth(screenWidth / 1.5);
+        primaryStage.setHeight(screenHeight / 1.5);
 
         //primaryStage.getIcons().add(new Image("file:/Pfad/zum/Bild.png"));
 
@@ -139,6 +141,7 @@ public class GUI extends Application implements ViewCallback {
         primaryStage.setScene(scene);
         primaryStage.show();
         standardFontSizeMethod();
+        displaySavedConnections();
 
     }
 
@@ -354,7 +357,7 @@ public class GUI extends Application implements ViewCallback {
         updateWindowFontSizeEverything(sizeValue);
     }
 
-    public void updateWindowFontSizeEverything(double fontSize) {
+        public void updateWindowFontSizeEverything(double fontSize) {
         menuBar.setStyle("-fx-font-size: " + fontSize);
         headerLabel.setStyle("-fx-font-size: " + fontSize);
         contentLabel.setStyle("-fx-font-size: " + fontSize);
@@ -365,14 +368,34 @@ public class GUI extends Application implements ViewCallback {
     private void displaySavedConnections() {
         ArrayList<ConnectionDetails> connections = client.configuration().getConnections();
         System.out.println("Number of connections (ArrayList<ConnectionDetails> connections): " + connections.size());
-        VBox connectionsContainer = new VBox(10); // Container for all connection boxes
+
+        // Use an HBox for arranging connection boxes in a horizontal row
+        HBox connectionsContainer = new HBox(10); // Horizontal gap between boxes
         connectionsContainer.setPadding(new Insets(10)); // Padding around the container
+
+        // Bind the HBox's width to the ScrollPane's width
+        connectionsContainer.prefWidthProperty().bind(scrollPane.widthProperty());
+
+        double totalHeight = 0; // Variable to hold the total height of all connection boxes
 
         for (ConnectionDetails connection : connections) {
             VBox connectionBox = new VBox(5); // Individual connection box
             System.out.println("new connection: " + connection);
+
+            // Set a fixed size for each connection box
+            connectionBox.autosize(); // Preferred width and height
+
+            // Prevent the VBox from being altered by setting min, max, and pref sizes to the same value
+            connectionBox.setMinWidth(250);
+            connectionBox.setPrefWidth(250);
+            connectionBox.setMaxWidth(250);
+
             connectionBox.setPadding(new Insets(10)); // Padding inside each box
             connectionBox.setStyle("-fx-border-color: black;"); // Optional: adds a border around each box
+
+            // Calculate the height of the current connection box
+            double boxHeight = connectionBox.getPrefHeight();
+            totalHeight += boxHeight; // Add the height to the total height
 
             // Create labels for each piece of connection information
             Label hostLabel = new Label("Host: " + connection.getHost());
@@ -391,14 +414,18 @@ public class GUI extends Application implements ViewCallback {
             // Add labels to the connection box
             connectionBox.getChildren().addAll(hostLabel, portLabel, nameLabel, usernameLabel, passwordLabel);
 
-            // Add the connection box to the container
+            // Add the connection box to the HBox
             connectionsContainer.getChildren().add(connectionBox);
-            System.out.println("connectioncontainer got the connectionBox");
         }
 
         // Update the scroll pane content
         scrollPane.setContent(connectionsContainer);
         System.out.println("scrollpane got the connectionsContainer");
+
+        // Dynamically set the minHeight of the ScrollPane to fit the content using a final variable
+        double finalTotalHeight = totalHeight;
+        scrollPane.minHeightProperty().bind(Bindings.createDoubleBinding(() -> finalTotalHeight, connectionsContainer.heightProperty()));
+
         scrollPane.requestLayout();
         System.out.println("requestlayout");
     }
