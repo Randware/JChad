@@ -19,6 +19,7 @@ module net.jchad {
     requires org.controlsfx.controls;
     requires java.rmi;
     requires org.fusesource.jansi;
+    requires javafx.media;
 
     opens net.jchad.server.model.command.commands.version;
     exports net.jchad.client.view;
@@ -44,4 +45,5 @@ module net.jchad {
     opens net.jchad.client.model.client.testing to javafx.fxml;
     exports net.jchad.client.view.gui;
     opens net.jchad.shared.common;
+    exports net.jchad.client.view.videos;
 }
