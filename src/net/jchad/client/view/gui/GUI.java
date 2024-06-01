@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public class GUI extends Application implements ViewCallback {
-    private ClientController client;
+    private ClientController client = new ClientController(this);
     private MenuBar menuBar = new MenuBar();
     private ScrollPane scrollPane = new ScrollPane();
     private Label headerLabel = new Label();
@@ -61,7 +61,6 @@ public class GUI extends Application implements ViewCallback {
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage; // Assign the primary stage to the class variable
-        client = new ClientController(this);
 
         headerLabel.setText("Welcome Jchader!");
         contentLabel.setText("This is the best Chad-Platform out there");
@@ -107,7 +106,7 @@ public class GUI extends Application implements ViewCallback {
         borderPane.setCenter(combinedLabel);
 
         connect.setOnAction(e -> connect()); // Pass primaryStage to the connect method
-        disconnect.setOnAction(e -> client.disconnect());
+        disconnect.setOnAction(e -> disconnect());
         increaseFontSize.setOnAction(e -> changeFontSize(2));
         standardFontSize.setOnAction(e -> standardFontSizeMethod());
         decreaseFontSize.setOnAction(e -> changeFontSize(-2));
@@ -257,6 +256,7 @@ public class GUI extends Application implements ViewCallback {
         }else {
             System.out.println("connect false");
             client.configuration().addConnection(connectionDetailsBuilder.build());
+            displaySavedConnections();
         }
 
         dialogStage.close();
@@ -281,6 +281,8 @@ public class GUI extends Application implements ViewCallback {
 
         System.out.println("changed to chat");
     }
+
+    private void disconnect(){}
 
     private void showChatSelectionWindow() {
         // Create a new stage for the chat selection window
@@ -362,11 +364,13 @@ public class GUI extends Application implements ViewCallback {
 
     private void displaySavedConnections() {
         ArrayList<ConnectionDetails> connections = client.configuration().getConnections();
+        System.out.println("Number of connections (ArrayList<ConnectionDetails> connections): " + connections.size());
         VBox connectionsContainer = new VBox(10); // Container for all connection boxes
         connectionsContainer.setPadding(new Insets(10)); // Padding around the container
 
         for (ConnectionDetails connection : connections) {
             VBox connectionBox = new VBox(5); // Individual connection box
+            System.out.println("new connection: " + connection);
             connectionBox.setPadding(new Insets(10)); // Padding inside each box
             connectionBox.setStyle("-fx-border-color: black;"); // Optional: adds a border around each box
 
@@ -389,10 +393,14 @@ public class GUI extends Application implements ViewCallback {
 
             // Add the connection box to the container
             connectionsContainer.getChildren().add(connectionBox);
+            System.out.println("connectioncontainer got the connectionBox");
         }
 
         // Update the scroll pane content
         scrollPane.setContent(connectionsContainer);
+        System.out.println("scrollpane got the connectionsContainer");
+        scrollPane.requestLayout();
+        System.out.println("requestlayout");
     }
 
     @Override
