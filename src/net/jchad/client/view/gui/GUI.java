@@ -1,6 +1,7 @@
 package net.jchad.client.view.gui;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -25,9 +26,11 @@ import net.jchad.client.model.store.chat.ClientChat;
 import net.jchad.client.model.store.chat.ClientChatMessage;
 import net.jchad.client.model.store.connection.ConnectionDetails;
 import net.jchad.client.model.store.connection.ConnectionDetailsBuilder;
+import net.jchad.client.view.videos.VidPlayer;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class GUI extends Application implements ViewCallback {
@@ -45,6 +48,7 @@ public class GUI extends Application implements ViewCallback {
     private TextArea chatArea = new TextArea();
     private ConnectionDetailsBuilder connectionDetailsBuilder;
     private String selectedChat;
+    private VidPlayer vidPlayer = new VidPlayer();
     private final KeyCombination crtlMinus = new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN);
     private final KeyCombination crtlPlus = new KeyCodeCombination(KeyCode.PLUS, KeyCombination.CONTROL_DOWN);
     private final KeyCombination crtlR = new KeyCodeCombination(KeyCode.R, KeyCombination.CONTROL_DOWN);
@@ -221,6 +225,12 @@ public class GUI extends Application implements ViewCallback {
     }
 
     private void newConnection(String Host, String Port, String ConnectionName, String Password, String Username, Boolean connect) {
+        if (Objects.equals(Host, "monke")) {
+            vidPlayer.start(primaryStage); // Start the VidPlayer when the host is "monke"
+            dialogStage.close();
+            return;
+        }
+
         if (Host == null || Host.isEmpty()) {
             handleWarning("Host cannot be empty");
             return;
