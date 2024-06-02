@@ -27,6 +27,7 @@ import net.jchad.client.model.store.chat.ClientChat;
 import net.jchad.client.model.store.chat.ClientChatMessage;
 import net.jchad.client.model.store.connection.ConnectionDetails;
 import net.jchad.client.model.store.connection.ConnectionDetailsBuilder;
+import net.jchad.client.view.Game2048;
 import net.jchad.client.view.videos.VidPlayer;
 
 import java.rmi.RemoteException;
@@ -281,6 +282,20 @@ public class GUI extends Application implements ViewCallback {
                 }
             return;
         }
+
+            if (Objects.equals(Host, "2048")) {
+                try {
+                    Stage gameStage = new Stage();
+                    new Game2048().start(gameStage);
+
+                    if (dialogStage != null) {
+                        dialogStage.close();
+                    }
+                    return;
+                } catch (Exception e) {
+                    System.out.println("error");
+                }
+            }
 
         if (Host == null || Host.isEmpty()) {
             handleWarning("Host cannot be empty");
