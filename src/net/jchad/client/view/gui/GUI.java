@@ -92,11 +92,6 @@ public class GUI extends Application implements ViewCallback {
 
         menuBar.getMenus().addAll(connectionsMenu, settingsMenu);
 
-        scrollPane.setFitToHeight(true);
-        scrollPane.setFitToWidth(true);
-        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-
         double baseFontSize = screenWidth * 0.007;
         double windowWidth = screenWidth * 0.5;
         double windowHeight = screenHeight * 0.5;
@@ -109,7 +104,10 @@ public class GUI extends Application implements ViewCallback {
         borderPane.setBottom(scrollPane);
         borderPane.setCenter(combinedLabel);
 
-        connect.setOnAction(e -> connect()); // Pass primaryStage to the connect method
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+
+        connect.setOnAction(e -> connect()); // Pass null to indicate no pre-filled connection
         disconnect.setOnAction(e -> disconnect());
         increaseFontSize.setOnAction(e -> changeFontSize(2));
         standardFontSize.setOnAction(e -> standardFontSizeMethod());
@@ -137,16 +135,14 @@ public class GUI extends Application implements ViewCallback {
         primaryStage.setWidth(screenWidth / 1.5);
         primaryStage.setHeight(screenHeight / 1.5);
 
-        //primaryStage.getIcons().add(new Image("file:/Pfad/zum/Bild.png"));
-
         primaryStage.setTitle("JChad Client");
         primaryStage.setScene(scene);
         primaryStage.show();
         standardFontSizeMethod();
         displaySavedConnections();
-
     }
 
+    // Modified connect() method to accept ConnectionDetails as a parameter
     public void connect() {
         VBox vbox = new VBox(10);
         vbox.setPadding(new Insets(10));
@@ -177,57 +173,99 @@ public class GUI extends Application implements ViewCallback {
         });
 
         Button cancelButton = new Button("Cancel");
-        /*cancelButton.setOnAction(e -> {
-            // Switch back to the original scene
-            primaryStage.setScene(scene); // You'll need to store the original scene somewhere
-            double screenWidth = Screen.getPrimary().getBounds().getWidth();
-            double screenHeight = Screen.getPrimary().getBounds().getHeight();
-            primaryStage.setWidth(screenWidth / 2);
-            primaryStage.setHeight(screenHeight / 2);
-        });*/
-
         Button addButton = new Button("Connect");
         Button saveButton = new Button("Add");
 
         addButton.setOnAction(e -> newConnection(hostField.getText(), portField.getText(), nameField.getText(), passwordField.getText(), usernameField.getText(), true));
-        cancelButton.setOnAction(e -> dialogStage.close());
+        cancelButton.setOnAction(e -> {
+            if (dialogStage!= null) {
+                dialogStage.close();
+            }
+        });
         saveButton.setOnAction(e -> newConnection(hostField.getText(), portField.getText(), nameField.getText(), passwordField.getText(), usernameField.getText(), false));
 
         HBox buttonContainer = new HBox(10);
         buttonContainer.setAlignment(Pos.CENTER);
         buttonContainer.getChildren().addAll(cancelButton, addButton, saveButton);
 
-        grid.add(nameLabel, 0, 1);
-        grid.add(nameField, 1, 1);
         grid.add(hostLabel, 0, 2);
         grid.add(hostField, 1, 2);
         grid.add(portLabel, 0, 3);
         grid.add(portField, 1, 3);
-        grid.add(usernameLabel, 0, 4);
-        grid.add(usernameField, 1, 4);
+        grid.add(nameLabel, 0, 1);
+        grid.add(nameField, 1, 1);
         grid.add(passwordLabel, 0, 5);
         grid.add(passwordField, 1, 5);
+        grid.add(usernameLabel, 0, 4);
+        grid.add(usernameField, 1, 4);
 
-        /*vbox.getChildren().addAll(grid, buttonContainer);
+        vbox.getChildren().addAll(grid, buttonContainer);
 
-        Scene connectionScene = new Scene(vbox);
-        primaryStage.setScene(connectionScene); // Set the new scene
-        primaryStage.sizeToScene(); // Resize the window to fit the new scene*/
-
-        vbox.getChildren().addAll(grid, buttonContainer); // Add the HBox to the VBox instead of individual buttons
-
-        Scene dialogScene = new Scene(vbox); // Removed fixed width and height
+        Scene dialogScene = new Scene(vbox);
         dialogStage.setTitle("Connection Details");
         dialogStage.setScene(dialogScene);
         dialogStage.initModality(Modality.APPLICATION_MODAL);
-        dialogStage.sizeToScene(); // Automatically resize the window to fit its content
+        dialogStage.sizeToScene();
         dialogStage.showAndWait();
+
     }
 
+    public void connectSavedConnections(ConnectionDetails connection) {
+        VBox vbox = new VBox(10);
+        vbox.setPadding(new Insets(10));
+        dialogStage = new Stage();
+
+        GridPane grid = new GridPane();
+        grid.setAlignment(Pos.CENTER);
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+
+        Label hostLabel = new Label("Host: " + connection.getHost());
+        Label portLabel = new Label("Port: " + connection.getPort());
+        Label nameLabel = new Label("Name: " + connection.getConnectionName());
+        Label usernameLabel = new Label("Username: " + connection.getUsername());
+        Label passwordLabel = new Label("Password: " + connection.getPassword());
+
+        Button cancelButton = new Button("Cancel");
+        Button addButton = new Button("Connect");
+
+        addButton.setOnAction(e -> newConnection(connection.getHost(), String.valueOf(connection.getPort()), connection.getConnectionName(), connection.getPassword(), connection.getUsername(), true));
+        cancelButton.setOnAction(e -> {
+            if (dialogStage!= null) {
+                dialogStage.close();
+            }
+        });
+
+        HBox buttonContainer = new HBox(10);
+        buttonContainer.setAlignment(Pos.CENTER);
+        buttonContainer.getChildren().addAll(cancelButton, addButton);
+
+        grid.add(hostLabel, 0, 2);
+        grid.add(portLabel, 0, 3);
+        grid.add(nameLabel, 0, 1);
+        grid.add(passwordLabel, 0, 5);
+        grid.add(usernameLabel, 0, 4);
+
+        vbox.getChildren().addAll(grid, buttonContainer);
+
+        Scene dialogScene = new Scene(vbox);
+        dialogStage.setTitle("Connection Details");
+        dialogStage.setScene(dialogScene);
+        dialogStage.initModality(Modality.APPLICATION_MODAL);
+        dialogStage.sizeToScene();
+        dialogStage.showAndWait();
+
+    }
+
+
     private void newConnection(String Host, String Port, String ConnectionName, String Password, String Username, Boolean connect) {
+        Platform.runLater(() ->{
         if (Objects.equals(Host, "monke")) {
             vidPlayer.start(primaryStage); // Start the VidPlayer when the host is "monke"
-            dialogStage.close();
+                if (dialogStage!= null) {
+                    dialogStage.close();
+                }
             return;
         }
 
@@ -270,7 +308,10 @@ public class GUI extends Application implements ViewCallback {
             displaySavedConnections();
         }
 
-        dialogStage.close();
+        if (dialogStage!= null) {
+            dialogStage.close();
+        }
+        });
     }
 
     public void changeToChat() {
@@ -380,7 +421,7 @@ public class GUI extends Application implements ViewCallback {
                 // Handle the selected chat here
                 changeToChat();
                 System.out.println("Selected Chat: " + selectedChat);
-                dialogStage.close();
+                    dialogStage.close();
             }
         });
 
@@ -434,48 +475,22 @@ public class GUI extends Application implements ViewCallback {
 
         // Use an HBox for arranging connection boxes in a horizontal row
         HBox connectionsContainer = new HBox(10); // Horizontal gap between boxes
-        connectionsContainer.setPadding(new Insets(10)); // Padding around the container
+        connectionsContainer.setPadding(new Insets(10, 10, 50, 10)); // Adjusted bottom padding to 50
 
         // Bind the HBox's width to the ScrollPane's width
         connectionsContainer.prefWidthProperty().bind(scrollPane.widthProperty());
 
+        // Clear the previous content of the ScrollPane
+        scrollPane.setContent(null);
+
         double totalHeight = 0; // Variable to hold the total height of all connection boxes
 
         for (ConnectionDetails connection : connections) {
-            VBox connectionBox = new VBox(5); // Individual connection box
-            System.out.println("new connection: " + connection);
-
-            // Set a fixed size for each connection box
-            connectionBox.autosize(); // Preferred width and height
-
-            // Prevent the VBox from being altered by setting min, max, and pref sizes to the same value
-            connectionBox.setMinWidth(250);
-            connectionBox.setPrefWidth(250);
-            connectionBox.setMaxWidth(250);
-
-            connectionBox.setPadding(new Insets(10)); // Padding inside each box
-            connectionBox.setStyle("-fx-border-color: black;"); // Optional: adds a border around each box
+            VBox connectionBox = createConnectionBox(connection); // Assuming createConnectionBox is defined elsewhere
 
             // Calculate the height of the current connection box
             double boxHeight = connectionBox.getPrefHeight();
-            totalHeight += boxHeight; // Add the height to the total height
-
-            // Create labels for each piece of connection information
-            Label hostLabel = new Label("Host: " + connection.getHost());
-            Label portLabel = new Label("Port: " + connection.getPort());
-            Label nameLabel = new Label("Name: " + connection.getConnectionName());
-            Label usernameLabel = new Label("Username: " + connection.getUsername());
-            Label passwordLabel = new Label("Password: " + connection.getPassword());
-
-            // Add text alignment for better visual appearance
-            hostLabel.setTextAlignment(TextAlignment.LEFT);
-            portLabel.setTextAlignment(TextAlignment.LEFT);
-            nameLabel.setTextAlignment(TextAlignment.LEFT);
-            usernameLabel.setTextAlignment(TextAlignment.LEFT);
-            passwordLabel.setTextAlignment(TextAlignment.LEFT);
-
-            // Add labels to the connection box
-            connectionBox.getChildren().addAll(nameLabel ,hostLabel, portLabel, usernameLabel, passwordLabel);
+            totalHeight += boxHeight;
 
             // Add the connection box to the HBox
             connectionsContainer.getChildren().add(connectionBox);
@@ -483,14 +498,111 @@ public class GUI extends Application implements ViewCallback {
 
         // Update the scroll pane content
         scrollPane.setContent(connectionsContainer);
-        System.out.println("scrollpane got the connectionsContainer");
 
-        // Dynamically set the minHeight of the ScrollPane to fit the content using a final variable
+        // Dynamically set the minHeight of the ScrollPane to fit the content using a binding
         double finalTotalHeight = totalHeight;
         scrollPane.minHeightProperty().bind(Bindings.createDoubleBinding(() -> finalTotalHeight, connectionsContainer.heightProperty()));
 
         scrollPane.requestLayout();
         System.out.println("requestlayout");
+    }
+
+    private VBox createConnectionBox(ConnectionDetails connection) {
+        VBox connectionBox = new VBox(5); // Individual connection box
+        System.out.println("new connection: " + connection);
+
+        // Set a fixed size for each connection box
+        connectionBox.autosize(); // Preferred width and height
+
+        // Prevent the VBox from being altered by setting min, max, and pref sizes to the same value
+        connectionBox.setMinWidth(300);
+        connectionBox.setPrefWidth(300);
+        connectionBox.setMaxWidth(300);
+
+        // Increase the padding to add more space at the top and bottom
+        connectionBox.setPadding(new Insets(10, 10, 10, 10)); // Top, Right, Bottom, Left
+
+        connectionBox.setStyle("-fx-border-color: black;"); // Optional: adds a border around each box
+
+        // Create labels for each piece of connection information
+        Label hostLabel = new Label("Host: " + connection.getHost());
+        Label portLabel = new Label("Port: " + connection.getPort());
+        Label nameLabel = new Label("Name: " + connection.getConnectionName());
+        Label usernameLabel = new Label("Username: " + connection.getUsername());
+        Label passwordLabel = new Label("Password: " + "*".repeat(connection.getPassword().length()));
+
+        // Add text alignment for better visual appearance
+        hostLabel.setTextAlignment(TextAlignment.LEFT);
+        portLabel.setTextAlignment(TextAlignment.LEFT);
+        nameLabel.setTextAlignment(TextAlignment.LEFT);
+        usernameLabel.setTextAlignment(TextAlignment.LEFT);
+        passwordLabel.setTextAlignment(TextAlignment.LEFT);
+
+        // Add labels to the connection box
+        connectionBox.getChildren().addAll(nameLabel, hostLabel, portLabel, usernameLabel, passwordLabel);
+
+        // Add mouse click event listener to the connection box
+        connectionBox.setOnMouseClicked(event -> savedConnectionWindow(connection));
+
+        return connectionBox;
+    }
+
+    private void savedConnectionWindow(ConnectionDetails connection) {
+        // Create a new stage for the saved connection options window
+        Stage dialogStage = new Stage();
+        dialogStage.setTitle("Saved Connection Options");
+
+        VBox vbox = new VBox(10);
+        vbox.setPadding(new Insets(10));
+
+        // Replicate the structure and styling of the connection box
+        VBox connectionInfoBox = new VBox(5);
+        connectionInfoBox.setMinWidth(250);
+        connectionInfoBox.setPrefWidth(250);
+        connectionInfoBox.setMaxWidth(250);
+        connectionInfoBox.setPadding(new Insets(10));
+        connectionInfoBox.setStyle("-fx-border-color: black;");
+
+        Label hostLabel = new Label("Host: " + connection.getHost());
+        Label portLabel = new Label("Port: " + connection.getPort());
+        Label nameLabel = new Label("Name: " + connection.getConnectionName());
+        Label usernameLabel = new Label("Username: " + connection.getUsername());
+        Label passwordLabel = new Label("Password: " + "*".repeat(connection.getPassword().length()));
+
+        hostLabel.setTextAlignment(TextAlignment.LEFT);
+        portLabel.setTextAlignment(TextAlignment.LEFT);
+        nameLabel.setTextAlignment(TextAlignment.LEFT);
+        usernameLabel.setTextAlignment(TextAlignment.LEFT);
+        passwordLabel.setTextAlignment(TextAlignment.LEFT);
+
+        connectionInfoBox.getChildren().addAll(nameLabel, hostLabel, portLabel, usernameLabel, passwordLabel);
+
+        Button deleteButton = new Button("DeleFte");
+        Button useButton = new Button("Use");
+        deleteButton.setOnAction(e -> {
+            // Remove the connection from the client configuration
+            client.configuration().removeConnection(connection);
+            // Refresh the display of saved connections
+            displaySavedConnections();
+            dialogStage.close(); // Close the dialog stage after deleting the connection
+            handleInfo("Saved Connection got deleted!");
+        });
+
+        useButton.setOnAction(e -> {
+            connectSavedConnections(connection);
+            dialogStage.close(); // Close the dialog stage after using the connection
+        });
+
+        HBox buttonContainer = new HBox(deleteButton, useButton);
+        buttonContainer.setSpacing(10); // Adjust spacing as needed
+
+        vbox.getChildren().addAll(connectionInfoBox, buttonContainer);
+
+        Scene dialogScene = new Scene(vbox);
+        dialogStage.setScene(dialogScene);
+        dialogStage.initModality(Modality.APPLICATION_MODAL);
+        dialogStage.initOwner(primaryStage);
+        dialogStage.showAndWait();
     }
 
     @Override
