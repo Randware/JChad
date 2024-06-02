@@ -49,6 +49,7 @@ public class GUI extends Application implements ViewCallback {
     private TextArea chatArea = new TextArea();
     private ConnectionDetailsBuilder connectionDetailsBuilder;
     private String selectedChat;
+    private Menu connectionsMenu = new Menu("Connections");
     private VidPlayer vidPlayer = new VidPlayer();
     private final KeyCombination crtlMinus = new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN);
     private final KeyCombination crtlPlus = new KeyCodeCombination(KeyCode.PLUS, KeyCombination.CONTROL_DOWN);
@@ -76,12 +77,11 @@ public class GUI extends Application implements ViewCallback {
 
         combinedLabel = new Label(headerLabel.getText() + "\n" + contentLabel.getText());
 
-        Menu connectionsMenu = new Menu("Connections");
 
         MenuItem connect = new MenuItem("add connection");
         MenuItem disconnect = new MenuItem("remove connection");
 
-        connectionsMenu.getItems().addAll(connect, disconnect);
+        this.connectionsMenu.getItems().addAll(connect, disconnect);
 
         Menu settingsMenu = new Menu("Settings");
 
@@ -102,8 +102,6 @@ public class GUI extends Application implements ViewCallback {
         double windowHeight = screenHeight * 0.5;
 
         this.sizeValue = baseFontSize;
-
-        borderPane = new BorderPane();
 
         borderPane.setTop(menuBar);
         borderPane.setBottom(scrollPane);
@@ -216,67 +214,19 @@ public class GUI extends Application implements ViewCallback {
     }
 
     public void connectSavedConnections(ConnectionDetails connection) {
-        VBox vbox = new VBox(10);
-        vbox.setPadding(new Insets(10));
-        dialogStage = new Stage();
-
-        GridPane grid = new GridPane();
-        grid.setAlignment(Pos.CENTER);
-        grid.setHgap(10);
-        grid.setVgap(10);
-        // Apply black border to the GridPane
-        grid.setStyle("-fx-border-color: black; -fx-border-width: 1px;");
-
-        Label hostLabel = new Label("Host: " + connection.getHost());
-        Label portLabel = new Label("Port: " + connection.getPort());
-        Label nameLabel = new Label("Name: " + connection.getConnectionName());
-        Label usernameLabel = new Label("Username: " + connection.getUsername());
-        Label passwordLabel = new Label("Password: " + "*".repeat(connection.getPassword().length()));
-
-        portLabel.addEventFilter(KeyEvent.KEY_TYPED, e -> {
-            char ar[] = e.getCharacter().toCharArray();
-            boolean b = ar[0] >= 48 && ar[0] <= 57; // ASCII values for digits 0-9
-            if (!b) {
-                e.consume(); // Ignore event, don't type anything
-            }
-        });
-
-        Button cancelButton = new Button("Cancel");
-        Button addButton = new Button("Connect");
-
-        addButton.setOnAction(e -> newConnection(connection.getHost(), String.valueOf(connection.getPort()), connection.getConnectionName(), connection.getPassword(), connection.getUsername(), true));
-        cancelButton.setOnAction(e -> {
-            if (dialogStage!= null) {
-                dialogStage.close();
-            }
-        });
-
-        HBox buttonContainer = new HBox(10);
-        buttonContainer.setAlignment(Pos.CENTER);
-        buttonContainer.getChildren().addAll(cancelButton, addButton);
-
-        grid.add(hostLabel, 0, 2);
-        grid.add(portLabel, 0, 3);
-        grid.add(nameLabel, 0, 1);
-        grid.add(passwordLabel, 0, 5);
-        grid.add(usernameLabel, 0, 4);
-
-        vbox.getChildren().addAll(grid, buttonContainer);
-
-        Scene dialogScene = new Scene(vbox);
-        dialogStage.setTitle("Connection Details");
-        dialogStage.setScene(dialogScene);
-        dialogStage.initModality(Modality.APPLICATION_MODAL);
-        dialogStage.sizeToScene();
-        dialogStage.showAndWait();
+        newConnection(connection.getHost(), String.valueOf(connection.getPort()), connection.getConnectionName(), connection.getPassword(), connection.getUsername(), true);
     }
 
 
     private void newConnection(String Host, String Port, String ConnectionName, String Password, String Username, Boolean connect) {
         Platform.runLater(() ->{
         if (Objects.equals(Host, "monke")) {
-            vidPlayer.start(primaryStage); // Start the VidPlayer when the host is "monke"
-                if (dialogStage!= null) {
+            try {
+                vidPlayer.start(primaryStage); // Start the VidPlayer when the host is "monke"
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            if (dialogStage!= null) {
                     dialogStage.close();
                 }
             return;
@@ -406,7 +356,18 @@ public class GUI extends Application implements ViewCallback {
     }
 
 
-    private void disconnect(){}
+    private void disconnect() {
+        /*Platform.runLater(() ->{
+        client.disconnect();
+
+        scene = new Scene(borderPane, scene.getWidth(), scene.getHeight());
+        primaryStage.setTitle("JChad Client");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+        standardFontSizeMethod();
+        displaySavedConnections();
+    });*/
+    }
 
     private void showChatSelectionWindow() {
         // Create a new stage for the chat selection window
@@ -594,7 +555,7 @@ public class GUI extends Application implements ViewCallback {
 
         connectionInfoBox.getChildren().addAll(nameLabel, hostLabel, portLabel, usernameLabel, passwordLabel);
 
-        Button deleteButton = new Button("DeleFte");
+        Button deleteButton = new Button("Delete");
         Button useButton = new Button("Use");
         deleteButton.setOnAction(e -> {
             // Remove the connection from the client configuration
