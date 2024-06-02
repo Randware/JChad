@@ -16,6 +16,7 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
@@ -57,6 +58,10 @@ public class GUI extends Application implements ViewCallback {
     double screenHeight = screenBounds.getHeight();
     TextArea chatDisplayArea = new TextArea();
     TextField messageInputField = new TextField();
+    HBox chatline = new HBox();
+    VBox theGuyIamChattingWith = new VBox();
+    VBox me = new VBox();
+    ScrollPane chatScrollPane;
 
     public static void main(String[] args) {
         Application.launch(args);
@@ -278,7 +283,11 @@ public class GUI extends Application implements ViewCallback {
         sendButton.setPadding(new Insets(10));
         // Create a new layout for the chat view
         BorderPane chatLayout = new BorderPane();
-
+        theGuyIamChattingWith.setPadding(new Insets(5));
+        theGuyIamChattingWith.setSpacing(50);
+        me.setPadding(new Insets(10));
+        me.setSpacing(90);
+        chatline.getChildren().addAll(theGuyIamChattingWith, me);
         // Reuse the existing menu bar
         chatLayout.setTop(menuBar);
 
@@ -287,10 +296,10 @@ public class GUI extends Application implements ViewCallback {
         chatDisplayArea.setWrapText(true); // Ensure text wraps within the TextArea
 
         // Create a ScrollPane to hold the chat display area
-        ScrollPane chatScrollPane = new ScrollPane(chatDisplayArea);
+        chatScrollPane = new ScrollPane(chatline);
         chatScrollPane.setFitToWidth(true);
         chatScrollPane.setFitToHeight(true);
-        chatScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        chatScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
 
         // Create a TextField for typing messages
         HBox bottom = new HBox();
@@ -539,12 +548,24 @@ public class GUI extends Application implements ViewCallback {
 
     @Override
     public void displayOwnMessage(ClientChatMessage message) {
-        chatDisplayArea.appendText(message.getUsername() + " " + message.getPrettyTimestamp() + "\n" + message.getContent()+ "\n" + "\n");
+        Platform.runLater(() -> {
+            Bubble bubble = new Bubble(message.getUsername() + " " + "\n" + "\n" + message.getContent() + "\n", String.valueOf(message.getPrettyTimestamp()));
+            theGuyIamChattingWith.getChildren().addAll(bubble);
+            // Automatisches Scrollen nach unten
+            chatScrollPane.setVvalue(1.0);
+        });
     }
-
     @Override
     public void displayOtherMessage(ClientChatMessage message) {
-        chatDisplayArea.appendText(message.getUsername() + " " + message.getPrettyTimestamp() + "\n" + message.getContent()+ "\n" + "\n");
+        Platform.runLater(() -> {
+            Bubble bubble2 = new Bubble(message.getUsername() + " " + "\n" + "\n" + message.getContent() + "\n", String.valueOf(message.getPrettyTimestamp()));
+            theGuyIamChattingWith.getChildren().addAll(bubble2);
+            // Überprüfen, ob der Benutzer bereits am unteren Ende des Chats ist
+            if (chatScrollPane.getVvalue() == 1.0) {
+                // Wenn ja, automatisches Scrollen nach unten
+                chatScrollPane.setVvalue(1.0);
+            }
+        });
     }
 
     @Override
