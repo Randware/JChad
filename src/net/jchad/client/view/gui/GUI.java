@@ -197,12 +197,12 @@ public class GUI extends Application implements ViewCallback {
         buttonContainer.setAlignment(Pos.CENTER);
         buttonContainer.getChildren().addAll(cancelButton, addButton, saveButton);
 
-        grid.add(hostLabel, 0, 1);
-        grid.add(hostField, 1, 1);
-        grid.add(portLabel, 0, 2);
-        grid.add(portField, 1, 2);
-        grid.add(nameLabel, 0, 3);
-        grid.add(nameField, 1, 3);
+        grid.add(nameLabel, 0, 1);
+        grid.add(nameField, 1, 1);
+        grid.add(hostLabel, 0, 2);
+        grid.add(hostField, 1, 2);
+        grid.add(portLabel, 0, 3);
+        grid.add(portField, 1, 3);
         grid.add(passwordLabel, 0, 4);
         grid.add(passwordField, 1, 4);
         grid.add(usernameLabel, 0, 5);
@@ -475,7 +475,7 @@ public class GUI extends Application implements ViewCallback {
             passwordLabel.setTextAlignment(TextAlignment.LEFT);
 
             // Add labels to the connection box
-            connectionBox.getChildren().addAll(hostLabel, portLabel, nameLabel, usernameLabel, passwordLabel);
+            connectionBox.getChildren().addAll(nameLabel ,hostLabel, portLabel, usernameLabel, passwordLabel);
 
             // Add the connection box to the HBox
             connectionsContainer.getChildren().add(connectionBox);
