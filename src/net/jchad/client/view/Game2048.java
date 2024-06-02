@@ -11,6 +11,11 @@ import javafx.stage.Stage;
 
 
 public class Game2048 extends Application {
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("2048 by JChad");
