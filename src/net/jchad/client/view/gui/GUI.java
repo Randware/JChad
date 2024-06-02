@@ -203,10 +203,10 @@ public class GUI extends Application implements ViewCallback {
         grid.add(hostField, 1, 2);
         grid.add(portLabel, 0, 3);
         grid.add(portField, 1, 3);
-        grid.add(passwordLabel, 0, 4);
-        grid.add(passwordField, 1, 4);
-        grid.add(usernameLabel, 0, 5);
-        grid.add(usernameField, 1, 5);
+        grid.add(usernameLabel, 0, 4);
+        grid.add(usernameField, 1, 4);
+        grid.add(passwordLabel, 0, 5);
+        grid.add(passwordField, 1, 5);
 
         /*vbox.getChildren().addAll(grid, buttonContainer);
 
