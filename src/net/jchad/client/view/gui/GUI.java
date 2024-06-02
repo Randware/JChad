@@ -219,13 +219,22 @@ public class GUI extends Application implements ViewCallback {
         grid.setAlignment(Pos.CENTER);
         grid.setHgap(10);
         grid.setVgap(10);
-
+        // Apply black border to the GridPane
+        grid.setStyle("-fx-border-color: black; -fx-border-width: 1px;");
 
         Label hostLabel = new Label("Host: " + connection.getHost());
         Label portLabel = new Label("Port: " + connection.getPort());
         Label nameLabel = new Label("Name: " + connection.getConnectionName());
         Label usernameLabel = new Label("Username: " + connection.getUsername());
-        Label passwordLabel = new Label("Password: " + connection.getPassword());
+        Label passwordLabel = new Label("Password: " + "*".repeat(connection.getPassword().length()));
+
+        portLabel.addEventFilter(KeyEvent.KEY_TYPED, e -> {
+            char ar[] = e.getCharacter().toCharArray();
+            boolean b = ar[0] >= 48 && ar[0] <= 57; // ASCII values for digits 0-9
+            if (!b) {
+                e.consume(); // Ignore event, don't type anything
+            }
+        });
 
         Button cancelButton = new Button("Cancel");
         Button addButton = new Button("Connect");
@@ -255,7 +264,6 @@ public class GUI extends Application implements ViewCallback {
         dialogStage.initModality(Modality.APPLICATION_MODAL);
         dialogStage.sizeToScene();
         dialogStage.showAndWait();
-
     }
 
 
