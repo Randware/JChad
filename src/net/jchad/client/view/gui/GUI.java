@@ -646,17 +646,17 @@ public class GUI extends Application implements ViewCallback {
     @Override
     public void displayOwnMessage(ClientChatMessage message) {
         Platform.runLater(() -> {
-            Bubble bubble = new Bubble(message.getUsername() + " " + "\n" + "\n" + message.getContent() + "\n", String.valueOf(message.getPrettyTimestamp()));
+            Bubble bubble = new Bubble(message.getUsername() + " " + "\n" + "\n" + message.getContent() + "\n", String.valueOf(message.getPrettyTimestamp()), chatScrollPane.getWidth());
             bubble.setBubbleColor(Color.GREEN);
             theGuyIamChattingWith.getChildren().addAll(bubble);
-            // Automatisches Scrollen nach unten
+            // Automatischesdie connection closed  Scrollen nach unten
             chatScrollPane.setVvalue(1.0);
         });
     }
     @Override
     public void displayOtherMessage(ClientChatMessage message) {
         Platform.runLater(() -> {
-            Bubble bubble2 = new Bubble(message.getUsername() + " " + "\n" + "\n" + message.getContent() + "\n", String.valueOf(message.getPrettyTimestamp()));
+            Bubble bubble2 = new Bubble(message.getUsername() + " " + "\n" + "\n" + message.getContent() + "\n", String.valueOf(message.getPrettyTimestamp()), chatScrollPane.getWidth());
             theGuyIamChattingWith.getChildren().addAll(bubble2);
             // Überprüfen, ob der Benutzer bereits am unteren Ende des Chats ist
             if (chatScrollPane.getVvalue() == 1.0) {
