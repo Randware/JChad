@@ -17,6 +17,7 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
@@ -196,16 +197,16 @@ public class GUI extends Application implements ViewCallback {
         buttonContainer.setAlignment(Pos.CENTER);
         buttonContainer.getChildren().addAll(cancelButton, addButton, saveButton);
 
+        grid.add(nameLabel, 0, 1);
+        grid.add(nameField, 1, 1);
         grid.add(hostLabel, 0, 2);
         grid.add(hostField, 1, 2);
         grid.add(portLabel, 0, 3);
         grid.add(portField, 1, 3);
-        grid.add(nameLabel, 0, 1);
-        grid.add(nameField, 1, 1);
-        grid.add(passwordLabel, 0, 5);
-        grid.add(passwordField, 1, 5);
         grid.add(usernameLabel, 0, 4);
         grid.add(usernameField, 1, 4);
+        grid.add(passwordLabel, 0, 5);
+        grid.add(passwordField, 1, 5);
 
         vbox.getChildren().addAll(grid, buttonContainer);
 
@@ -598,7 +599,7 @@ public class GUI extends Application implements ViewCallback {
             dialogStage.close(); // Close the dialog stage after using the connection
         });
 
-        HBox buttonContainer = new HBox(deleteButton, useButton);
+        HBox buttonContainer = new HBox(useButton, deleteButton);
         buttonContainer.setSpacing(10); // Adjust spacing as needed
 
         vbox.getChildren().addAll(connectionInfoBox, buttonContainer);
@@ -659,16 +660,17 @@ public class GUI extends Application implements ViewCallback {
     @Override
     public void displayOwnMessage(ClientChatMessage message) {
         Platform.runLater(() -> {
-            Bubble bubble = new Bubble(message.getUsername() + " " + "\n" + "\n" + message.getContent() + "\n", String.valueOf(message.getPrettyTimestamp()));
+            Bubble bubble = new Bubble(message.getUsername() + " " + "\n" + "\n" + message.getContent() + "\n", String.valueOf(message.getPrettyTimestamp()), chatScrollPane.getWidth());
+            bubble.setBubbleColor(Color.GREEN);
             theGuyIamChattingWith.getChildren().addAll(bubble);
-            // Automatisches Scrollen nach unten
+            // Automatischesdie connection closed  Scrollen nach unten
             chatScrollPane.setVvalue(1.0);
         });
     }
     @Override
     public void displayOtherMessage(ClientChatMessage message) {
         Platform.runLater(() -> {
-            Bubble bubble2 = new Bubble(message.getUsername() + " " + "\n" + "\n" + message.getContent() + "\n", String.valueOf(message.getPrettyTimestamp()));
+            Bubble bubble2 = new Bubble(message.getUsername() + " " + "\n" + "\n" + message.getContent() + "\n", String.valueOf(message.getPrettyTimestamp()), chatScrollPane.getWidth());
             theGuyIamChattingWith.getChildren().addAll(bubble2);
             // Überprüfen, ob der Benutzer bereits am unteren Ende des Chats ist
             if (chatScrollPane.getVvalue() == 1.0) {
