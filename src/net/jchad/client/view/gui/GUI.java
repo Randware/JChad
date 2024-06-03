@@ -43,6 +43,7 @@ public class GUI extends Application implements ViewCallback {
     private Label contentLabel = new Label();
     private Label combinedLabel = new Label();
     private Stage primaryStage; // Store the primary stage to access it later
+    private Stage chatStage = new Stage();
     private Scene scene;
     private Stage dialogStage;
     private double sizeValue;
@@ -64,6 +65,9 @@ public class GUI extends Application implements ViewCallback {
     VBox theGuyIamChattingWith = new VBox();
     VBox me = new VBox();
     ScrollPane chatScrollPane;
+    private Scene primaryScene;
+    private Scene chatScene;
+    private BorderPane chatLayout;
 
     public static void main(String[] args) {
         Application.launch(args);
@@ -132,7 +136,7 @@ public class GUI extends Application implements ViewCallback {
             }
         });
 
-        this.scene = new Scene(borderPane, windowWidth, windowHeight);
+        primaryScene = new Scene(borderPane, windowWidth, windowHeight);
 
         double screenWidth = Screen.getPrimary().getBounds().getWidth();
         double screenHeight = Screen.getPrimary().getBounds().getHeight();
@@ -140,7 +144,7 @@ public class GUI extends Application implements ViewCallback {
         primaryStage.setHeight(screenHeight / 1.5);
 
         primaryStage.setTitle("JChad Client");
-        primaryStage.setScene(scene);
+        primaryStage.setScene(primaryScene);
         primaryStage.show();
         standardFontSizeMethod();
         displaySavedConnections();
@@ -296,7 +300,7 @@ public class GUI extends Application implements ViewCallback {
         Button sendButton = new Button("Send");
         sendButton.setPadding(new Insets(10));
         // Create a new layout for the chat view
-        BorderPane chatLayout = new BorderPane();
+        chatLayout = new BorderPane();
         theGuyIamChattingWith.setPadding(new Insets(5));
         theGuyIamChattingWith.setSpacing(50);
         me.setPadding(new Insets(10));
@@ -332,10 +336,12 @@ public class GUI extends Application implements ViewCallback {
         chatLayout.setBottom(bottom);
 
         // Create a new scene with the chat layout
-        Scene chatScene = new Scene(chatLayout, scene.getWidth(), scene.getHeight());
+        chatScene = new Scene(chatLayout, primaryScene.getWidth(), primaryScene.getHeight());
 
         // Apply the scene to the primary stage
-        primaryStage.setScene(chatScene);
+        chatStage.setScene(chatScene);
+        primaryStage.hide();
+        chatStage.show();
 
         messageInputField.setOnAction(event -> {
             String message = messageInputField.getText();
@@ -372,16 +378,22 @@ public class GUI extends Application implements ViewCallback {
 
 
     private void disconnect() {
-        /*Platform.runLater(() ->{
-        client.disconnect();
+        Platform.runLater(() -> {
+            client.disconnect();
 
-        scene = new Scene(borderPane, scene.getWidth(), scene.getHeight());
-        primaryStage.setTitle("JChad Client");
-        primaryStage.setScene(scene);
-        primaryStage.show();
-        standardFontSizeMethod();
-        displaySavedConnections();
-    });*/
+            // Erstellen einer neuen Instanz von GUI und Aufrufen der start Methode
+            GUI guiInstance = new GUI();
+            try {
+                guiInstance.start(primaryStage);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            chatStage.hide();
+            Platform.runLater(() -> primaryStage.show());
+            standardFontSizeMethod();
+            displaySavedConnections();
+        });
     }
 
     private void showChatSelectionWindow() {
@@ -601,6 +613,8 @@ public class GUI extends Application implements ViewCallback {
     @Override
     public void handleFatalError(Exception e) {
         new ClientAlerts(Alert.AlertType.ERROR, "Fatal Error", e.toString());
+        e.printStackTrace();
+        // TODO printstackTrace löschen nach fixen
     }
 
     @Override
