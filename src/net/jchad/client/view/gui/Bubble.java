@@ -240,6 +240,7 @@ public class Bubble extends Group {
         this.s = textSidespace;
     }
 
+
     /**
      * get the padding of the meta text
      *
@@ -364,6 +365,7 @@ public class Bubble extends Group {
      */
     public void setBubbleColor(Paint bubbleColor) {
         this.bubbleColor = bubbleColor;
+        r.setFill(bubbleColor);
     }
 
 }
