@@ -338,6 +338,7 @@ public class GUI extends Application implements ViewCallback {
         chatScrollPane.setFitToHeight(true);
         chatScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
 
+
         // Create a TextField for typing messages
         HBox bottom = new HBox();
         bottom.getChildren().addAll(messageInputField, sendButton);
@@ -346,6 +347,10 @@ public class GUI extends Application implements ViewCallback {
         messageInputField.setPadding(new Insets(10));
         ClientChat chat = client.getChat(selectedChat);
         client.setCurrentChat(chat);
+
+        theGuyIamChattingWith.heightProperty().addListener((obs, oldVal, newVal) -> {
+            chatScrollPane.setVvalue(1.0); // Scroll to the bottom whenever content height changes
+        });
 
         // Add the ScrollPane to the center of the BorderPane
         chatLayout.setCenter(chatScrollPane);
@@ -717,6 +722,7 @@ public class GUI extends Application implements ViewCallback {
     }
     @Override
     public void displayOtherMessage(ClientChatMessage message) {
+        chatScrollPane.setVvalue(1.0);
         Platform.runLater(() -> {
             Bubble bubble2 = new Bubble(message.getUsername() + " " + "\n" + "\n" + message.getContent() + "\n", String.valueOf(message.getPrettyTimestamp()), chatScrollPane.getWidth() / 3.5);
             theGuyIamChattingWith.getChildren().addAll(bubble2);
