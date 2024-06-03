@@ -347,7 +347,6 @@ public class CLI implements ViewCallback {
                         message.getChat(),
                         message.getContent(),
                         message.getPrettyTimestamp()
-                                .format(DateTimeFormatter.ofPattern("dd.M. - HH:mm"))
                 )).reset().toString()
         );
         emptyLine();
@@ -360,7 +359,6 @@ public class CLI implements ViewCallback {
                         message.getChat(),
                         message.getContent(),
                         message.getPrettyTimestamp()
-                                .format(DateTimeFormatter.ofPattern("dd.M. - HH:mm"))
                 )
         );
         emptyLine();

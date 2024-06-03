@@ -1,9 +1,7 @@
 package net.jchad.client.model.store.chat;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 
 // TODO: Figure out how to differentiate the chat messages that are received by the server and which are sent by the client
 //          (See Client class sendMessageString() method)
@@ -66,7 +64,16 @@ public class ClientChatMessage {
         return timestamp;
     }
 
-    public LocalDateTime getPrettyTimestamp() {
-        return Instant.ofEpochMilli(timestamp).atZone(ZoneId.systemDefault()).toLocalDateTime();
+    public String getPrettyTimestamp() {
+        // Convert Unix timestamp to Instant
+        Instant instant = Instant.ofEpochMilli(timestamp);
+
+        // Convert Instant to ZonedDateTime with a specific time zone (e.g., UTC)
+        ZonedDateTime zonedDateTime = instant.atZone(ZoneId.systemDefault());
+
+        // Format ZonedDateTime as a human-readable string
+        return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(zonedDateTime);
+
+
     }
 }
