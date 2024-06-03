@@ -64,6 +64,8 @@ public class ServerConnection implements Runnable {
      */
     private ConnectionReader connectionReader;
 
+    private boolean connected;
+
     public ServerConnection(Client client, ConnectionDetails connectionDetails, ConnectionWriter connectionWriter,
                             ConnectionReader connectionReader, ServerInformation serverInformation, Socket socket,AESencryptionKeysPacket keys ) {
         this.client = client;
@@ -74,6 +76,8 @@ public class ServerConnection implements Runnable {
         this.serverInformation = serverInformation;
         this.socket = socket;
         this.keys = keys;
+
+        connected = true;
     }
 
     /**
@@ -85,11 +89,15 @@ public class ServerConnection implements Runnable {
     public void run() {
         try {
             while (true) {
-                Packet readPacket = null;
+                Packet readPacket;
                 try {
                     readPacket = readPacket();
                 } catch (IOException e) {
-                    throw new ClosedConnectionException("An IOException occurred while reading the server data", e);
+                    if(connected) {
+                        throw new ClosedConnectionException("An IOException occurred while reading the server data", e);
+                    } else {
+                        return;
+                    }
                 } catch (InvalidPacketException e) {
                     throw new ClosedConnectionException("The server sent an invalid packet", e);
                 }
@@ -202,6 +210,8 @@ public class ServerConnection implements Runnable {
     public void closeConnection() {
         // Do everything that must be done in order to properly close the current connection
         try {
+            connected = false;
+
             connectionWriter.close();
             connectionReader.close();
             socket.close();
