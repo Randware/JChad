@@ -1,5 +1,7 @@
 package net.jchad.client.view.gui;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -27,6 +29,7 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import net.jchad.client.controller.ClientController;
 import net.jchad.client.model.client.ViewCallback;
 import net.jchad.client.model.store.chat.ClientChat;
@@ -89,7 +92,8 @@ public class GUI extends Application implements ViewCallback {
         dropShadow.setOffsetY(0.0);
         dropShadow.setColor(Color.color(0, 0, 0, 0.5)); // semi-transparent black
 
-        headerLabel.setText("Welcome to JChad!");
+
+        animateText(headerLabel);
 
         MenuItem connect = new MenuItem("New connection");
         MenuItem disconnect = new MenuItem("Disconnect");
@@ -156,6 +160,98 @@ public class GUI extends Application implements ViewCallback {
         primaryStage.show();
         standardFontSizeMethod();
         displaySavedConnections();
+    }
+
+
+    public static void animateText(Label label) {
+        // Set the font to bold
+        label.setFont(Font.font("System", FontWeight.BOLD, 24));
+
+        // Define the base text
+        String baseText = "Welcome to ";
+
+        // Define the phrases to replace "JChad!" with
+        String[] phrases = {
+                "Freedom",
+                "your secure messenger",
+                "the ultimate Chat Platform",
+                "FOSS!",
+                "privacy by design",
+                "JChad <3"
+        };
+
+        // Add a caret to the end of the text
+        final String caret = "|";
+        final String blankSpace = " ";
+        label.setText(baseText + "JChad!" + caret);
+
+        // Create a Timeline for the animation
+        Timeline timeline = new Timeline();
+
+        // Variable to keep track of the current character index
+        final int[] charIndex = {0};
+
+        // Duration for each keyframe
+        Duration frameDuration = Duration.millis(150); // Adjusted for slower and smoother animation
+
+        // Create a random number generator
+        Random random = new Random();
+
+        // Function to add keyframes for the typing animation of a phrase
+        java.util.function.Consumer<String> addTypingAnimation = phrase -> {
+            // Add the new phrase one character at a time
+            for (int i = 0; i < phrase.length(); i++) {
+                final String newText = baseText + phrase.substring(0, i + 1);
+                timeline.getKeyFrames().add(new KeyFrame(frameDuration.multiply(charIndex[0]++), e -> {
+                    label.setText(newText + caret);
+                }));
+            }
+
+            // Random pause duration with slower blinking caret
+            int randomPause = 10 + random.nextInt(10);
+            for (int i = 0; i < randomPause; i++) {
+                final int pauseIndex = i;
+                timeline.getKeyFrames().add(new KeyFrame(frameDuration.multiply(charIndex[0]++), e -> {
+                    label.setText(baseText + phrase + ((pauseIndex % 4 < 2) ? caret : blankSpace));
+                }));
+            }
+
+            // Remove the phrase character by character
+            for (int i = phrase.length(); i >= 0; i--) {
+                final String remainingText = baseText + phrase.substring(0, i);
+                timeline.getKeyFrames().add(new KeyFrame(frameDuration.multiply(charIndex[0]++), e -> {
+                    label.setText(remainingText + caret);
+                }));
+            }
+        };
+
+        // Initial display of "JChad!"
+        for (int i = "JChad!".length(); i >= 0; i--) {
+            final int currentLength = "JChad!".length() - i;
+            timeline.getKeyFrames().add(new KeyFrame(frameDuration.multiply(charIndex[0]++), e -> {
+                String currentText = baseText + "JChad!".substring(0, currentLength);
+                label.setText(currentText + caret);
+            }));
+        }
+
+        // Random pause duration with slower blinking caret
+        int randomPause = 10 + random.nextInt(10);
+        for (int i = 0; i < randomPause; i++) {
+            final int pauseIndex = i;
+            timeline.getKeyFrames().add(new KeyFrame(frameDuration.multiply(charIndex[0]++), e -> {
+                label.setText(baseText + "JChad!" + ((pauseIndex % 4 < 2) ? caret : blankSpace));
+            }));
+        }
+
+        // Add animations for each phrase in random order
+        for (int i = 0; i < phrases.length; i++) {
+            String randomPhrase = phrases[random.nextInt(phrases.length)];
+            addTypingAnimation.accept(randomPhrase);
+        }
+
+        // Start the animation
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
     }
 
     // Modified connect() method to accept ConnectionDetails as a parameter
