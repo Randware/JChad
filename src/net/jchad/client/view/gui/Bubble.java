@@ -138,16 +138,14 @@
             }
 
 
-
-
-
             // label text
             Label l = new Label(text);
             l.setFont(textFont);
             l.setTextFill(textColor);
             if (maxWidth != null) {
                 l.setWrapText(true); // Enable text wrapping
-                l.setMaxWidth(maxWidth); // Set max width for wrapping
+                l.setPrefWidth(maxWidth); // Set max width for wrapping
+                l.setPrefHeight(h);
             }
             l.setTranslateX(x + p + s);
             l.setTranslateY(y + p);
@@ -174,6 +172,7 @@
             r.setFill(bubbleColor);
 
             getChildren().addAll(r, l, m);
+
         }
 
 
