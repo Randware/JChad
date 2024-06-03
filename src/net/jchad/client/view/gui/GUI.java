@@ -39,10 +39,10 @@ import net.jchad.client.model.store.connection.ConnectionDetailsBuilder;
 import net.jchad.client.view.Game2048;
 import net.jchad.client.view.videos.VidPlayer;
 
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Random;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 public class GUI extends Application implements ViewCallback {
@@ -181,7 +181,8 @@ public class GUI extends Application implements ViewCallback {
                 "JChad <3",
                 "the platform for chads",
                 "anonymity",
-                "choice",
+                "a fresh chat experience",
+                "the chat platform of your choice",
                 "everything you need, nothing you don't"
         };
 
@@ -842,7 +843,12 @@ public class GUI extends Application implements ViewCallback {
 
     @Override
     public void handleFatalError(Exception e) {
-        new ClientAlerts(Alert.AlertType.ERROR, "Fatal Error", e.toString());
+        if (e instanceof ExecutionException) {
+            new ClientAlerts(Alert.AlertType.ERROR, "Fatal Error", e.getCause().getMessage());
+        } else {
+            new ClientAlerts(Alert.AlertType.ERROR, "Fatal Error", e.toString());
+        }
+
         disconnect();
     }
 
@@ -861,34 +867,75 @@ public class GUI extends Application implements ViewCallback {
         new ClientAlerts(Alert.AlertType.INFORMATION, "Info", info);
     }
 
+
     /**
-     * Hier habe ich bereits das prompt implementiert, damit ihr euch vorstellen könnt wie man mit mehreren
-     * Klassen im GUI arbeiten kann. Das Ganze macht den Code unendlich lesbarer und auch einfacher wiederzuverwenden.
-     * Versucht das ganze GUI so ähnlich aufzubauen.
+     * <p><b><u><font color="red">THIS METHODE DOES NOT WORK!</font></u></b></p>
+     * <p>I am unable to fix this because of <b>JavaFX</b></p>
+     * <p><u>The problem</u>:</p>
+     * <ul>
+     *     <li>The {@link net.jchad.client.model.client.connection.ServerConnector ServerConnector}
+     *     access this methode from its own thread. This is huge problem because the application behaves
+     *     really strange since I have to use {@code Platform.runLater{() -> ()}}.
+     *     This messes up the entire order and this methode just returns an empty string. (I think)
+     *     </li>
+     *
+     *     <li>
+     *         {@code Platform.runLater{() -> ()}} this also somehow "destroys" the {@code stage.showAndWait()}
+     *         methode because it seems that it does not wait and immediately continues the code execution.
+     *     </li>
+     *
+     * </ul>
+     *
+     * <p>This <font color="red">issue</font> <u>needs further investigations</u> to exactly know the problem
+     *    and to find a solution</p>
+     *
+     * @param promptTitle the title of the displayed prompt.
+     * @param promptMessage the full message of the prompt displayed.
+     * @return The new value (set by the user)
      */
     @Override
     public String displayPrompt(String promptTitle, String promptMessage) {
-        InputPrompt inputPrompt = new InputPrompt(Alert.AlertType.CONFIRMATION, promptTitle, promptMessage);
 
-        inputPrompt.showAndWait();
+            //This code prevents exception. This has to be removed if you are trying to fix the code
+            boolean disableCode = true;
+            if (disableCode) {
+                return "";
+            }
 
-        String input = inputPrompt.getInput();
 
-        if(input != null && !input.isEmpty()) {
-            return input;
-        } else {
-            // disconnect the currently running connection or connection process,
-            // since the user didn't provide the required information.
-            client.disconnect();
+            StringBuilder string = new StringBuilder();
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            Platform.runLater(() -> {
 
-            return null;
-        }
+                InputPrompt inputPrompt = new InputPrompt(Alert.AlertType.CONFIRMATION, promptTitle, promptMessage);
+                // Show the input prompt and wait for user input
+               inputPrompt.showAndWait();
+                String input = inputPrompt.getInput();
+
+
+
+                if (input != null && !input.isEmpty()) {
+                    string.replace(0, string.length(), "");
+                    string.append(input);
+                } else {
+                    // disconnect the currently running connection or connection process,
+                    // since the user didn't provide the required information.
+                    client.disconnect();
+                    return;
+                }
+
+                // Countdown the latch to unblock the calling thread
+            });
+
+
+            return string.toString();
+
     }
 
     @Override
     public void displayOwnMessage(ClientChatMessage message) {
         Platform.runLater(() -> {
-            Bubble bubble = new Bubble(message.getUsername() + " " + "\n" + "\n" + message.getContent() + "\n", String.valueOf(message.getPrettyTimestamp()), chatScrollPane.getWidth() / 3.5);
+            Bubble bubble = new Bubble(message.getUsername() + " " + "\n" + "\n" + message.getContent() + "\n", message.getPrettyTimestamp(), chatScrollPane.getWidth() / 3.5);
             bubble.setBubbleColor(Color.GREEN);
             theGuyIamChattingWith.getChildren().addAll(bubble);
             // Automatischesdie connection closed  Scrollen nach unten
@@ -899,7 +946,7 @@ public class GUI extends Application implements ViewCallback {
     public void displayOtherMessage(ClientChatMessage message) {
         chatScrollPane.setVvalue(1.0);
         Platform.runLater(() -> {
-            Bubble bubble2 = new Bubble(message.getUsername() + " " + "\n" + "\n" + message.getContent() + "\n", String.valueOf(message.getPrettyTimestamp()), chatScrollPane.getWidth() / 3.5);
+            Bubble bubble2 = new Bubble(message.getUsername() + " " + "\n" + "\n" + message.getContent() + "\n", message.getPrettyTimestamp(), chatScrollPane.getWidth() / 3.5);
             theGuyIamChattingWith.getChildren().addAll(bubble2);
             // Überprüfen, ob der Benutzer bereits am unteren Ende des Chats ist
             if (chatScrollPane.getVvalue() == 1.0) {
