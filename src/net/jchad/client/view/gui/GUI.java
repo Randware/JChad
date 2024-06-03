@@ -8,6 +8,7 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -350,6 +351,19 @@ public class GUI extends Application implements ViewCallback {
         // Create a new scene with the chat layout
         chatScene = new Scene(chatLayout, primaryScene.getWidth(), primaryScene.getHeight());
 
+        chatStage.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (crtlPlus.match(event)) {
+                changeFontSize(2);
+                event.consume();
+            } else if (crtlMinus.match(event)) {
+                changeFontSize(-2);
+                event.consume();
+            } else if (crtlR.match(event)) {
+                standardFontSizeMethod();
+                event.consume();
+            }
+        });
+
         // Apply the scene to the primary stage
         chatStage.setScene(chatScene);
         primaryStage.hide();
@@ -409,6 +423,8 @@ public class GUI extends Application implements ViewCallback {
     }
 
     private void showChatSelectionWindow() {
+        String cssStyle = "-fx-font-size: " + sizeValue + ";";
+
         // Create a new stage for the chat selection window
         Stage dialogStage = new Stage();
         dialogStage.setTitle("Select Chat");
@@ -461,6 +477,16 @@ public class GUI extends Application implements ViewCallback {
         // Set the scene on the dialog stage
         dialogStage.setScene(dialogScene);
         dialogStage.showAndWait();
+
+        chatListView.setStyle(cssStyle);
+        selectButton.setStyle(cssStyle);
+        cancelButton.setStyle(cssStyle);
+        buttonContainer.setStyle(cssStyle);
+    }
+
+    private void standardFontSizeMethod() {
+        this.sizeValue = screenWidth * 0.01;
+        updateWindowFontSizeEverything();
     }
 
     private void changeFontSize(int size) {
@@ -470,20 +496,29 @@ public class GUI extends Application implements ViewCallback {
         } else if (sizeValue > 50) {
             this.sizeValue = 50;
         }
-        updateWindowFontSizeEverything(sizeValue);
+        updateWindowFontSizeEverything();
     }
 
-    private void standardFontSizeMethod() {
-        this.sizeValue = screenWidth * 0.01;
-        updateWindowFontSizeEverything(sizeValue);
-    }
+    public void updateWindowFontSizeEverything() {
+        // Define a CSS string with the new font size
+        String cssStyle = "-fx-font-size: " + sizeValue + ";";
 
-    public void updateWindowFontSizeEverything(double fontSize) {
-        menuBar.setStyle("-fx-font-size: " + fontSize);
-        headerLabel.setStyle("-fx-font-size: " + fontSize);
-        contentLabel.setStyle("-fx-font-size: " + fontSize);
-        combinedLabel.setStyle("-fx-font-size: " + fontSize);
-        scrollPane.setStyle("-fx-font-size: " + fontSize);
+        // Apply the font size to the main application components
+        menuBar.setStyle(cssStyle);
+        headerLabel.setStyle(cssStyle);
+        contentLabel.setStyle(cssStyle);
+        combinedLabel.setStyle(cssStyle);
+        scrollPane.setStyle(cssStyle);
+
+        // Apply the font size to the chat view components
+        chatDisplayArea.setStyle(cssStyle);
+        messageInputField.setStyle(cssStyle);
+
+        if (dialogStage!= null && dialogStage.isShowing()) {
+            for (Node node : dialogStage.getScene().getRoot().lookupAll(".text")) {
+                node.setStyle(cssStyle);
+            }
+        }
     }
 
     private void displaySavedConnections() {
