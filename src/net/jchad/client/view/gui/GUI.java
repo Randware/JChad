@@ -44,8 +44,6 @@ public class GUI extends Application implements ViewCallback {
     private MenuBar menuBar = new MenuBar();
     private ScrollPane scrollPane = new ScrollPane();
     private Label headerLabel = new Label();
-    private Label contentLabel = new Label();
-    private Label combinedLabel = new Label();
     private Stage primaryStage; // Store the primary stage to access it later
     private Stage chatStage = new Stage();
     private Scene scene;
@@ -88,14 +86,11 @@ public class GUI extends Application implements ViewCallback {
         dropShadow.setOffsetY(0.0);
         dropShadow.setColor(Color.color(0, 0, 0, 0.5)); // semi-transparent black
 
-        headerLabel.setText("Welcome Jchader!");
-        contentLabel.setText("This is the best Chad-Platform out there");
-
-        combinedLabel = new Label(headerLabel.getText() + "\n" + contentLabel.getText());
+        headerLabel.setText("Welcome to JChad!");
 
 
-        MenuItem connect = new MenuItem("add connection");
-        MenuItem disconnect = new MenuItem("disconnect");
+        MenuItem connect = new MenuItem("New connection");
+        MenuItem disconnect = new MenuItem("Disconnect");
 
         this.connectionsMenu.getItems().addAll(connect, disconnect);
 
@@ -103,9 +98,9 @@ public class GUI extends Application implements ViewCallback {
 
         Menu fontsSubMenu = new Menu("Fonts");
 
-        MenuItem increaseFontSize = new MenuItem("increase Font size (ctrl & +)");
-        MenuItem standardFontSize = new MenuItem("standard Font size (crtl & R)");
-        MenuItem decreaseFontSize = new MenuItem("decrease Font size (crtl & -)");
+        MenuItem increaseFontSize = new MenuItem("Increase Font size (ctrl & +)");
+        MenuItem standardFontSize = new MenuItem("Standard Font size (crtl & R)");
+        MenuItem decreaseFontSize = new MenuItem("Decrease Font size (crtl & -)");
 
         fontsSubMenu.getItems().addAll(increaseFontSize, standardFontSize, decreaseFontSize);
 
@@ -121,7 +116,7 @@ public class GUI extends Application implements ViewCallback {
 
         borderPane.setTop(menuBar);
         borderPane.setBottom(scrollPane);
-        borderPane.setCenter(combinedLabel);
+        borderPane.setCenter(headerLabel);
 
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
@@ -264,9 +259,7 @@ public class GUI extends Application implements ViewCallback {
                         dialogStage.close();
                     }
                     return;
-                } catch (Exception e) {
-                    System.out.println("error");
-                }
+                } catch (Exception e) {}
             }
 
         if (Host == null || Host.isEmpty()) {
@@ -297,13 +290,11 @@ public class GUI extends Application implements ViewCallback {
         connectionDetailsBuilder.addUsername(Username);
 
         if (connect){
-            System.out.println("connect true");
             client.connect(connectionDetailsBuilder.build());
             showChatSelectionWindow();
 
             handleInfo("Successfully connected to: " + selectedChat);
         }else {
-            System.out.println("connect false");
             client.configuration().addConnection(connectionDetailsBuilder.build());
             displaySavedConnections();
         }
@@ -355,7 +346,6 @@ public class GUI extends Application implements ViewCallback {
         messageInputField.setPadding(new Insets(10));
         ClientChat chat = client.getChat(selectedChat);
         client.setCurrentChat(chat);
-        System.out.println("connected to: " + selectedChat);
 
         // Add the ScrollPane to the center of the BorderPane
         chatLayout.setCenter(chatScrollPane);
@@ -412,9 +402,6 @@ public class GUI extends Application implements ViewCallback {
         });
 
         // Set an action for the message input field to send a message when Enter is pressed
-
-
-        System.out.println("Changed to chat view");
     }
 
 
@@ -472,8 +459,7 @@ public class GUI extends Application implements ViewCallback {
             if (selectedChat!= null) {
                 // Handle the selected chat here
                 changeToChat();
-                System.out.println("Selected Chat: " + selectedChat);
-                    dialogStage.close();
+                dialogStage.close();
             }
         });
 
@@ -525,8 +511,6 @@ public class GUI extends Application implements ViewCallback {
         // Apply the font size to the main application components
         menuBar.setStyle(cssStyle);
         headerLabel.setStyle(cssStyle);
-        contentLabel.setStyle(cssStyle);
-        combinedLabel.setStyle(cssStyle);
         scrollPane.setStyle(cssStyle);
 
         // Apply the font size to the chat view components
@@ -542,7 +526,6 @@ public class GUI extends Application implements ViewCallback {
 
     private void displaySavedConnections() {
         ArrayList<ConnectionDetails> connections = client.configuration().getConnections();
-        System.out.println("Number of connections (ArrayList<ConnectionDetails> connections): " + connections.size());
 
         // Use an HBox for arranging connection boxes in a horizontal row
         HBox connectionsContainer = new HBox(10); // Horizontal gap between boxes
@@ -575,12 +558,10 @@ public class GUI extends Application implements ViewCallback {
         scrollPane.minHeightProperty().bind(Bindings.createDoubleBinding(() -> finalTotalHeight, connectionsContainer.heightProperty()));
 
         scrollPane.requestLayout();
-        System.out.println("requestlayout");
     }
 
     private VBox createConnectionBox(ConnectionDetails connection) {
         VBox connectionBox = new VBox(5); // Individual connection box
-        System.out.println("new connection: " + connection);
 
         // Set a fixed size for each connection box
         connectionBox.autosize(); // Preferred width and height
@@ -683,8 +664,6 @@ public class GUI extends Application implements ViewCallback {
     @Override
     public void handleFatalError(Exception e) {
         new ClientAlerts(Alert.AlertType.ERROR, "Fatal Error", e.toString());
-        e.printStackTrace();
-        // TODO printstackTrace löschen nach fixen
     }
 
     @Override
