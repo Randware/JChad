@@ -587,7 +587,7 @@ public class GUI extends Application implements ViewCallback {
             dialogStage.close(); // Close the dialog stage after using the connection
         });
 
-        HBox buttonContainer = new HBox(deleteButton, useButton);
+        HBox buttonContainer = new HBox(useButton, deleteButton);
         buttonContainer.setSpacing(10); // Adjust spacing as needed
 
         vbox.getChildren().addAll(connectionInfoBox, buttonContainer);
@@ -647,7 +647,7 @@ public class GUI extends Application implements ViewCallback {
     public void displayOwnMessage(ClientChatMessage message) {
         Platform.runLater(() -> {
             Bubble bubble = new Bubble(message.getUsername() + " " + "\n" + "\n" + message.getContent() + "\n", String.valueOf(message.getPrettyTimestamp()));
-
+            bubble.setBubbleColor(Color.GREEN);
             theGuyIamChattingWith.getChildren().addAll(bubble);
             // Automatisches Scrollen nach unten
             chatScrollPane.setVvalue(1.0);
