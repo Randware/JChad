@@ -660,7 +660,7 @@ public class GUI extends Application implements ViewCallback {
     @Override
     public void displayOwnMessage(ClientChatMessage message) {
         Platform.runLater(() -> {
-            Bubble bubble = new Bubble(message.getUsername() + " " + "\n" + "\n" + message.getContent() + "\n", String.valueOf(message.getPrettyTimestamp()), chatScrollPane.getWidth());
+            Bubble bubble = new Bubble(message.getUsername() + " " + "\n" + "\n" + message.getContent() + "\n", String.valueOf(message.getPrettyTimestamp()), chatScrollPane.getWidth() / 3.5);
             bubble.setBubbleColor(Color.GREEN);
             theGuyIamChattingWith.getChildren().addAll(bubble);
             // Automatischesdie connection closed  Scrollen nach unten
@@ -670,7 +670,7 @@ public class GUI extends Application implements ViewCallback {
     @Override
     public void displayOtherMessage(ClientChatMessage message) {
         Platform.runLater(() -> {
-            Bubble bubble2 = new Bubble(message.getUsername() + " " + "\n" + "\n" + message.getContent() + "\n", String.valueOf(message.getPrettyTimestamp()), chatScrollPane.getWidth());
+            Bubble bubble2 = new Bubble(message.getUsername() + " " + "\n" + "\n" + message.getContent() + "\n", String.valueOf(message.getPrettyTimestamp()), chatScrollPane.getWidth() / 3.5);
             theGuyIamChattingWith.getChildren().addAll(bubble2);
             // Überprüfen, ob der Benutzer bereits am unteren Ende des Chats ist
             if (chatScrollPane.getVvalue() == 1.0) {
