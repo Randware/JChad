@@ -173,13 +173,16 @@ public class GUI extends Application implements ViewCallback {
 
         // Define the phrases to replace "JChad!" with
         String[] phrases = {
-                "Freedom",
+                "freedom",
                 "your secure messenger",
-                "the ultimate Chat Platform",
+                "the ultimate chat platform",
                 "Free and Open-Source Software",
                 "privacy by design",
                 "JChad <3",
-                "the platform for Chads"
+                "the platform for chads",
+                "anonymity",
+                "choice",
+                "everything you need, nothing you don't"
         };
 
         // Add a caret to the end of the text
