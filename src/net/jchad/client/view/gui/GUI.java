@@ -69,6 +69,7 @@ public class GUI extends Application implements ViewCallback {
     private Scene primaryScene;
     private Scene chatScene;
     private BorderPane chatLayout;
+    MenuItem changeChat = new MenuItem("Change chat");
 
     public static void main(String[] args) {
         Application.launch(args);
@@ -298,17 +299,27 @@ public class GUI extends Application implements ViewCallback {
     }
 
     public void changeToChat() {
+
         Button sendButton = new Button("Send");
         sendButton.setPadding(new Insets(10));
         // Create a new layout for the chat view
         chatLayout = new BorderPane();
         theGuyIamChattingWith.setPadding(new Insets(5));
         theGuyIamChattingWith.setSpacing(50);
+        theGuyIamChattingWith.getChildren().clear();
         me.setPadding(new Insets(10));
         me.setSpacing(90);
-        chatline.getChildren().addAll(theGuyIamChattingWith, me);
+        if(!chatline.getChildren().contains(theGuyIamChattingWith)) {
+            chatline.getChildren().addAll(theGuyIamChattingWith);
+        }
         // Reuse the existing menu bar
         chatLayout.setTop(menuBar);
+        if(!connectionsMenu.getItems().contains(changeChat)) {
+            connectionsMenu.getItems().add(changeChat);
+        }
+        changeChat.setOnAction(event -> {
+            showChatSelectionWindow();
+        });
 
         // Create a TextArea for displaying chat messages
         chatDisplayArea.setEditable(false); // Make the chat area read-only
