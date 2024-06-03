@@ -637,6 +637,22 @@ public class GUI extends Application implements ViewCallback {
                 node.setStyle(cssStyle);
             }
         }
+
+        //updates the fontsize for the saved connections
+        HBox hbox = (HBox) scrollPane.getContent();
+        if (hbox != null) {
+            for (Node node : hbox.getChildren()) {
+                ((VBox) node).getChildren().forEach((node1 -> {
+                    try {
+                        Label label = (Label) node1;
+                        label.setFont(new Font(label.getFont().getName(), sizeValue));
+                    } catch (ClassCastException e) {
+                        //If the element is not a label.
+                        //This just gets ignored
+                    }
+                }));
+            }
+        }
     }
 
     private void displaySavedConnections() {
@@ -674,6 +690,8 @@ public class GUI extends Application implements ViewCallback {
 
         scrollPane.requestLayout();
     }
+
+
 
 
     private VBox createConnectionBox(ConnectionDetails connection) {
@@ -800,8 +818,9 @@ public class GUI extends Application implements ViewCallback {
             client.configuration().removeConnection(connection);
             // Refresh the display of saved connections
             displaySavedConnections();
-            dialogStage.close(); // Close the dialog stage after deleting the connection
             handleInfo("Saved Connection got deleted!");
+            dialogStage.close(); // Close the dialog stage after deleting the connection
+
         });
 
         useButton.setOnAction(e -> {
