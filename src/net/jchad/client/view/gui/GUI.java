@@ -85,7 +85,7 @@ public class GUI extends Application implements ViewCallback {
 
 
         MenuItem connect = new MenuItem("add connection");
-        MenuItem disconnect = new MenuItem("remove connection");
+        MenuItem disconnect = new MenuItem("disconnect");
 
         this.connectionsMenu.getItems().addAll(connect, disconnect);
 
@@ -584,7 +584,7 @@ public class GUI extends Application implements ViewCallback {
         connectionInfoBox.getChildren().addAll(nameLabel, hostLabel, portLabel, usernameLabel, passwordLabel);
 
         Button deleteButton = new Button("Delete");
-        Button useButton = new Button("Use");
+        Button useButton = new Button("Connect");
         deleteButton.setOnAction(e -> {
             // Remove the connection from the client configuration
             client.configuration().removeConnection(connection);
