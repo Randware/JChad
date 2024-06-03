@@ -9,7 +9,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.effect.DropShadow;
-import javafx.scene.paint.Color;
+import javafx.scene.paint.*;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -20,7 +20,9 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
+import javafx.scene.shape.Line;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
@@ -37,6 +39,7 @@ import net.jchad.client.view.videos.VidPlayer;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 public class GUI extends Application implements ViewCallback {
@@ -565,38 +568,83 @@ public class GUI extends Application implements ViewCallback {
         scrollPane.requestLayout();
     }
 
+
     private VBox createConnectionBox(ConnectionDetails connection) {
-        VBox connectionBox = new VBox(5); // Individual connection box
+        VBox connectionBox = new VBox(10); // Increased spacing between elements
 
-        // Set a fixed size for each connection box
-        connectionBox.autosize(); // Preferred width and height
-
-        // Prevent the VBox from being altered by setting min, max, and pref sizes to the same value
+        // Set fixed size for each connection box
         connectionBox.setMinWidth(300);
         connectionBox.setPrefWidth(300);
         connectionBox.setMaxWidth(300);
 
-        // Increase the padding to add more space at the top and bottom
-        connectionBox.setPadding(new Insets(10, 10, 10, 10)); // Top, Right, Bottom, Left
+        // Add padding inside the box
+        connectionBox.setPadding(new Insets(20)); // Increased padding for better spacing
 
-        connectionBox.setStyle("-fx-border-color: black;"); // Optional: adds a border around each box
+        // Create a solid background color
+        Color backgroundColor = Color.CORNFLOWERBLUE;
+        BackgroundFill backgroundFill = new BackgroundFill(backgroundColor, new CornerRadii(10), Insets.EMPTY);
+        connectionBox.setBackground(new Background(backgroundFill));
+
+        // Set border with rounded corners
+        connectionBox.setStyle("-fx-border-color: #4A90E2; -fx-border-radius: 10; -fx-border-width: 2px;");
+
+        // Add a drop shadow effect in the middle
+        DropShadow dropShadow = new DropShadow();
+        dropShadow.setOffsetX(0);
+        dropShadow.setOffsetY(0);
+        dropShadow.setColor(Color.GRAY);
+        dropShadow.setRadius(10);
+        dropShadow.setSpread(0.3);
+        connectionBox.setEffect(dropShadow);
 
         // Create labels for each piece of connection information
+        Label nameLabel = new Label(connection.getConnectionName());
         Label hostLabel = new Label("Host: " + connection.getHost());
         Label portLabel = new Label("Port: " + connection.getPort());
-        Label nameLabel = new Label("Name: " + connection.getConnectionName());
         Label usernameLabel = new Label("Username: " + connection.getUsername());
         Label passwordLabel = new Label("Password: " + "*".repeat(connection.getPassword().length()));
 
-        // Add text alignment for better visual appearance
+        // Customize label fonts and text alignment
+        Font titleFont = Font.font("Arial", FontWeight.BOLD, 18);
+        Font font = new Font("Arial", 14);
+
+        nameLabel.setFont(titleFont);
+        hostLabel.setFont(font);
+        portLabel.setFont(font);
+        usernameLabel.setFont(font);
+        passwordLabel.setFont(font);
+
+        nameLabel.setTextAlignment(TextAlignment.LEFT);
         hostLabel.setTextAlignment(TextAlignment.LEFT);
         portLabel.setTextAlignment(TextAlignment.LEFT);
-        nameLabel.setTextAlignment(TextAlignment.LEFT);
         usernameLabel.setTextAlignment(TextAlignment.LEFT);
         passwordLabel.setTextAlignment(TextAlignment.LEFT);
 
-        // Add labels to the connection box
-        connectionBox.getChildren().addAll(nameLabel, hostLabel, portLabel, usernameLabel, passwordLabel);
+        nameLabel.setTextFill(Color.WHITE);
+        hostLabel.setTextFill(Color.WHITE);
+        portLabel.setTextFill(Color.WHITE);
+        usernameLabel.setTextFill(Color.WHITE);
+        passwordLabel.setTextFill(Color.WHITE);
+
+        // Add a line under the connection name
+        Line line = new Line();
+        line.setStartX(0);
+        line.setEndX(260); // Adjust to fit the width of the box
+        line.setStroke(Color.WHITE);
+
+        // Make the password label clickable to reveal/hide the password
+        passwordLabel.setOnMouseClicked(event -> {
+            if (passwordLabel.getText().contains("*")) {
+                passwordLabel.setText("Password: " + connection.getPassword());
+            } else {
+                passwordLabel.setText("Password: " + "*".repeat(connection.getPassword().length()));
+            }
+            event.consume(); // Prevents triggering the VBox click event
+        });
+        passwordLabel.setStyle("-fx-cursor: hand;");
+
+        // Add labels and line to the connection box
+        connectionBox.getChildren().addAll(nameLabel, line, hostLabel, portLabel, usernameLabel, passwordLabel);
 
         // Add mouse click event listener to the connection box
         connectionBox.setOnMouseClicked(event -> savedConnectionWindow(connection));
