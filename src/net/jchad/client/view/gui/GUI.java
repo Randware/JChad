@@ -389,10 +389,6 @@ public class GUI extends Application implements ViewCallback {
 
         if (connect){
             client.connect(connectionDetailsBuilder.build());
-            if (selectedChat == null){
-                dialogStage.close();
-                return;
-            }
             showChatSelectionWindow();
             handleInfo("Successfully connected to: " + selectedChat);
         }else {
