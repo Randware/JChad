@@ -169,21 +169,23 @@ public class GUI extends Application implements ViewCallback {
 
         // Define the base text
         String baseText = "Welcome to ";
+        String initialText = "JChad!";
 
         // Define the phrases to replace "JChad!" with
         String[] phrases = {
                 "Freedom",
                 "your secure messenger",
                 "the ultimate Chat Platform",
-                "FOSS!",
+                "Free and Open-Source Software",
                 "privacy by design",
-                "JChad <3"
+                "JChad <3",
+                "the platform for Chads"
         };
 
         // Add a caret to the end of the text
         final String caret = "|";
         final String blankSpace = " ";
-        label.setText(baseText + "JChad!" + caret);
+        label.setText(baseText + initialText + caret);
 
         // Create a Timeline for the animation
         Timeline timeline = new Timeline();
@@ -226,22 +228,30 @@ public class GUI extends Application implements ViewCallback {
         };
 
         // Initial display of "JChad!"
-        for (int i = "JChad!".length(); i >= 0; i--) {
-            final int currentLength = "JChad!".length() - i;
+        for (int i = initialText.length(); i >= 0; i--) {
+            final int currentLength = initialText.length() - i;
             timeline.getKeyFrames().add(new KeyFrame(frameDuration.multiply(charIndex[0]++), e -> {
-                String currentText = baseText + "JChad!".substring(0, currentLength);
+                String currentText = baseText + initialText.substring(0, currentLength);
                 label.setText(currentText + caret);
             }));
         }
 
         // Random pause duration with slower blinking caret
-        int randomPause = 10 + random.nextInt(10);
+        int randomPause = 12 + random.nextInt(10);
         for (int i = 0; i < randomPause; i++) {
             final int pauseIndex = i;
             timeline.getKeyFrames().add(new KeyFrame(frameDuration.multiply(charIndex[0]++), e -> {
-                label.setText(baseText + "JChad!" + ((pauseIndex % 4 < 2) ? caret : blankSpace));
+                label.setText(baseText + initialText + ((pauseIndex % 4 < 2) ? caret : blankSpace));
             }));
         }
+
+        for (int i = initialText.length(); i >= 0; i--) {
+            final String remainingText = baseText + initialText.substring(0, i);
+            timeline.getKeyFrames().add(new KeyFrame(frameDuration.multiply(charIndex[0]++), e -> {
+                label.setText(remainingText + caret);
+            }));
+        }
+
 
         // Add animations for each phrase in random order
         for (int i = 0; i < phrases.length; i++) {
