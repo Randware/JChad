@@ -148,15 +148,14 @@
                 l.setPrefHeight(h);
             }
             l.setTranslateX(x + p + s);
-            l.setTranslateY(y + p);
+            l.setTranslateY(y-10); // Remove padding from y-coordinate
 
             // label meta
             Label m = new Label(meta);
             m.setFont(metaFont);
             m.setTextFill(metaColor);
             m.setTranslateX(x + (w - (metaW + pm + sm)));
-            m.setTranslateY(y + textH + pm * 2);
-
+            m.setTranslateY(y + textH + pm * 3 - metaH); // Adjust y-coordinate to align with text
 
             // bubble
             r = new Rectangle();
