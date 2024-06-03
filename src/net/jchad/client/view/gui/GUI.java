@@ -8,6 +8,8 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.paint.Color;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -54,6 +56,7 @@ public class GUI extends Application implements ViewCallback {
     private ConnectionDetailsBuilder connectionDetailsBuilder;
     private String selectedChat;
     private Menu connectionsMenu = new Menu("Connections");
+    private DropShadow dropShadow = new DropShadow();
     private VidPlayer vidPlayer = new VidPlayer();
     private final KeyCombination crtlMinus = new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN);
     private final KeyCombination crtlPlus = new KeyCodeCombination(KeyCode.PLUS, KeyCombination.CONTROL_DOWN);
@@ -79,6 +82,11 @@ public class GUI extends Application implements ViewCallback {
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage; // Assign the primary stage to the class variable
+
+        dropShadow.setRadius(10.0);
+        dropShadow.setOffsetX(0.0);
+        dropShadow.setOffsetY(0.0);
+        dropShadow.setColor(Color.color(0, 0, 0, 0.5)); // semi-transparent black
 
         headerLabel.setText("Welcome Jchader!");
         contentLabel.setText("This is the best Chad-Platform out there");
@@ -186,6 +194,13 @@ public class GUI extends Application implements ViewCallback {
         Button cancelButton = new Button("Cancel");
         Button addButton = new Button("Connect");
         Button saveButton = new Button("Add");
+
+        cancelButton.setStyle("-fx-background-color: #ff5555; -fx-text-fill: #FFFFFF;");
+        cancelButton.setEffect(dropShadow);
+        addButton.setStyle("-fx-background-color: #48ac3a; -fx-text-fill: #FFFFFF;");
+        addButton.setEffect(dropShadow);
+        saveButton.setStyle("-fx-background-color: #3a87b6; -fx-text-fill: #FFFFFF;");
+        saveButton.setEffect(dropShadow);
 
         addButton.setOnAction(e -> newConnection(hostField.getText(), portField.getText(), nameField.getText(), passwordField.getText(), usernameField.getText(), true));
         cancelButton.setOnAction(e -> {
@@ -446,6 +461,10 @@ public class GUI extends Application implements ViewCallback {
         // Buttons for Select and Cancel actions
         Button selectButton = new Button("Select");
         Button cancelButton = new Button("Cancel");
+        cancelButton.setStyle("-fx-background-color: #ff5555; -fx-text-fill: #FFFFFF;");
+        cancelButton.setEffect(dropShadow);
+        selectButton.setStyle("-fx-background-color: #3a87b6; -fx-text-fill: #FFFFFF;");
+        selectButton.setEffect(dropShadow);
 
         // Action for Select button
         selectButton.setOnAction(event -> {
@@ -630,7 +649,11 @@ public class GUI extends Application implements ViewCallback {
         connectionInfoBox.getChildren().addAll(nameLabel, hostLabel, portLabel, usernameLabel, passwordLabel);
 
         Button deleteButton = new Button("Delete");
+        deleteButton.setStyle("-fx-background-color: #ff5555; -fx-text-fill: #FFFFFF;");
+        deleteButton.setEffect(dropShadow);
         Button useButton = new Button("Connect");
+        useButton.setStyle("-fx-background-color: #48ac3a; -fx-text-fill: #FFFFFF;");
+        useButton.setEffect(dropShadow);
         deleteButton.setOnAction(e -> {
             // Remove the connection from the client configuration
             client.configuration().removeConnection(connection);
