@@ -88,7 +88,6 @@ public class GUI extends Application implements ViewCallback {
 
         headerLabel.setText("Welcome to JChad!");
 
-
         MenuItem connect = new MenuItem("New connection");
         MenuItem disconnect = new MenuItem("Disconnect");
 
@@ -291,8 +290,11 @@ public class GUI extends Application implements ViewCallback {
 
         if (connect){
             client.connect(connectionDetailsBuilder.build());
+            if (selectedChat == null){
+                dialogStage.close();
+                return;
+            }
             showChatSelectionWindow();
-
             handleInfo("Successfully connected to: " + selectedChat);
         }else {
             client.configuration().addConnection(connectionDetailsBuilder.build());
@@ -664,6 +666,7 @@ public class GUI extends Application implements ViewCallback {
     @Override
     public void handleFatalError(Exception e) {
         new ClientAlerts(Alert.AlertType.ERROR, "Fatal Error", e.toString());
+        disconnect();
     }
 
     @Override
