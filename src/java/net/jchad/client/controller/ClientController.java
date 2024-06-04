@@ -3,6 +3,7 @@ package net.jchad.client.controller;
 import net.jchad.client.model.client.Client;
 import net.jchad.client.model.client.ViewCallback;
 import net.jchad.client.model.client.config.ClientConfigManager;
+import net.jchad.client.model.client.connection.ServerInformation;
 import net.jchad.client.model.store.chat.ClientChat;
 import net.jchad.client.model.store.chat.ClientChatMessage;
 import net.jchad.client.model.store.connection.ConnectionDetails;
@@ -105,5 +106,13 @@ public class ClientController {
      */
     public ArrayList<ClientChatMessage> getChatMessages(ClientChat chat) {
         return new ArrayList<>();
+    }
+
+    /**
+     * <b>Returns a <u>COPY</u> of the current server information or null if the server infos are not known yet</b>
+     * @return a copy of the server infos or null if the connection was not established yet
+     */
+    public ServerInformation getServerInformation() {
+        return client.getServerInformation();
     }
 }

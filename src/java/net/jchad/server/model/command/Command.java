@@ -22,7 +22,7 @@ public enum Command {
     INFO("info", new InfoCommand(), "info", "Show information about the running server instance"),
     GITHUB("github", new GitHubCommand(), "github", "Get the link for the official JChad github repository"),
     VERSION("version", new VersionCommand(), "version | version -current", "Shows infos for the current server installation"),
-    CONNECTION("connections", new ConnectionsCommand(), "connections list", "Show connections and related info");
+    CONNECTION("connections", new ConnectionsCommand(), "connections help", "Show connections and related info");
     /**
      * This value represents the command string, which should be associated with the command.
      * For example, the help command should be callable with the "help" command. Crazy, right?

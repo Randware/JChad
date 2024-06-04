@@ -10,12 +10,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ConnectionsCommand extends BaseCommand{
     @Override
     public void execute(Server server, ArrayList<String> args) {
-        if (args == null || args.getFirst().equalsIgnoreCase("-help") ||args.getFirst().equalsIgnoreCase("-h") ) {
+        if (args == null || args.getFirst().equalsIgnoreCase("help") ||args.getFirst().equalsIgnoreCase("-h") ) {
             server.getMessageHandler().handleInfo("""
                     Usage:
                     connections list | lists all connections
                     connections kick (-user) <ip1/username1> <ip2/username2> | kicks the provided ip or user (if specified).
-                    connections -help | shows you more infos about the connections command
+                    connections help | shows you more infos about the connections command
                     """);
         } else {
             if (args.getFirst().equalsIgnoreCase("list")) {
@@ -71,7 +71,7 @@ public class ConnectionsCommand extends BaseCommand{
 
     }
 
-    if (args.size() == 1) return "Please specify the ips to kick. Do \"connections -help\" to see proper use";
-        return "Unrecognized attribute(s). Do \"connections -help\"";
+    if (args.size() == 1) return "Please specify the ips to kick. Do \"connections help\" to see proper use";
+        return "Unrecognized attribute(s). Do \"connections help\"";
     }
 }

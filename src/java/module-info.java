@@ -45,5 +45,4 @@ module net.jchad {
     opens net.jchad.client.model.client.testing to javafx.fxml;
     exports net.jchad.client.view.gui;
     opens net.jchad.shared.common;
-    exports net.jchad.client.view.videos;
 }

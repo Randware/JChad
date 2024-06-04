@@ -1,7 +1,6 @@
 package net.jchad.client.view.gui;
 
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
+import javafx.animation.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -11,6 +10,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.image.ImageView;
 import javafx.scene.paint.*;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -25,6 +25,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
@@ -37,7 +38,6 @@ import net.jchad.client.model.store.chat.ClientChatMessage;
 import net.jchad.client.model.store.connection.ConnectionDetails;
 import net.jchad.client.model.store.connection.ConnectionDetailsBuilder;
 import net.jchad.client.view.Game2048;
-import net.jchad.client.view.videos.VidPlayer;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -61,7 +61,6 @@ public class GUI extends Application implements ViewCallback {
     private String selectedChat;
     private Menu connectionsMenu = new Menu("Connections");
     private DropShadow dropShadow = new DropShadow();
-    private VidPlayer vidPlayer = new VidPlayer();
     private final KeyCombination crtlMinus = new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN);
     private final KeyCombination crtlPlus = new KeyCodeCombination(KeyCode.PLUS, KeyCombination.CONTROL_DOWN);
     private final KeyCombination crtlR = new KeyCodeCombination(KeyCode.R, KeyCombination.CONTROL_DOWN);
@@ -350,18 +349,6 @@ public class GUI extends Application implements ViewCallback {
 
     private void newConnection(String Host, String Port, String ConnectionName, String Password, String Username, Boolean connect) {
         Platform.runLater(() ->{
-        if (Objects.equals(Host, "monke")) {
-            try {
-                vidPlayer.start(primaryStage); // Start the VidPlayer when the host is "monke"
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            if (dialogStage!= null) {
-                    dialogStage.close();
-                }
-            return;
-        }
-
             if (Objects.equals(Host, "2048")) {
                 try {
                     Stage gameStage = new Stage();
@@ -404,7 +391,11 @@ public class GUI extends Application implements ViewCallback {
         if (connect){
             client.connect(connectionDetailsBuilder.build());
             showChatSelectionWindow();
-            handleInfo("Successfully connected to: " + selectedChat);
+            if (selectedChat != null) {
+                handleInfo("Successfully connected to: " + selectedChat);
+            } else {
+                //User pressed cancel
+            }
         }else {
             client.configuration().addConnection(connectionDetailsBuilder.build());
             displaySavedConnections();
@@ -579,6 +570,8 @@ public class GUI extends Application implements ViewCallback {
             }
         });
 
+
+
         // Action for Cancel button
         cancelButton.setOnAction(event -> dialogStage.close());
 
@@ -594,7 +587,6 @@ public class GUI extends Application implements ViewCallback {
 
         // Scene for the dialog
         Scene dialogScene = new Scene(dialogLayout, 300, 200);
-
         // Set the scene on the dialog stage
         dialogStage.setScene(dialogScene);
         dialogStage.showAndWait();
@@ -604,6 +596,8 @@ public class GUI extends Application implements ViewCallback {
         cancelButton.setStyle(cssStyle);
         buttonContainer.setStyle(cssStyle);
     }
+
+
 
     private void standardFontSizeMethod() {
         this.sizeValue = screenWidth * 0.01;
