@@ -46,7 +46,7 @@ public class ServerSettings {
      * if the username is on this list
      *
      */
-    private List<String> blockedUsernames = new ArrayList<>(List.of("null", "admin", "server", "owner"));
+    private List<String> blockedUsernames = new ArrayList<>(List.of( "all"));
 
     /**
      * This determines if the blocked usernames should also be checked based on their capitalization.

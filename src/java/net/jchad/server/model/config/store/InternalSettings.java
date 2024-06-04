@@ -1,10 +1,8 @@
 package net.jchad.server.model.config.store;
 
+import net.jchad.server.model.server.ServerThread;
 import net.jchad.shared.files.PathWatcher;
 import net.jchad.shared.networking.packets.defaults.ServerInformationResponsePacket;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Stores internal settings the server uses to function.
@@ -33,6 +31,21 @@ public class InternalSettings {
      * </ul>
      */
     private long connectionRefreshIntervalMillis = 100;
+
+    /**
+     * This enables a separate thread that loops after a specified sleeping time through
+     * every connection ot check if it is still open. The {@link net.jchad.server.model.server.ServerThread ServerThread} gets interrupted if
+     * the connection is closed even though the {@link net.jchad.server.model.server.ServerThread ServerThread} is running
+     * This may be resource intensive, but it closes "dead" connections (a Connection that is closed but still uses a Thread)
+     */
+    private boolean enableConnectionCheckerThread = true;
+
+    /**
+     * This specifies the time (in seconds) between each checking process.
+     * During the checking process for each {@link net.jchad.server.model.server.ServerThread ServerThread} the {@code isClosed()} methode gets called.
+     *
+     */
+    private long connectionCheckerThreadSleepTime = 60;
 
     /**
      * This determines how many times the client is allowed to send falsy data to the server.
@@ -93,11 +106,14 @@ public class InternalSettings {
      *                                                   Set to negative number to never reset the restart counter.
      */
     public InternalSettings(int maxPathWatcherRestarts, int PathWatcherRestartCountResetMilliseconds,
-                            long connectionRefreshIntervalMillis, int retriesOnInvalidPackets, int passwordAttempts,
+                            long connectionRefreshIntervalMillis,boolean enableConnectionCheckerThread,
+                            long connectionCheckerThreadSleepTime,int retriesOnInvalidPackets, int passwordAttempts,
                             String usernameRegex, String usernameRegexDescription) {
         this.maxPathWatcherRestarts = maxPathWatcherRestarts;
         this.pathWatcherRestartCountResetMilliseconds = PathWatcherRestartCountResetMilliseconds;
         this.connectionRefreshIntervalMillis = connectionRefreshIntervalMillis;
+        this.enableConnectionCheckerThread = enableConnectionCheckerThread;
+        this.connectionCheckerThreadSleepTime = connectionCheckerThreadSleepTime;
         this.retriesOnInvalidPackets = retriesOnInvalidPackets;
         this.passwordAttempts = passwordAttempts;
         this.usernameRegex = usernameRegex;
@@ -148,6 +164,37 @@ public class InternalSettings {
      */
     public void setConnectionRefreshIntervalMillis(long connectionRefreshIntervalMillis) {
         this.connectionRefreshIntervalMillis = connectionRefreshIntervalMillis;
+    }
+
+    /**
+     * @return true if the connection checker thread is enabled
+     */
+    public boolean isEnableConnectionCheckerThread() {
+        return enableConnectionCheckerThread;
+    }
+
+    /**
+     *
+     * @param enableConnectionCheckerThread enable/disable the connection checker thread
+     */
+    public void setEnableConnectionCheckerThread(boolean enableConnectionCheckerThread) {
+        this.enableConnectionCheckerThread = enableConnectionCheckerThread;
+    }
+
+    /**
+     * @return connectionCheckerThreadSleepTime
+     */
+    public long getConnectionCheckerThreadSleepTime() {
+        if (connectionCheckerThreadSleepTime < 0) return 60;
+        return connectionCheckerThreadSleepTime;
+    }
+
+    /**
+     *
+     * @param connectionCheckerThreadSleepTime connectionCheckerThreadSleepTime
+     */
+    public void setConnectionCheckerThreadSleepTime(long connectionCheckerThreadSleepTime) {
+        this.connectionCheckerThreadSleepTime = connectionCheckerThreadSleepTime;
     }
 
     /**

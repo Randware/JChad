@@ -27,6 +27,7 @@ public final class MainSocket implements Runnable{
     private final Server server;
     private final Set<ServerThread> serverThreadSet = ConcurrentHashMap.newKeySet();
     private boolean running = true;
+    private Thread connectionCheckerThread = null;
 
 
     protected MainSocket(int port, Server server) {
@@ -38,6 +39,11 @@ public final class MainSocket implements Runnable{
         if (1024 > port || port > 49151) messageHandler.handleWarning("Server-Port is outside of the User ports! Refer to https://en.wikipedia.org/wiki/Registered_port");
         this.port = port;
         executor = Executors.newVirtualThreadPerTaskExecutor();
+        if (server.getConfig().getInternalSettings().isEnableConnectionCheckerThread()) {
+            connectionCheckerThread = new Thread(new ConnectionCheckerThread(this));
+            connectionCheckerThread.start();
+            messageHandler.handleInfo("The Connection Checker Thread was enabled");
+        }
     }
 
 
@@ -133,6 +139,27 @@ public final class MainSocket implements Runnable{
         return false;
     }
 
+    /**
+     * This methode gets called, by the {@link Server} if one of the ServerConfigs gets updated.
+     */
+    public void configUpdated() {
+        if (server.getConfig().getInternalSettings().isEnableConnectionCheckerThread() && connectionCheckerThread == null) {
+            connectionCheckerThread = new Thread(new ConnectionCheckerThread(this));
+            connectionCheckerThread.start();
+            messageHandler.handleInfo("The Connection Checker Thread was enabled");
+        } else if (!server.getConfig().getInternalSettings().isEnableConnectionCheckerThread() && connectionCheckerThread != null) {
+            connectionCheckerThread.interrupt();
+            messageHandler.handleInfo("The Connection Checker Thread was disabled");
+            connectionCheckerThread = null;
+        }
+
+        String newConf = Server.getCurrentServerInfo(server).toJSON();
+        serverThreadSet.forEach(serverThread -> {
+            if ( serverThread.getUser() != null && serverThread.getUser().isReadyToReceiveMessages()) {
+                serverThread.write(newConf);
+            }
+        });
+    }
 
     /**
      * Returns a Set of all current connected ServerThreads.
@@ -168,4 +195,10 @@ public final class MainSocket implements Runnable{
     public Gson getGson() {
         return gson;
     }
+
+    public MessageHandler getMessageHandler() {
+        return messageHandler;
+    }
+
+
 }
