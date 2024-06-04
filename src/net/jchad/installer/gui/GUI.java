@@ -190,7 +190,12 @@ public class GUI extends Application implements BarDisplay {
                     // Update UI after installation is complete
                     progressBar.setProgress(1); // Set progress to complete
                     progressBar.setStyle("-fx-accent: green;");
-                    installButton.setDisable(false); // Enable the button
+                    installButton.setDisable(false); //// Enable the button
+                    Alert alert2 = new Alert(Alert.AlertType.INFORMATION);
+                    alert2.setTitle("Installation successful");
+                    alert2.setContentText("Successfully installed JChad!");
+                    alert2.showAndWait();
+                    Platform.exit();
                 });
 
                 installTask.setOnFailed(event -> {
