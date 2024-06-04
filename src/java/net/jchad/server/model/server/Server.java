@@ -77,13 +77,9 @@ public class Server implements ConfigObserver {
     public void configUpdated() {
         config = configManager.getConfig();
         chats = chatManager.getAllChats();
-
+        mainSocket.configUpdated();
         messageHandler.handleInfo("Updated server configuration");
-        mainSocket.getServerThreadSet().forEach(serverThread -> {
-            if ( serverThread.getUser() != null && serverThread.getUser().isReadyToReceiveMessages()) {
-                serverThread.write(Server.getCurrentServerInfo(this).toJSON());
-            }
-        });
+
     }
 
     public Config getConfig() {
