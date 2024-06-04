@@ -5,6 +5,7 @@ import net.jchad.client.model.client.config.ClientConfigManager;
 import net.jchad.client.model.client.connection.ClosedConnectionException;
 import net.jchad.client.model.client.connection.ServerConnection;
 import net.jchad.client.model.client.connection.ServerConnector;
+import net.jchad.client.model.client.connection.ServerInformation;
 import net.jchad.client.model.store.chat.ClientChat;
 import net.jchad.client.model.store.chat.ClientChatMessage;
 import net.jchad.client.model.store.connection.ConnectionDetails;
@@ -219,5 +220,27 @@ public class Client {
 
     public ViewCallback getViewCallback() {
         return viewCallback;
+    }
+
+    /**
+     * <b>Returns a <u>COPY</u> of the current server information or null if the server infos are not known yet</b>
+     * @return a copy of the server infos or null if the connection was not established yet
+     */
+    public ServerInformation getServerInformation() {
+        if (currentConnection != null && currentConnection.getServerInformation() != null) {
+            final ServerInformation temp = currentConnection.getServerInformation();
+            return new ServerInformation(
+                    temp.server_version(),
+                    temp.encrypt_communications(),
+                    temp.encrypt_messages(),
+                    temp.available_chats(),
+                    temp.requires_password(),
+                    temp.strictly_anonymous(),
+                    temp.username_validation_regex(),
+                    temp.username_validation_description()
+            );
+        } else {
+            return null;
+        }
     }
 }
