@@ -837,11 +837,13 @@ public class GUI extends Application implements ViewCallback {
 
     @Override
     public void handleFatalError(Exception e) {
-        if (e instanceof ExecutionException) {
-            new ClientAlerts(Alert.AlertType.ERROR, "Fatal Error", e.getCause().getMessage());
-        } else {
-            new ClientAlerts(Alert.AlertType.ERROR, "Fatal Error", e.toString());
-        }
+        Platform.runLater(() -> {
+            if (e instanceof ExecutionException) {
+                new ClientAlerts(Alert.AlertType.ERROR, "Fatal Error", e.getCause().getMessage());
+            } else {
+                new ClientAlerts(Alert.AlertType.ERROR, "Fatal Error", e.toString());
+            }
+        });
 
         disconnect();
     }

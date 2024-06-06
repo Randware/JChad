@@ -27,7 +27,7 @@ public final class MainSocket implements Runnable{
     private final Server server;
     private final Set<ServerThread> serverThreadSet = ConcurrentHashMap.newKeySet();
     private boolean running = true;
-    private Thread connectionCheckerThread = null;
+    private Thread connectionTimeoutChecker = null;
 
 
     protected MainSocket(int port, Server server) {
@@ -39,9 +39,9 @@ public final class MainSocket implements Runnable{
         if (1024 > port || port > 49151) messageHandler.handleWarning("Server-Port is outside of the User ports! Refer to https://en.wikipedia.org/wiki/Registered_port");
         this.port = port;
         executor = Executors.newVirtualThreadPerTaskExecutor();
-        if (server.getConfig().getInternalSettings().isEnableConnectionCheckerThread()) {
-            connectionCheckerThread = new Thread(new ConnectionCheckerThread(this));
-            connectionCheckerThread.start();
+        if (server.getConfig().getInternalSettings().isEnableConnectionTimeoutCheckerThread()) {
+            connectionTimeoutChecker = new Thread(new ConnectionTimeoutChecker(this));
+            connectionTimeoutChecker.start();
             messageHandler.handleInfo("The Connection Checker Thread was enabled");
         }
     }
@@ -143,14 +143,24 @@ public final class MainSocket implements Runnable{
      * This methode gets called, by the {@link Server} if one of the ServerConfigs gets updated.
      */
     public void configUpdated() {
-        if (server.getConfig().getInternalSettings().isEnableConnectionCheckerThread() && connectionCheckerThread == null) {
-            connectionCheckerThread = new Thread(new ConnectionCheckerThread(this));
-            connectionCheckerThread.start();
-            messageHandler.handleInfo("The Connection Checker Thread was enabled");
-        } else if (!server.getConfig().getInternalSettings().isEnableConnectionCheckerThread() && connectionCheckerThread != null) {
-            connectionCheckerThread.interrupt();
-            messageHandler.handleInfo("The Connection Checker Thread was disabled");
-            connectionCheckerThread = null;
+        final boolean isTimeoutCheckerEnabled = server.getConfig().getInternalSettings().isEnableConnectionTimeoutCheckerThread();
+        if (server.getConfig().getInternalSettings().getMainTimeout() == 0 && server.getConfig().getInternalSettings().getHandshakeTimeout() == 0 && isTimeoutCheckerEnabled) {
+            if (connectionTimeoutChecker != null) {
+                server.getMessageHandler().handleWarning("The Connection Timeout Checker got disabled, because the HandshakeTimeout and the MainTimeout are both set to 0 seconds. " +
+                        "Please Disable the Connection Timeout Checker in the config!");
+                connectionTimeoutChecker.interrupt();
+            } else {
+                server.getMessageHandler().handleWarning("The Connection Timeout Checker could not be enabled, because the HandshakeTimeout and the MainTimeout are both set to 0 seconds. " +
+                        "Please Disable the Connection Timeout Checker in the config!");
+            }
+        } else if (isTimeoutCheckerEnabled && connectionTimeoutChecker == null) {
+            connectionTimeoutChecker = new Thread(new ConnectionTimeoutChecker(this));
+            connectionTimeoutChecker.start();
+            messageHandler.handleInfo("The Connection Timeout Checker Thread was enabled");
+        } else if (!isTimeoutCheckerEnabled && connectionTimeoutChecker != null) {
+            connectionTimeoutChecker.interrupt();
+            messageHandler.handleInfo("The Connection Timeout Checker Thread was disabled");
+            connectionTimeoutChecker = null;
         }
 
         String newConf = Server.getCurrentServerInfo(server).toJSON();
