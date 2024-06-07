@@ -25,6 +25,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Scanner;
 
 public class ServerThread implements Runnable{
@@ -254,6 +255,19 @@ public class ServerThread implements Runnable{
     public void useMessageKey() {
         crypterManager.setAESkey(messageAESkey);
         crypterManager.setIV(messageIV);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (object == null || getClass() != object.getClass()) return false;
+        ServerThread that = (ServerThread) object;
+        return Objects.equals(inetAddress, that.inetAddress) && Objects.equals(remoteAddress, that.remoteAddress);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(inetAddress, remoteAddress);
     }
 
     /**

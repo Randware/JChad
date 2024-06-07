@@ -31,45 +31,7 @@ public class InternalSettings {
      */
     private long connectionRefreshIntervalMillis = 100;
 
-    /**
-     * <p>This enables a separate thread that loops through
-     * every connection to check if the set timeout was exceeded.</p>
-     * <p>The {@link net.jchad.server.model.server.ServerThread ServerThread} gets interrupted if
-     * the timeout gets reached</p>
-     * <p>This should be turned off if {@link InternalSettings#handshakeTimeout} and {@link InternalSettings#mainTimeout} are <b><u>both</u></b> set to <b><u>0</u></b></p>
-     * This may be resource intensive (because it uses an extra Thread),
-     * but it helps to prevent inactive connections
-     */
-    private boolean enableConnectionTimeoutCheckerThread = false;
 
-    /**
-     * <p>This defines the <b><u>timeout after</u></b> the <b><i>handshake</i></b>.</p>
-     * <p>Set this to 0 if you want to disable the timeout <b><u>after</u></b> the handshake</p>
-     * This includes
-     * <ul>
-     *     <li>Sending and receiving messages</li>
-     *     <li><i>joining</i> chats (being able to send/receive message to/from the chat)</li>
-     *     <li>Send requested server information</li>
-     * </ul>
-     * If this timeout gets exceeded the {@link net.jchad.server.model.server.ServerThread connection} gets closed.
-     * If this is set to a negative number, the default value (default: 0) gets used.
-     */
-    private long mainTimeout = 0;
-
-    /**
-     * This specifies the timeout (in seconds) during the handshake.
-     * Set this to 0 if you want to disable the timeout <b><u>during</u></b> the handshake
-     * The handshake includes:
-     * <ul>
-     *     <li>Exchanging the encryption keys securely</li>
-     *     <li>Get the correct password from the client</li>
-     *     <li>Let the client decide its username</li>
-     *     <li>Let the client know about the current server configurations</li>
-     * </ul>
-     * If this timeout gets exceeded the {@link net.jchad.server.model.server.ServerThread connection} gets closed.
-     * If this is set to a negative number, the default value (default: 0) gets used.
-     */
-    private long handshakeTimeout = 0;
     /**
      * This determines how many times the client is allowed to send falsy data to the server.
      * If this limit gets exceeded, the connection will close.
@@ -84,7 +46,20 @@ public class InternalSettings {
      */
     private int passwordAttempts = 3;
 
+    /**
+     * This enables a separate thread that loops after a specified sleeping time through
+     * every connection ot check if it is still open. The {@link net.jchad.server.model.server.ServerThread ServerThread} gets interrupted if
+     * the connection is closed even though the {@link net.jchad.server.model.server.ServerThread ServerThread} is running
+     * This may be resource intensive, but it closes "dead" connections (a Connection that is closed but still uses a Thread)
+     */
+    private boolean enableConnectionCheckerThread = true;
 
+    /**
+     * This specifies the time (in seconds) between each checking process.
+     * During the checking process for each {@link net.jchad.server.model.server.ServerThread ServerThread} the {@code isClosed()} methode gets called.
+     *
+     */
+    private long connectionCheckerThreadSleepTime = 60;
 
     /**
      * This regex checks if the wanted username (from the client) is valid.
@@ -129,15 +104,14 @@ public class InternalSettings {
      *                                                   Set to negative number to never reset the restart counter.
      */
     public InternalSettings(int maxPathWatcherRestarts, int PathWatcherRestartCountResetMilliseconds,
-                            long connectionRefreshIntervalMillis, boolean enableConnectionTimeoutCheckerThread,
-                            long mainTimeout, long handshakeTimeout, int retriesOnInvalidPackets,
-                            int passwordAttempts, String usernameRegex, String usernameRegexDescription) {
+                            long connectionRefreshIntervalMillis,boolean enableConnectionCheckerThread,
+                            long connectionCheckerThreadSleepTime,int retriesOnInvalidPackets, int passwordAttempts,
+                            String usernameRegex, String usernameRegexDescription) {
         this.maxPathWatcherRestarts = maxPathWatcherRestarts;
         this.pathWatcherRestartCountResetMilliseconds = PathWatcherRestartCountResetMilliseconds;
         this.connectionRefreshIntervalMillis = connectionRefreshIntervalMillis;
-        this.enableConnectionTimeoutCheckerThread = enableConnectionTimeoutCheckerThread;
-        this.mainTimeout = mainTimeout;
-        this.handshakeTimeout = handshakeTimeout;
+        this.enableConnectionCheckerThread = enableConnectionCheckerThread;
+        this.connectionCheckerThreadSleepTime = connectionCheckerThreadSleepTime;
         this.retriesOnInvalidPackets = retriesOnInvalidPackets;
         this.passwordAttempts = passwordAttempts;
         this.usernameRegex = usernameRegex;
@@ -190,51 +164,36 @@ public class InternalSettings {
         this.connectionRefreshIntervalMillis = connectionRefreshIntervalMillis;
     }
 
+
     /**
      * @return true if the connection checker thread is enabled
      */
-    public boolean isEnableConnectionTimeoutCheckerThread() {
-        return enableConnectionTimeoutCheckerThread;
+    public boolean isEnableConnectionCheckerThread() {
+        return enableConnectionCheckerThread;
     }
 
     /**
      *
-     * @param enableConnectionTimeoutCheckerThread enable/disable the connection timeout checker thread
+     * @param enableConnectionCheckerThread enable/disable the connection checker thread
      */
-    public void setEnableConnectionTimeoutCheckerThread(boolean enableConnectionTimeoutCheckerThread) {
-        this.enableConnectionTimeoutCheckerThread = enableConnectionTimeoutCheckerThread;
+    public void setEnableConnectionCheckerThread(boolean enableConnectionCheckerThread) {
+        this.enableConnectionCheckerThread = enableConnectionCheckerThread;
+    }
+
+    /**
+     * @return connectionCheckerThreadSleepTime
+     */
+    public long getConnectionCheckerThreadSleepTime() {
+        if (connectionCheckerThreadSleepTime < 0) return 60;
+        return connectionCheckerThreadSleepTime;
     }
 
     /**
      *
-     * @return the main timeout
+     * @param connectionCheckerThreadSleepTime connectionCheckerThreadSleepTime
      */
-    public long getMainTimeout() {
-        return mainTimeout;
-    }
-
-    /**
-     *
-     * @param mainTimeout the main timeout
-     */
-    public void setMainTimeout(long mainTimeout) {
-        this.mainTimeout = mainTimeout;
-    }
-
-    /**
-     * @return the timeout during the Handshake
-     */
-    public long getHandshakeTimeout() {
-        if (handshakeTimeout < 0) return 0;
-        return handshakeTimeout;
-    }
-
-    /**
-     *
-     * @param handshakeTimeout the timeout during the Handshake
-     */
-    public void setHandshakeTimeout(long handshakeTimeout) {
-        this.handshakeTimeout = handshakeTimeout;
+    public void setConnectionCheckerThreadSleepTime(long connectionCheckerThreadSleepTime) {
+        this.connectionCheckerThreadSleepTime = connectionCheckerThreadSleepTime;
     }
 
     /**
