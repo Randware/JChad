@@ -3,23 +3,17 @@ module net.jchad {
     requires javafx.fxml;
     requires com.google.gson;
     requires org.kordamp.ikonli.javafx;
-    requires org.kordamp.bootstrapfx.core;
     requires com.fasterxml.jackson.dataformat.yaml;
     requires com.fasterxml.jackson.databind;
     requires java.desktop;
-    requires org.junit.jupiter.api;
-    requires org.junit.jupiter.engine;
-    requires org.junit.jupiter.params;
-    requires org.junit.platform.engine;
-    requires org.junit.platform.commons;
     requires org.jline;
-    requires org.fxmisc.richtext;
     requires jdk.unsupported;
     requires javafx.web;
     requires org.controlsfx.controls;
     requires java.rmi;
     requires org.fusesource.jansi;
     requires javafx.media;
+    requires org.fxmisc.richtext;
 
     opens net.jchad.server.model.command.commands.version;
     exports net.jchad.client.view;
@@ -35,6 +29,7 @@ module net.jchad {
     opens net.jchad.server.model.config.store to com.fasterxml.jackson.databind;
     opens net.jchad.server.model.chats to com.google.gson;
     exports net.jchad.tests.shared;
+    opens net.jchad.server.view to org.fxmisc.richtext;
     opens net.jchad.shared.networking.packets.password to com.google.gson;
     opens net.jchad.shared.networking.packets.username to com.google.gson;
     opens net.jchad.shared.networking.packets.encryption to com.google.gson;
