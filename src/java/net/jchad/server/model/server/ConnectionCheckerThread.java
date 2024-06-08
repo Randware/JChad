@@ -30,10 +30,7 @@ public class ConnectionCheckerThread implements Runnable {
                 });
 
                 TimeUnit.SECONDS.sleep(mainSocket.getServer().getConfig().getInternalSettings().getConnectionCheckerThreadSleepTime());
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            }
+            } catch (InterruptedException ignore) {}
         }
     }
 
