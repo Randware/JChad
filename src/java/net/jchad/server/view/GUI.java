@@ -6,6 +6,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.input.*;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -22,6 +23,7 @@ public class GUI extends Application implements MessageHandler {
     private final TextField cmdField = new TextField();
     private double sizeValue;
     private final ScrollPane scrollPane = new ScrollPane();
+    private Image serverImage = new Image(getClass().getResourceAsStream("/images/server.png"));
     private final KeyCombination crtlMinus = new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN);
     private final KeyCombination crtlPlus = new KeyCodeCombination(KeyCode.PLUS, KeyCombination.CONTROL_DOWN);
     private final KeyCombination crtlR = new KeyCodeCombination(KeyCode.R, KeyCombination.CONTROL_DOWN);
@@ -112,6 +114,8 @@ public class GUI extends Application implements MessageHandler {
         });
 
         Scene scene = new Scene(vbox, windowWidth, windowHeight);
+
+        stage.getIcons().add(serverImage);
         stage.setTitle("Server GUI");
         stage.setScene(scene);
         stage.show();
