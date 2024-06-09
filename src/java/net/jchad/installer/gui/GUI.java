@@ -9,6 +9,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -37,6 +39,8 @@ public class GUI extends Application implements BarDisplay {
     private int selectedIndex;
     private DirectoryChooser directoryChooser;
     private Button chooseDirectoryButton;
+
+    private Image installerImage = new Image(getClass().getResourceAsStream("/images/installer.png"));
 
     private static final double BASE_WIDTH = 800;
     private static final double BASE_HEIGHT = 600;
@@ -228,6 +232,7 @@ public class GUI extends Application implements BarDisplay {
             vbox.setScaleY(newScale);
         });
 
+        primaryStage.getIcons().add(installerImage);
         primaryStage.setScene(scene);
         primaryStage.setWidth(800);
         primaryStage.setHeight(600);
