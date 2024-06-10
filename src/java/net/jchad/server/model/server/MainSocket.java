@@ -2,6 +2,7 @@ package net.jchad.server.model.server;
 
 import com.google.gson.Gson;
 import net.jchad.server.model.error.MessageHandler;
+import net.jchad.server.model.server.util.HandshakeTimeoutChecker;
 import net.jchad.shared.networking.ip.IPAddress;
 import net.jchad.shared.networking.ip.InvalidIPAddressException;
 
@@ -39,10 +40,10 @@ public final class MainSocket implements Runnable{
         if (1024 > port || port > 49151) messageHandler.handleWarning("Server-Port is outside of the User ports! Refer to https://en.wikipedia.org/wiki/Registered_port");
         this.port = port;
         executor = Executors.newVirtualThreadPerTaskExecutor();
-        if (server.getConfig().getInternalSettings().isEnableConnectionCheckerThread()) {
-            connectionCheckerThread = new Thread(new ConnectionCheckerThread(this));
+        if (server.getConfig().getInternalSettings().isEnableHandshakeTimeoutThread()) {
+            connectionCheckerThread = new Thread(new HandshakeTimeoutChecker(this));
             connectionCheckerThread.start();
-            messageHandler.handleInfo("The Connection Checker Thread was enabled");
+            messageHandler.handleInfo("The Handshake Timeout Checker Thread was enabled");
         }
     }
 
@@ -144,13 +145,13 @@ public final class MainSocket implements Runnable{
      * This methode gets called, by the {@link Server} if one of the ServerConfigs gets updated.
      */
     public void configUpdated() {
-        if (server.getConfig().getInternalSettings().isEnableConnectionCheckerThread() && connectionCheckerThread == null) {
-            connectionCheckerThread = new Thread(new ConnectionCheckerThread(this));
+        if (server.getConfig().getInternalSettings().isEnableHandshakeTimeoutThread() && connectionCheckerThread == null) {
+            connectionCheckerThread = new Thread(new HandshakeTimeoutChecker(this));
             connectionCheckerThread.start();
-            messageHandler.handleInfo("The Connection Checker Thread was enabled");
-        } else if (!server.getConfig().getInternalSettings().isEnableConnectionCheckerThread() && connectionCheckerThread != null) {
+            messageHandler.handleInfo("The Handshake Timeout Checker Thread was enabled");
+        } else if (!server.getConfig().getInternalSettings().isEnableHandshakeTimeoutThread() && connectionCheckerThread != null) {
             connectionCheckerThread.interrupt();
-            messageHandler.handleInfo("The Connection Checker Thread was disabled");
+            messageHandler.handleInfo("The Handshake Timeout Checker Thread was disabled");
             connectionCheckerThread = null;
         }
 

@@ -8,7 +8,7 @@ import java.util.concurrent.Executors;
 
 public class ClientServerBenchmark {
 
-    private static final int connections = 500;
+    private static final int connections = 1000;
     private static final ExecutorService service = Executors.newVirtualThreadPerTaskExecutor();
 
     public static void main(String[] args) {
