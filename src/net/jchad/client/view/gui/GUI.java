@@ -574,7 +574,7 @@ public class GUI extends Application implements ViewCallback {
 
 
         // Action for Cancel button
-        cancelButton.setOnAction(event -> dialogStage.close());
+        cancelButton.setOnAction(event -> disconnect());
 
         // Layout for the buttons
         HBox buttonContainer = new HBox(10);
