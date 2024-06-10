@@ -60,7 +60,6 @@ public class GUI extends Application implements ViewCallback {
     private ConnectionDetailsBuilder connectionDetailsBuilder;
     private String selectedChat;
     private Menu connectionsMenu = new Menu("Connections");
-    private Image mainImage = new Image(getClass().getResourceAsStream("/images/chad-bird.png"));
     private DropShadow dropShadow = new DropShadow();
     private final KeyCombination crtlMinus = new KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN);
     private final KeyCombination crtlPlus = new KeyCodeCombination(KeyCode.PLUS, KeyCombination.CONTROL_DOWN);
@@ -155,7 +154,6 @@ public class GUI extends Application implements ViewCallback {
         primaryStage.setWidth(screenWidth / 1.5);
         primaryStage.setHeight(screenHeight / 1.5);
 
-        primaryStage.getIcons().setAll(mainImage);
         primaryStage.setTitle("JChad Client");
         primaryStage.setScene(primaryScene);
         primaryStage.show();
@@ -479,7 +477,7 @@ public class GUI extends Application implements ViewCallback {
         });
 
         // Apply the scene to the primary stage
-        chatStage.getIcons().setAll(mainImage);
+
         chatStage.setScene(chatScene);
         primaryStage.hide();
         chatStage.show();
