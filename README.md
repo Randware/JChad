@@ -78,7 +78,7 @@ cd ./target
 
 6. _(Optional)_ To open the jar in the terminal:
 ```bash
-java -jar JChad-<client|server|installer> -cl
+java -jar JChad-<client|server|installer>.jar -cl
 ```
 
 ## Configuration
