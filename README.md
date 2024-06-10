@@ -23,6 +23,11 @@ Simply use the `-cl` argument on start.
 - A kick command, live configuration updating, impressive performance, and more!
 
 ## Installation
+
+> [!TIP]
+> There is an official docker image for the JChad server available. 
+> Visit [our Docker repository](https://hub.docker.com/r/randware/jchad) for step-by-step installation instructions.
+
 #### Keep in mind, that JChad is written in Java. That means you need to have a Java runtime installed on your machine.
 
 The JChad installer makes it easy to install the desired components on your machine!
@@ -34,9 +39,47 @@ To run in GUI mode, simply double click the .jar file. To run it in the terminal
 
 `java -jar JChad-server.jar -cl`
 
-> [!TIP]
-> There is an official docker image for the JChad server available. 
-> Visit [our Docker repository](https://hub.docker.com/r/randware/jchad) for step-by-step installation instructions.
+## Build from Source Code
+
+### Prerequisites 
+
+> To build JChad from the source code, you need to install the following _tools_:
+
+  * [Git](https://git-scm.com/downloads) (To clone the repository)
+  * [Maven](https://maven.apache.org/install.html) (To build the project)
+  * [JDK21](https://www.oracle.com/java/technologies/downloads/#java21) (Using a newer java version **may** work)
+
+### Step-by-Step guide
+
+> To build the project follow these steps along in your terminal:  
+
+1. Clone the repository
+```bash
+git clone https://github.com/Randware/JChad
+```
+
+2. Change to the repository directory
+```bash
+cd ./JChad
+```
+
+3. **Build** the **desired component** of JChad choose between client, server or installer
+```bash
+mvn install -P <client|server|installer>
+```
+
+4. Change to the target directory where the jar file was built
+```bash
+cd ./target
+```
+
+5. You are now ready to use JChad  
+  **ENJOY!**
+
+6. _(Optional)_ To open the jar in the terminal:
+```bash
+java -jar JChad-<client|server|installer> -cl
+```
 
 ## Configuration
 #### Configuring your JChad server instance is easy:
