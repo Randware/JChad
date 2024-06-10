@@ -16,7 +16,7 @@ public class Server implements ConfigObserver {
     private final MessageHandler messageHandler;
     private ConfigManager configManager;
     private ChatManager chatManager;
-    private final String version = "1.1";
+    private final String version = "2.0";
     private String serverPassword; //A SHA256 string that represents the server password
     private long startTimestamp;
     private boolean running;
