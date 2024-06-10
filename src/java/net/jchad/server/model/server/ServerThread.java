@@ -128,7 +128,7 @@ public class ServerThread implements Runnable{
         catch (Exception e) {
             messageHandler.handleError(new Exception("An error occurred while connected to [%s]: %s".formatted(remoteAddress,e.getMessage()), e));
         } finally {
-            close();
+            close("The Client disconnected");
         }
     }
 
@@ -229,7 +229,7 @@ public class ServerThread implements Runnable{
      * and {@link ServerThread#communicationsAESkey} is set all outgoing data gets encrypted automatically
      * @param data The data that gets send to the client
      */
-    public void write(String data) {
+    public synchronized void write(String data) {
         if (communicationsAESkey != null && encryptCommunication) {
             useCommunicationsKey();
             try {
