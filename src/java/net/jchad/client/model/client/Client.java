@@ -51,8 +51,8 @@ public class Client {
      * @param connectionDetails the {@link ConnectionDetails} that should be
      *                          used to establish a {@link ServerConnection}.
      */
-    public void connect(ConnectionDetails connectionDetails) {
-
+    public boolean connect(ConnectionDetails connectionDetails) {
+        boolean successful = true;
         serverConnector = new ServerConnector(this, connectionDetails);
         try {
             if(currentConnection != null ) {
@@ -67,7 +67,9 @@ public class Client {
             new Thread(currentConnection).start();
         } catch (Exception e) {
             viewCallback.handleFatalError(e);
+            successful = false;
         }
+            return successful;
     }
 
     /**
