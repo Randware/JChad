@@ -26,7 +26,7 @@ public class TestConnection implements ViewCallback, Runnable {
         ClientController client = new ClientController(this);
         client.connect(new ConnectionDetails(
                 "test",
-                    "vnos.bot.nu",
+                    "localhost",
                         13814,
                 username,
                             ""

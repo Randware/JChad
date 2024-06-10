@@ -14,7 +14,7 @@ import java.util.Base64;
 
 
 /**
- * <h4>Abstraction of the {@link javax.crypto} and {@link java.security} class</h4>
+ * <h1>Abstraction of the {@link javax.crypto} and {@link java.security} class</h1>
  * Simplifies the encryption and decryption process by abstracting the {@link javax.crypto default Cryptography library} in java.
  * An example to use the {@code RSA} encryption and decryption:
  * <blockquote><pre>
