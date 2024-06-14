@@ -43,7 +43,7 @@ To run in GUI mode, simply double click the .jar file. To run it in the terminal
 
 ### Prerequisites 
 
-> To build JChad from the source code, you need to install the following _tools_:
+> To build JChad from source, you need to install the following _tools_:
 
   * [Git](https://git-scm.com/downloads) (To clone the repository)
   * [Maven](https://maven.apache.org/install.html) (To build the project)
